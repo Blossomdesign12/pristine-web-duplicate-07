@@ -1,10 +1,9 @@
-
 import { useEffect } from 'react';
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import FeaturedProperties from "@/components/FeaturedProperties";
 import Footer from "@/components/Footer";
-import { ArrowRight, Search, Home, Building2, Handshake, Users, Award, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Search, Home, Building2, Handshake, Users, Award, CheckCircle2, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { getRecentProperties, formatPrice } from '@/lib/data';
