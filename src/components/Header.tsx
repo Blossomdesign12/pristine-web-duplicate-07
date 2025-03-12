@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Building2, Phone, Search, User, ChevronDown } from 'lucide-react';
+import { Menu, X, Home, Building2, Phone, User, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -11,6 +11,9 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
+
+  // This would come from auth in a real app
+  const isLoggedIn = false;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,16 +67,26 @@ const Header = () => {
             <nav className="flex items-center gap-6">
               <NavLinks />
               <div className="flex items-center gap-3">
-                <Link to="/login">
-                  <Button variant="outline" className="text-estate-primary border-estate-primary hover:bg-estate-primary/10">
-                    Login
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button className="bg-estate-primary hover:bg-estate-primary/90">
-                    Register
-                  </Button>
-                </Link>
+                {isLoggedIn ? (
+                  <Link to="/dashboard">
+                    <Button className="bg-estate-primary hover:bg-estate-primary/90">
+                      Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <>
+                    <Link to="/login">
+                      <Button variant="outline" className="text-estate-primary border-estate-primary hover:bg-estate-primary/10">
+                        Login
+                      </Button>
+                    </Link>
+                    <Link to="/register">
+                      <Button className="bg-estate-primary hover:bg-estate-primary/90">
+                        Register
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           )}
@@ -91,16 +104,26 @@ const Header = () => {
           <nav className="flex flex-col gap-6 py-8">
             <MobileNavLinks />
             <div className="flex flex-col gap-3 mt-4">
-              <Link to="/login">
-                <Button variant="outline" className="w-full text-estate-primary border-estate-primary hover:bg-estate-primary/10">
-                  Login
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button className="w-full bg-estate-primary hover:bg-estate-primary/90">
-                  Register
-                </Button>
-              </Link>
+              {isLoggedIn ? (
+                <Link to="/dashboard">
+                  <Button className="w-full bg-estate-primary hover:bg-estate-primary/90">
+                    Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <Button variant="outline" className="w-full text-estate-primary border-estate-primary hover:bg-estate-primary/10">
+                      Login
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button className="w-full bg-estate-primary hover:bg-estate-primary/90">
+                      Register
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>
