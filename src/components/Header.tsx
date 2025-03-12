@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, Building2, Phone, Search, ChevronDown } from 'lucide-react';
+import { Menu, X, Home, Building2, Phone, Search, User, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -128,6 +128,10 @@ const NavLinks = () => {
         <Building2 size={16} />
         <span>Properties</span>
       </Link>
+      <Link to="/agents" className={cn("flex items-center gap-1 font-medium hover:text-estate-primary transition-colors", isActiveLink('/agents') && "text-estate-primary")}>
+        <User size={16} />
+        <span>Agents</span>
+      </Link>
       <Link to="/contact" className={cn("flex items-center gap-1 font-medium hover:text-estate-primary transition-colors", isActiveLink('/contact') && "text-estate-primary")}>
         <Phone size={16} />
         <span>Contact</span>
@@ -149,6 +153,12 @@ const MobileNavLinks = () => {
         <div className="flex items-center gap-2">
           <Building2 size={20} />
           <span className="font-medium text-lg">Properties</span>
+        </div>
+      </Link>
+      <Link to="/agents" className="flex items-center justify-between py-3 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <User size={20} />
+          <span className="font-medium text-lg">Agents</span>
         </div>
       </Link>
       <Link to="/contact" className="flex items-center justify-between py-3 border-b border-gray-100">
