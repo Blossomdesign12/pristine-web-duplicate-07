@@ -1,256 +1,260 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Property, properties } from "@/lib/data";
-import { Home, DollarSign, Plus, Edit, ExternalLink, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { BarChart4, Home, Clock, Plus, Users, CalendarIcon, Eye } from "lucide-react";
+import { formatPrice } from "@/lib/data";
+import { Link } from "react-router-dom";
 
-interface OwnerDashboardProps {
-  activeTab: string;
-}
+const OwnerDashboard = () => {
+  const [activeTab, setActiveTab] = useState("overview");
 
-const OwnerDashboard: React.FC<OwnerDashboardProps> = ({ activeTab }) => {
-  // Mock data - would come from API calls in a real app
-  const [myProperties] = useState<Property[]>(properties.slice(0, 4));
-  const { toast } = useToast();
-
-  const handleDeleteProperty = (id: string) => {
-    toast({
-      title: "Property Deleted",
-      description: "The property has been successfully removed.",
-    });
-    // In a real app, this would call an API to delete the property
-  };
-
-  if (activeTab === "properties") {
-    return (
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold">My Properties</h2>
-          <Link to="/add-property">
-            <Button className="bg-estate-primary hover:bg-estate-primary/90">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Property
-            </Button>
-          </Link>
-        </div>
-        
-        {myProperties.length > 0 ? (
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {myProperties.map((property) => (
-                    <tr key={property.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="h-10 w-10 flex-shrink-0">
-                            <img className="h-10 w-10 rounded-md object-cover" src={property.images[0]} alt="" />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{property.title}</div>
-                            <div className="text-sm text-gray-500">{property.location.city}, {property.location.state}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          property.features.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
-                          property.features.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
-                          property.features.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {property.features.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${property.price.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {Math.floor(Math.random() * 500)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-2">
-                          <Button variant="ghost" size="sm" asChild>
-                            <Link to={`/property/${property.id}`}>
-                              <ExternalLink className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button variant="ghost" size="sm" asChild>
-                            <Link to={`/edit-property/${property.id}`}>
-                              <Edit className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-red-600 hover:text-red-800 hover:bg-red-50"
-                            onClick={() => handleDeleteProperty(property.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-16 bg-white rounded-lg shadow-sm">
-            <Home className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-            <h3 className="text-lg font-medium mb-2">No properties listed yet</h3>
-            <p className="text-gray-500 mb-6">
-              Add your first property to start selling or renting.
-            </p>
-            <Link to="/add-property">
-              <Button className="bg-estate-primary hover:bg-estate-primary/90">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Property
-              </Button>
-            </Link>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (activeTab === "listings") {
-    return (
-      <div>
-        <h2 className="text-xl font-bold mb-6">My Listings</h2>
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-medium mb-4">For Sale</h3>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-3xl font-bold text-estate-primary">3</p>
-                  <p className="text-sm text-gray-500">Active Listings</p>
-                </div>
-                <Home className="h-10 w-10 text-estate-primary opacity-50" />
-              </div>
-            </div>
-            
-            <div className="border border-gray-200 rounded-lg p-6">
-              <h3 className="text-lg font-medium mb-4">For Rent</h3>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-3xl font-bold text-blue-500">1</p>
-                  <p className="text-sm text-gray-500">Active Listings</p>
-                </div>
-                <Home className="h-10 w-10 text-blue-500 opacity-50" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Default: Overview
   return (
-    <div>
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Properties</h3>
-            <Home className="h-6 w-6 text-estate-primary" />
-          </div>
-          <p className="text-3xl font-bold mt-2">{myProperties.length}</p>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Total Value</h3>
-            <DollarSign className="h-6 w-6 text-estate-primary" />
-          </div>
-          <p className="text-3xl font-bold mt-2">
-            ${myProperties.reduce((sum, property) => sum + property.price, 0).toLocaleString()}
-          </p>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Property Views</h3>
-            <Eye className="h-6 w-6 text-estate-primary" />
-          </div>
-          <p className="text-3xl font-bold mt-2">1,248</p>
-          <p className="text-green-500 text-sm mt-1">+15% from last month</p>
-        </div>
+    <div className="w-full p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Owner Dashboard</h1>
+        <Link to="/add-property">
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Property
+          </Button>
+        </Link>
       </div>
       
-      {/* Recent Properties */}
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold">My Properties</h2>
-          <Link to="/properties">
-            <Button variant="outline">View All</Button>
-          </Link>
-        </div>
+      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-3 w-full md:w-auto">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="properties">My Properties</TabsTrigger>
+          <TabsTrigger value="offers">Offers & Inquiries</TabsTrigger>
+        </TabsList>
         
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Listed</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {myProperties.slice(0, 3).map((property) => (
-                <tr key={property.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        <img className="h-10 w-10 rounded-md object-cover" src={property.images[0]} alt="" />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{property.title}</div>
-                        <div className="text-sm text-gray-500">{property.location.city}, {property.location.state}</div>
+        <TabsContent value="overview" className="space-y-4 mt-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Properties</CardTitle>
+                <Home className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">4</div>
+                <p className="text-xs text-muted-foreground">+1 from last month</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Listings</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">3</div>
+                <p className="text-xs text-muted-foreground">-1 from last month</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Inquiries</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">16</div>
+                <p className="text-xs text-muted-foreground">+3 from last week</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Property Value</CardTitle>
+                <BarChart4 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">$1.2M</div>
+                <p className="text-xs text-muted-foreground">+$150K from last assessment</p>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Activity on your properties</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[1, 2, 3].map((_, i) => (
+                    <div key={i} className="flex items-start space-x-4">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>
+                          {["JD", "AS", "RH"][i]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">
+                          {[
+                            "New inquiry for Coastal Villa",
+                            "Property viewed by 3 potential buyers",
+                            "Offer received for Downtown Apartment",
+                          ][i]}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {["2 hours ago", "Yesterday", "3 days ago"][i]}
+                        </p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      property.features.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
-                      property.features.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
-                      property.features.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {property.features.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(property.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {Math.floor(Math.random() * 500)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <Button variant="ghost" size="sm" className="text-estate-primary">Edit</Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Upcoming Viewings</CardTitle>
+                <CardDescription>Scheduled property viewings</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[1, 2].map((_, i) => (
+                    <div key={i} className="flex items-start space-x-4">
+                      <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">
+                          {[
+                            "Coastal Villa Viewing with Sarah Miller",
+                            "Downtown Apartment Viewing with Robert Brown",
+                          ][i]}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {["Tomorrow, 2:00 PM", "Saturday, 11:00 AM"][i]}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="properties" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>My Properties</CardTitle>
+              <CardDescription>Manage your property listings</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((_, i) => (
+                  <div key={i} className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 p-4 border rounded-md">
+                    <div className="flex space-x-4">
+                      <div className="w-20 h-20 bg-gray-200 rounded-md shrink-0 relative overflow-hidden">
+                        <img 
+                          src={`https://images.unsplash.com/photo-${["1600585154340-be6161a56a0c", "1564013799919-ab600027ffc6", "1512917774080-9991f1c4c750", "1493809842364-78817add7ffb"][i]}?auto=format&fit=crop&w=100&q=80`} 
+                          alt="Property" 
+                          className="object-cover w-full h-full"
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">{["Coastal Villa", "Urban Loft", "Family Home", "Downtown Apartment"][i]}</h3>
+                        <p className="text-sm text-muted-foreground">{["123 Beach Rd, Miami, FL", "456 Main St, Austin, TX", "789 Oak Ave, Seattle, WA", "101 Market St, San Francisco, CA"][i]}</p>
+                        <div className="flex items-center mt-1">
+                          <Badge variant={["default", "outline", "secondary", "destructive"][i]}>
+                            {["For Sale", "For Rent", "Pending", "Off Market"][i]}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium">{formatPrice([950000, 450000, 650000, 750000][i])}</span>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm" onClick={() => console.log("Edit property")}>
+                          Edit
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => console.log("View property")}>
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="offers" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Offers & Inquiries</CardTitle>
+              <CardDescription>Manage offers and inquiries for your properties</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[1, 2, 3].map((_, i) => (
+                  <div key={i} className="p-4 border rounded-md">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium">{["Offer", "Inquiry", "Offer"][i]} for {["Coastal Villa", "Urban Loft", "Family Home"][i]}</h3>
+                        <p className="text-sm text-muted-foreground">From: {["John Doe", "Sarah Miller", "Robert Brown"][i]}</p>
+                        <p className="text-sm text-muted-foreground">{["3 days ago", "Yesterday", "Today"][i]}</p>
+                      </div>
+                      <Badge variant={["success", "default", "warning"][i]}>
+                        {["Offer", "Inquiry", "Negotiation"][i]}
+                      </Badge>
+                    </div>
+                    <Separator className="my-4" />
+                    <div className="space-y-2">
+                      {i === 0 && (
+                        <div>
+                          <p className="text-sm">Offer Amount: <span className="font-medium">{formatPrice(920000)}</span></p>
+                          <p className="text-sm">Financing: Pre-approved mortgage</p>
+                          <p className="text-sm">Closing: 45 days</p>
+                        </div>
+                      )}
+                      {i === 1 && (
+                        <div>
+                          <p className="text-sm">I'm interested in scheduling a viewing for this property. Is it possible to see it this weekend?</p>
+                        </div>
+                      )}
+                      {i === 2 && (
+                        <div>
+                          <p className="text-sm">Offer Amount: <span className="font-medium">{formatPrice(625000)}</span></p>
+                          <p className="text-sm">Counter Offer: <span className="font-medium">{formatPrice(640000)}</span></p>
+                          <p className="text-sm">Closing: 30 days</p>
+                        </div>
+                      )}
+                      <div className="flex space-x-2 mt-4">
+                        {i === 0 && (
+                          <>
+                            <Button variant="default" size="sm">Accept</Button>
+                            <Button variant="outline" size="sm">Counter</Button>
+                            <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700">Decline</Button>
+                          </>
+                        )}
+                        {i === 1 && (
+                          <>
+                            <Button variant="default" size="sm">Respond</Button>
+                            <Button variant="outline" size="sm">Schedule Viewing</Button>
+                          </>
+                        )}
+                        {i === 2 && (
+                          <>
+                            <Button variant="default" size="sm">Accept Counter</Button>
+                            <Button variant="outline" size="sm">Counter Again</Button>
+                            <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700">Decline</Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

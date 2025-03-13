@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { loginUser, registerUser, logoutUser, getCurrentUser, isAuthenticated } from "@/services/authService";
 
 export type UserRole = "owner" | "agent" | "buyer" | "admin";
 
@@ -39,32 +40,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Check for existing session on mount
+  // Check for existing session on mount using JWT
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    const checkAuth = async () => {
+      try {
+        if (isAuthenticated()) {
+          const currentUser = getCurrentUser();
+          if (currentUser) {
+            setUser(currentUser);
+          }
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+        // If token is invalid, clear it
+        localStorage.removeItem("authToken");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Mock login - Replace with Supabase auth later
-      console.log("Login attempt:", { email, password });
-      
-      // Simulate successful login for now with mock user data
-      const mockUser: User = {
-        id: "user-1",
-        email,
-        name: email.split('@')[0],
-        role: "owner", // default role
-        avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&h=120&q=80"
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem("user", JSON.stringify(mockUser));
+      // Use our JWT authentication service
+      const { user: loggedInUser } = await loginUser(email, password);
+      setUser(loggedInUser);
       
       toast({
         title: "Success!",
@@ -87,20 +90,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, name: string, role: UserRole) => {
     setIsLoading(true);
     try {
-      // Mock registration - Replace with Supabase auth later
-      console.log("Registration attempt:", { email, password, name, role });
-      
-      // Simulate successful registration
-      const mockUser: User = {
-        id: "user-" + Date.now(),
-        email,
-        name,
-        role,
-        avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&h=120&q=80"
-      };
-      
-      setUser(mockUser);
-      localStorage.setItem("user", JSON.stringify(mockUser));
+      // Use our JWT authentication service
+      const { user: registeredUser } = await registerUser(email, password, name, role);
+      setUser(registeredUser);
       
       toast({
         title: "Registration successful!",
@@ -121,12 +113,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    // Use our JWT authentication service
+    logoutUser();
     setUser(null);
-    localStorage.removeItem("user");
+    
     toast({
       title: "Logged out",
       description: "You have been successfully logged out.",
     });
+    
     navigate("/");
   };
 
