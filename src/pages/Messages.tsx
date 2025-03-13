@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Send, Paperclip, MoreVertical, CheckCircle, Phone, Video } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import Layout from "@/components/Layout";
+// import Layout from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Sample messages data

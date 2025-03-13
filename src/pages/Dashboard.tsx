@@ -56,7 +56,7 @@ const Dashboard = () => {
   const mockUser = user || {
     name: "Guest User",
     role: "buyer",
-    avatar: "https://via.placeholder.com/40"
+    avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/ed060b47018885c4c6847048f8a83758_qgbypi.png"
   };
 
   return (
@@ -66,8 +66,7 @@ const Dashboard = () => {
         <div className="h-full flex flex-col">
           <div className="p-4 border-b border-gray-200">
             <Link to="/" className="flex items-center space-x-2">
-              <Building2 className="h-6 w-6 text-estate-primary" strokeWidth={2.5} />
-              <span className="font-bold text-xl">FindHome</span>
+          <img src="https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" alt="" />
             </Link>
           </div>
           
@@ -79,7 +78,7 @@ const Dashboard = () => {
                 className="h-10 w-10 rounded-full object-cover"
               />
               <div>
-                <h3 className="font-medium">{mockUser.name}</h3>
+                <h5 className="font-medium">{mockUser.name}</h5>
                 <p className="text-xs text-gray-500 capitalize">{mockUser.role}</p>
               </div>
             </Link>

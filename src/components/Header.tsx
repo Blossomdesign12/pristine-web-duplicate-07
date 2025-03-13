@@ -48,8 +48,7 @@ const Header = () => {
       <div className="container flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 z-50">
           <div className="flex items-center space-x-1">
-            <Building2 className="h-6 w-6 text-estate-primary" strokeWidth={2.5} />
-            <span className="font-bold text-xl">FindHome</span>
+           <img src="https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" alt="" />
           </div>
         </Link>
         
