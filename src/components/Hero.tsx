@@ -71,10 +71,10 @@ const Hero = () => {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
           )}
         >
-          <div className="inline-block px-3 py-1 bg-estate-primary/20 backdrop-blur-sm text-white rounded-full mb-4 animate-fade-in">
+          {/* <div className="inline-block px-3 py-1 bg-estate-primary/20 backdrop-blur-sm text-white rounded-full mb-4 animate-fade-in">
             <p className="text-sm font-medium">Find Your Dream Home Today</p>
-          </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 max-w-4xl leading-tight">
+          </div> */}
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 max-w-4xl mt-[70px] leading-tight">
             Discover Your Perfect Property With Our Expert Guidance
           </h1>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
