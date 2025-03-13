@@ -15,7 +15,8 @@ import {
   Heart,
   DollarSign,
   List,
-  Activity
+  Activity,
+  UserRound
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import BuyerDashboard from "@/components/dashboard/BuyerDashboard";
@@ -70,7 +71,7 @@ const Dashboard = () => {
           </div>
           
           <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center space-x-3">
+            <Link to="/profile" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <img 
                 src={mockUser.avatar || "https://via.placeholder.com/40"} 
                 alt={mockUser.name} 
@@ -80,7 +81,7 @@ const Dashboard = () => {
                 <h3 className="font-medium">{mockUser.name}</h3>
                 <p className="text-xs text-gray-500 capitalize">{mockUser.role}</p>
               </div>
-            </div>
+            </Link>
           </div>
           
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -167,23 +168,35 @@ const Dashboard = () => {
               </>
             )}
             
-            <Button
-              variant="ghost"
-              className={`w-full justify-start ${activeTab === "messages" ? "bg-gray-100" : ""}`}
-              onClick={() => setActiveTab("messages")}
-            >
-              <MessageSquare className="mr-2 h-5 w-5" />
-              Messages
-            </Button>
+            <Link to="/messages" className="block">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
+                <MessageSquare className="mr-2 h-5 w-5" />
+                Messages
+              </Button>
+            </Link>
             
-            <Button
-              variant="ghost"
-              className={`w-full justify-start ${activeTab === "notifications" ? "bg-gray-100" : ""}`}
-              onClick={() => setActiveTab("notifications")}
-            >
-              <Bell className="mr-2 h-5 w-5" />
-              Notifications
-            </Button>
+            <Link to="/notifications" className="block">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
+                <Bell className="mr-2 h-5 w-5" />
+                Notifications
+              </Button>
+            </Link>
+            
+            <Link to="/profile" className="block">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
+                <UserRound className="mr-2 h-5 w-5" />
+                Profile
+              </Button>
+            </Link>
             
             <Button
               variant="ghost"
