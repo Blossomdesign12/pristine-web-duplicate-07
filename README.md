@@ -1,7 +1,7 @@
 
-# FindHome - Real Estate Marketplace
+#Jugyah
 
-FindHome is a complete real estate platform where users can buy, sell, and rent properties.
+Jugyah is a complete real estate platform where users can buy, sell, and rent properties.
 
 ## Project info
 
