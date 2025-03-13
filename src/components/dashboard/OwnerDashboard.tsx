@@ -1,260 +1,255 @@
 
-import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { BarChart4, Home, Clock, Plus, Users, CalendarIcon, Eye } from "lucide-react";
-import { formatPrice } from "@/lib/data";
 import { Link } from "react-router-dom";
+import { Building2, Clock, DollarSign, Eye, Home, Plus, Clock8 } from "lucide-react";
+import { Property, properties } from "@/lib/data";
 
-const OwnerDashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+interface OwnerDashboardProps {
+  activeTab: string;
+}
 
-  return (
-    <div className="w-full p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Owner Dashboard</h1>
-        <Link to="/add-property">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Property
-          </Button>
-        </Link>
+const OwnerDashboard: React.FC<OwnerDashboardProps> = ({ activeTab }) => {
+  // Mock data - would come from API calls in a real app
+  const [myProperties] = useState<Property[]>(properties.slice(0, 4));
+  
+  if (activeTab === "properties") {
+    return (
+      <div>
+        <h2 className="text-xl font-bold mb-6">My Properties</h2>
+        <div className="flex justify-end mb-4">
+          <Link to="/add-property">
+            <Button className="bg-estate-primary hover:bg-estate-primary/90">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Property
+            </Button>
+          </Link>
+        </div>
+        {myProperties.length > 0 ? (
+          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Listed Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {myProperties.map((property) => (
+                    <tr key={property.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 flex-shrink-0 rounded overflow-hidden bg-gray-200">
+                            <img src={property.images[0]} alt={property.title} className="h-10 w-10 object-cover" />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900 line-clamp-1">{property.title}</div>
+                            <div className="text-sm text-gray-500">{property.location.city}, {property.location.state}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          Active
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${property.price.toLocaleString()}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">245</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Apr 12, 2023</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <Link to={`/property/${property.id}`} className="text-estate-primary hover:underline mr-4">View</Link>
+                        <Link to={`/edit-property/${property.id}`} className="text-estate-primary hover:underline">Edit</Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+            <Building2 className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+            <h3 className="text-lg font-medium mb-2">No properties yet</h3>
+            <p className="text-gray-500 mb-6">
+              Start listing your properties to sell or rent them out.
+            </p>
+            <Link to="/add-property">
+              <Button variant="outline">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Your First Property
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
-      
-      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 w-full md:w-auto">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="properties">My Properties</TabsTrigger>
-          <TabsTrigger value="offers">Offers & Inquiries</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview" className="space-y-4 mt-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Properties</CardTitle>
-                <Home className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">4</div>
-                <p className="text-xs text-muted-foreground">+1 from last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Listings</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">3</div>
-                <p className="text-xs text-muted-foreground">-1 from last month</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Inquiries</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">16</div>
-                <p className="text-xs text-muted-foreground">+3 from last week</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Property Value</CardTitle>
-                <BarChart4 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">$1.2M</div>
-                <p className="text-xs text-muted-foreground">+$150K from last assessment</p>
-              </CardContent>
-            </Card>
+    );
+  }
+  
+  if (activeTab === "listings") {
+    return (
+      <div>
+        <h2 className="text-xl font-bold mb-6">Property Listings</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Active Listings</h3>
+              <Home className="h-6 w-6 text-estate-primary" />
+            </div>
+            <p className="text-3xl font-bold mt-2">4</p>
           </div>
           
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Activity on your properties</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((_, i) => (
-                    <div key={i} className="flex items-start space-x-4">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>
-                          {["JD", "AS", "RH"][i]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">
-                          {[
-                            "New inquiry for Coastal Villa",
-                            "Property viewed by 3 potential buyers",
-                            "Offer received for Downtown Apartment",
-                          ][i]}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {["2 hours ago", "Yesterday", "3 days ago"][i]}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Upcoming Viewings</CardTitle>
-                <CardDescription>Scheduled property viewings</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[1, 2].map((_, i) => (
-                    <div key={i} className="flex items-start space-x-4">
-                      <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5" />
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">
-                          {[
-                            "Coastal Villa Viewing with Sarah Miller",
-                            "Downtown Apartment Viewing with Robert Brown",
-                          ][i]}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {["Tomorrow, 2:00 PM", "Saturday, 11:00 AM"][i]}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Total Views</h3>
+              <Eye className="h-6 w-6 text-estate-primary" />
+            </div>
+            <p className="text-3xl font-bold mt-2">1,243</p>
+            <p className="text-green-500 text-sm mt-1">+12% from last month</p>
           </div>
-        </TabsContent>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium">Avg. Time Listed</h3>
+              <Clock8 className="h-6 w-6 text-estate-primary" />
+            </div>
+            <p className="text-3xl font-bold mt-2">24 days</p>
+          </div>
+        </div>
         
-        <TabsContent value="properties" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>My Properties</CardTitle>
-              <CardDescription>Manage your property listings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[1, 2, 3, 4].map((_, i) => (
-                  <div key={i} className="flex flex-col md:flex-row md:items-center justify-between space-y-4 md:space-y-0 p-4 border rounded-md">
-                    <div className="flex space-x-4">
-                      <div className="w-20 h-20 bg-gray-200 rounded-md shrink-0 relative overflow-hidden">
-                        <img 
-                          src={`https://images.unsplash.com/photo-${["1600585154340-be6161a56a0c", "1564013799919-ab600027ffc6", "1512917774080-9991f1c4c750", "1493809842364-78817add7ffb"][i]}?auto=format&fit=crop&w=100&q=80`} 
-                          alt="Property" 
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{["Coastal Villa", "Urban Loft", "Family Home", "Downtown Apartment"][i]}</h3>
-                        <p className="text-sm text-muted-foreground">{["123 Beach Rd, Miami, FL", "456 Main St, Austin, TX", "789 Oak Ave, Seattle, WA", "101 Market St, San Francisco, CA"][i]}</p>
-                        <div className="flex items-center mt-1">
-                          <Badge variant={["default", "outline", "secondary", "destructive"][i]}>
-                            {["For Sale", "For Rent", "Pending", "Off Market"][i]}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-medium">{formatPrice([950000, 450000, 650000, 750000][i])}</span>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => console.log("Edit property")}>
-                          Edit
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => console.log("View property")}>
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
+          <h3 className="text-lg font-medium mb-4">Property Performance</h3>
+          <p className="text-gray-500 mb-4">
+            This section would display charts showing property views, inquiries, and other metrics over time.
+          </p>
+          <Button variant="outline">
+            View Detailed Analytics
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  
+  // Default: Overview
+  return (
+    <div>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Properties</h3>
+            <Building2 className="h-6 w-6 text-estate-primary" />
+          </div>
+          <p className="text-3xl font-bold mt-2">{myProperties.length}</p>
+        </div>
         
-        <TabsContent value="offers" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Offers & Inquiries</CardTitle>
-              <CardDescription>Manage offers and inquiries for your properties</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[1, 2, 3].map((_, i) => (
-                  <div key={i} className="p-4 border rounded-md">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-medium">{["Offer", "Inquiry", "Offer"][i]} for {["Coastal Villa", "Urban Loft", "Family Home"][i]}</h3>
-                        <p className="text-sm text-muted-foreground">From: {["John Doe", "Sarah Miller", "Robert Brown"][i]}</p>
-                        <p className="text-sm text-muted-foreground">{["3 days ago", "Yesterday", "Today"][i]}</p>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Pending Sales</h3>
+            <Clock className="h-6 w-6 text-estate-primary" />
+          </div>
+          <p className="text-3xl font-bold mt-2">1</p>
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Total Revenue</h3>
+            <DollarSign className="h-6 w-6 text-estate-primary" />
+          </div>
+          <p className="text-3xl font-bold mt-2">$124,500</p>
+        </div>
+      </div>
+      
+      {/* Recent Properties */}
+      <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-xl font-bold mb-4">My Properties</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {myProperties.slice(0, 2).map((property) => (
+                <tr key={property.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 flex-shrink-0 rounded overflow-hidden bg-gray-200">
+                        <img src={property.images[0]} alt={property.title} className="h-10 w-10 object-cover" />
                       </div>
-                      <Badge variant={["success", "default", "warning"][i]}>
-                        {["Offer", "Inquiry", "Negotiation"][i]}
-                      </Badge>
-                    </div>
-                    <Separator className="my-4" />
-                    <div className="space-y-2">
-                      {i === 0 && (
-                        <div>
-                          <p className="text-sm">Offer Amount: <span className="font-medium">{formatPrice(920000)}</span></p>
-                          <p className="text-sm">Financing: Pre-approved mortgage</p>
-                          <p className="text-sm">Closing: 45 days</p>
-                        </div>
-                      )}
-                      {i === 1 && (
-                        <div>
-                          <p className="text-sm">I'm interested in scheduling a viewing for this property. Is it possible to see it this weekend?</p>
-                        </div>
-                      )}
-                      {i === 2 && (
-                        <div>
-                          <p className="text-sm">Offer Amount: <span className="font-medium">{formatPrice(625000)}</span></p>
-                          <p className="text-sm">Counter Offer: <span className="font-medium">{formatPrice(640000)}</span></p>
-                          <p className="text-sm">Closing: 30 days</p>
-                        </div>
-                      )}
-                      <div className="flex space-x-2 mt-4">
-                        {i === 0 && (
-                          <>
-                            <Button variant="default" size="sm">Accept</Button>
-                            <Button variant="outline" size="sm">Counter</Button>
-                            <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700">Decline</Button>
-                          </>
-                        )}
-                        {i === 1 && (
-                          <>
-                            <Button variant="default" size="sm">Respond</Button>
-                            <Button variant="outline" size="sm">Schedule Viewing</Button>
-                          </>
-                        )}
-                        {i === 2 && (
-                          <>
-                            <Button variant="default" size="sm">Accept Counter</Button>
-                            <Button variant="outline" size="sm">Counter Again</Button>
-                            <Button variant="outline" size="sm" className="text-red-500 hover:text-red-700">Decline</Button>
-                          </>
-                        )}
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900 line-clamp-1">{property.title}</div>
+                        <div className="text-sm text-gray-500">{property.location.city}, {property.location.state}</div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      Active
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${property.price.toLocaleString()}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">245</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <Link to={`/property/${property.id}`} className="text-estate-primary hover:underline mr-4">View</Link>
+                    <Link to={`/edit-property/${property.id}`} className="text-estate-primary hover:underline">Edit</Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-4">
+          <Link to="/dashboard?tab=properties">
+            <Button variant="outline">
+              View All Properties
+            </Button>
+          </Link>
+        </div>
+      </div>
+      
+      {/* Recent Activity */}
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-xl font-bold mb-4">Recent Activity</h2>
+        <ul className="space-y-4">
+          <li className="flex items-start space-x-3">
+            <div className="flex-shrink-0 h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <Eye className="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">10 new views on <span className="text-estate-primary">Modern Apartment in Downtown</span></p>
+              <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
+            </div>
+          </li>
+          <li className="flex items-start space-x-3">
+            <div className="flex-shrink-0 h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+              <DollarSign className="h-4 w-4 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">New offer received on <span className="text-estate-primary">Beach Villa with Ocean View</span></p>
+              <p className="text-xs text-gray-500 mt-1">1 day ago</p>
+            </div>
+          </li>
+          <li className="flex items-start space-x-3">
+            <div className="flex-shrink-0 h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <MessageSquare className="h-4 w-4 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">New message from <span className="text-estate-primary">Sarah Johnson</span> about your property</p>
+              <p className="text-xs text-gray-500 mt-1">2 days ago</p>
+            </div>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 };

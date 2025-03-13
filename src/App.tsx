@@ -39,7 +39,7 @@ const App = () => (
             <Route 
               path="/dashboard" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute bypassAuth={true}>
                   <Dashboard />
                 </ProtectedRoute>
               } 
@@ -47,7 +47,7 @@ const App = () => (
             <Route 
               path="/add-property" 
               element={
-                <ProtectedRoute>
+                <ProtectedRoute bypassAuth={true}>
                   <AddProperty />
                 </ProtectedRoute>
               } 

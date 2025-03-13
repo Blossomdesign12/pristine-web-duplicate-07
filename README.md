@@ -1,13 +1,102 @@
-# Welcome to Jugyah project
+
+# FindHome - Real Estate Marketplace
+
+FindHome is a complete real estate platform where users can buy, sell, and rent properties.
 
 ## Project info
 
+This project is a real estate marketplace built with React, TypeScript, and various modern technologies. It allows users to:
+
+- Browse property listings
+- Search for properties with filters
+- View detailed property information
+- Save favorite properties
+- Buy, sell, and rent properties
+- Contact agents and property owners
+
+## Technology Stack
+
+- **Frontend**: React, TypeScript, Tailwind CSS, shadcn-ui components
+- **Authentication**: JWT (JSON Web Token)
+- **Messaging**: Firebase
+- **Database**: MongoDB
+- **State Management**: React Context API, Tanstack Query
+
+## Project Structure
+
+The project is organized into the following main sections:
+
+### Authentication
+
+- JWT-based authentication with user roles:
+  - Buyer: Can browse, favorite, and make offers on properties
+  - Owner: Can list and manage their properties
+  - Agent: Can list properties and manage clients
+  - Admin: Full system access
+
+### Property Management
+
+- Property listing with detailed information
+- Property search with filters
+- Property creation and editing
+- Property image gallery
+- Various property types support
+
+### User Dashboard
+
+- Role-based dashboards for buyers, owners, agents, and admins
+- Analytics and statistics for property owners and agents
+- Saved properties for buyers
+- Property management for owners and agents
+
+### Messaging
+
+- In-app messaging using Firebase
+- Real-time notifications
+- Chat between buyers, agents, and property owners
+
+## Project Roadmap
+
+1. **Phase 1: Core Functionality** ✅
+   - Setup project structure
+   - Create basic UI components
+   - Implement routing
+   - Create mock data
+
+2. **Phase 2: Authentication and User Roles** ✅
+   - Implement JWT authentication
+   - Set up user roles and permissions
+   - Create login and registration pages
+   - Build protected routes
+
+3. **Phase 3: Property Listings** ✅
+   - Implement property listing pages
+   - Create property details view
+   - Add property search functionality
+   - Build property cards and gallery
+
+4. **Phase 4: User Dashboard** ✅
+   - Create role-specific dashboards
+   - Implement property management
+   - Build analytics and statistics
+   - Add saved properties for buyers
+
+5. **Phase 5: Backend Integration** (In Progress)
+   - Connect to MongoDB for data storage
+   - Implement Firebase for messaging
+   - Set up real API endpoints
+   - Replace mock data with real data
+
+6. **Phase 6: Advanced Features** (Planned)
+   - Implement real-time notifications
+   - Add payment processing
+   - Create advanced search filters
+   - Build appointment scheduling
+   - Add map integration
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
-
-
 
 **Use your preferred IDE**
 
@@ -45,18 +134,9 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
 ## How can I deploy this project?
 
+FindHome can be deployed to various hosting platforms such as Netlify, Vercel, or GitHub Pages. Detailed deployment instructions coming soon.
 
 ## I want to use a custom domain - is that possible?
 

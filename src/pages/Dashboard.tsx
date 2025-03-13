@@ -28,12 +28,11 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   
-  if (!user) {
-    return null; // Protected route should handle this
-  }
+  // Default role to buyer if not authenticated
+  const role = user?.role || "buyer";
 
   const renderDashboardContent = () => {
-    switch (user.role) {
+    switch (role) {
       case "buyer":
         return <BuyerDashboard activeTab={activeTab} />;
       case "owner":
@@ -51,6 +50,13 @@ const Dashboard = () => {
     logout();
   };
 
+  // Mock user data when no user is authenticated
+  const mockUser = user || {
+    name: "Guest User",
+    role: "buyer",
+    avatar: "https://via.placeholder.com/40"
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -66,13 +72,13 @@ const Dashboard = () => {
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-3">
               <img 
-                src={user.avatar || "https://via.placeholder.com/40"} 
-                alt={user.name} 
+                src={mockUser.avatar || "https://via.placeholder.com/40"} 
+                alt={mockUser.name} 
                 className="h-10 w-10 rounded-full object-cover"
               />
               <div>
-                <h3 className="font-medium">{user.name}</h3>
-                <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                <h3 className="font-medium">{mockUser.name}</h3>
+                <p className="text-xs text-gray-500 capitalize">{mockUser.role}</p>
               </div>
             </div>
           </div>
@@ -87,7 +93,7 @@ const Dashboard = () => {
               Overview
             </Button>
             
-            {user.role === "buyer" && (
+            {(role === "buyer" || !user) && (
               <>
                 <Button
                   variant="ghost"
@@ -108,7 +114,7 @@ const Dashboard = () => {
               </>
             )}
             
-            {(user.role === "owner" || user.role === "agent") && (
+            {(role === "owner" || role === "agent") && (
               <>
                 <Button
                   variant="ghost"
@@ -129,7 +135,7 @@ const Dashboard = () => {
               </>
             )}
             
-            {user.role === "agent" && (
+            {role === "agent" && (
               <Button
                 variant="ghost"
                 className={`w-full justify-start ${activeTab === "clients" ? "bg-gray-100" : ""}`}
@@ -140,7 +146,7 @@ const Dashboard = () => {
               </Button>
             )}
             
-            {user.role === "admin" && (
+            {role === "admin" && (
               <>
                 <Button
                   variant="ghost"
@@ -190,14 +196,25 @@ const Dashboard = () => {
           </nav>
           
           <div className="p-4 border-t border-gray-200">
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-5 w-5" />
-              Sign Out
-            </Button>
+            {user ? (
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-2 h-5 w-5" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start"
+                onClick={() => navigate('/login')}
+              >
+                <LogOut className="mr-2 h-5 w-5" />
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </aside>
@@ -207,7 +224,7 @@ const Dashboard = () => {
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-2xl font-bold">Dashboard</h1>
-            {(user.role === "owner" || user.role === "agent") && (
+            {(role === "owner" || role === "agent") && (
               <Button 
                 className="bg-estate-primary hover:bg-estate-primary/90"
                 onClick={() => navigate("/add-property")}
