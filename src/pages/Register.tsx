@@ -4,43 +4,34 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "@/hooks/use-toast";
 import { Building2, Mail, Lock, User, ArrowRight } from "lucide-react";
+import { useAuth, UserRole } from "@/contexts/AuthContext";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState("renter");
-  const [isLoading, setIsLoading] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState<UserRole>("buyer");
+  const [error, setError] = useState("");
+  const { register, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
     try {
-      // This is a placeholder for Supabase registration
-      // Will be implemented once Supabase is connected
-      console.log("Registration attempt:", { name, email, password, userType });
-      
-      // Simulate successful registration for now
-      setTimeout(() => {
-        toast({
-          title: "Account created!",
-          description: "You have successfully registered.",
-        });
-        navigate("/dashboard");
-      }, 1500);
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast({
-        title: "Registration failed",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
+      await register(email, password, name, role);
+      // Redirect will be handled in the auth context
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError("Registration failed. Please try again.");
     }
   };
 
@@ -55,13 +46,13 @@ const Register = () => {
             </div>
           </Link>
           <h1 className="mt-6 text-3xl font-bold">Create an account</h1>
-          <p className="mt-2 text-gray-600">Join our platform and find your ideal property</p>
+          <p className="mt-2 text-gray-600">Join our platform to buy, sell, or list properties</p>
         </div>
 
         <div className="bg-white p-8 rounded-lg shadow-md">
           <form onSubmit={handleRegister} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Full name</Label>
+              <Label htmlFor="name">Full Name</Label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-gray-400" />
@@ -112,45 +103,51 @@ const Register = () => {
                   required
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
             </div>
 
             <div className="space-y-2">
-              <Label>I am a</Label>
-              <div className="grid grid-cols-3 gap-3">
-                <Button
-                  type="button"
-                  variant={userType === "renter" ? "default" : "outline"}
-                  className={userType === "renter" ? "bg-estate-primary" : ""}
-                  onClick={() => setUserType("renter")}
-                >
-                  Renter
-                </Button>
-                <Button
-                  type="button"
-                  variant={userType === "owner" ? "default" : "outline"}
-                  className={userType === "owner" ? "bg-estate-primary" : ""}
-                  onClick={() => setUserType("owner")}
-                >
-                  Owner
-                </Button>
-                <Button
-                  type="button"
-                  variant={userType === "agent" ? "default" : "outline"}
-                  className={userType === "agent" ? "bg-estate-primary" : ""}
-                  onClick={() => setUserType("agent")}
-                >
-                  Agent
-                </Button>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                />
               </div>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role">I want to</Label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value as UserRole)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-estate-primary"
+                required
+              >
+                <option value="buyer">Buy Properties</option>
+                <option value="owner">Sell My Properties</option>
+                <option value="agent">List as an Agent</option>
+              </select>
+            </div>
+
+            {error && (
+              <div className="text-red-500 text-sm">{error}</div>
+            )}
 
             <Button
               type="submit"
               className="w-full bg-estate-primary hover:bg-estate-primary/90"
               disabled={isLoading}
             >
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading ? "Creating Account..." : "Create Account"}
               {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
             </Button>
           </form>
