@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import AddProperty from "./pages/AddProperty";
 import Profile from "./pages/Profile";
 import Messages from "./pages/Messages";
@@ -44,6 +45,14 @@ const App = () => (
               element={
                 <ProtectedRoute bypassAuth={true}>
                   <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute bypassAuth={true}>
+                  <AdminDashboard />
                 </ProtectedRoute>
               } 
             />

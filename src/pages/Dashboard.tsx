@@ -16,7 +16,8 @@ import {
   DollarSign,
   List,
   Activity,
-  UserRound
+  UserRound,
+  Shield
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import BuyerDashboard from "@/components/dashboard/BuyerDashboard";
@@ -165,6 +166,15 @@ const Dashboard = () => {
                   <Activity className="mr-2 h-5 w-5" />
                   Analytics
                 </Button>
+                <Link to="/admin" className="block">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                  >
+                    <Shield className="mr-2 h-5 w-5" />
+                    Admin Portal
+                  </Button>
+                </Link>
               </>
             )}
             
@@ -244,6 +254,15 @@ const Dashboard = () => {
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add Property
+              </Button>
+            )}
+            {role === "admin" && (
+              <Button 
+                className="bg-estate-primary hover:bg-estate-primary/90"
+                onClick={() => navigate("/admin")}
+              >
+                <Shield className="mr-2 h-4 w-4" />
+                Admin Portal
               </Button>
             )}
           </div>
