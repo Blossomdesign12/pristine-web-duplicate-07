@@ -71,7 +71,6 @@ Jugyah provides a complete real estate solution with features tailored for the I
 - **Framework**: Express.js
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT (JSON Web Token)
-- **API Documentation**: Swagger/OpenAPI (planned)
 
 ### Authentication
 - **Method**: JWT (JSON Web Token)
