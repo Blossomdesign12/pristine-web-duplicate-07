@@ -50,6 +50,12 @@ Jugyah provides a complete real estate solution with features tailored for the I
 
 ## Technology Stack
 
+### MERN Stack
+- **MongoDB**: NoSQL database for storing property listings, user data, and more
+- **Express.js**: Backend framework for handling API requests
+- **React**: Frontend library for building user interfaces
+- **Node.js**: JavaScript runtime for building the backend server
+
 ### Frontend
 - **Framework**: React 18.3.1
 - **Language**: TypeScript
@@ -61,31 +67,40 @@ Jugyah provides a complete real estate solution with features tailored for the I
 - **Forms**: React Hook Form with Zod validation
 - **Notifications**: Sonner for toast notifications
 
+### Backend
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT (JSON Web Token)
+- **API Documentation**: Swagger/OpenAPI (planned)
+
 ### Authentication
 - **Method**: JWT (JSON Web Token)
+- **Password Hashing**: bcryptjs
 - **User Roles**: Buyer, Owner, Agent, Admin
-
-### Messaging
-- **Backend**: Firebase
-
-### Database
-- **Type**: MongoDB
 
 ## Project Structure
 
-The project follows a component-based architecture with the following main directories:
+The project follows a full-stack MERN architecture with the following structure:
 
 ```
-src/
-├── components/       # Reusable UI components
-│   ├── ui/           # Base UI components from shadcn
-│   └── dashboard/    # Dashboard-specific components
-├── contexts/         # React contexts for state management
-├── hooks/            # Custom React hooks
-├── lib/              # Utility functions and data
-├── pages/            # Page components
-├── services/         # API and service integrations
-└── assets/           # Static assets
+jugyah/
+├── server/               # Backend Node.js/Express server
+│   ├── controllers/      # API route controllers
+│   ├── models/           # Mongoose models
+│   ├── routes/           # Express routes
+│   ├── middleware/       # Custom middleware
+│   └── index.js          # Server entry point
+├── src/                  # Frontend React app
+│   ├── components/       # Reusable UI components
+│   │   ├── ui/           # Base UI components from shadcn
+│   │   └── dashboard/    # Dashboard-specific components
+│   ├── contexts/         # React contexts for state management
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Utility functions and data
+│   ├── pages/            # Page components
+│   ├── services/         # API and service integrations
+│   └── assets/           # Static assets
+└── package.json          # Project dependencies and scripts
 ```
 
 ## Design System
@@ -174,11 +189,11 @@ interface Property {
 
 Authentication is handled through JWT tokens with different permission levels based on user roles. The authentication flow includes:
 
-1. Registration
-2. Login
-3. Token validation
-4. Protected routes
-5. Role-based access control
+1. Registration: Users create an account with email, password and role
+2. Login: Users authenticate with email and password to receive a JWT token
+3. Token validation: Token is validated on protected routes
+4. Role-based access control: Different permissions based on user roles
+5. Password hashing: Passwords are securely hashed using bcryptjs
 
 ## Installation
 
@@ -191,16 +206,44 @@ git clone <repository-url>
 # Navigate to the project directory
 cd jugyah
 
-# Install dependencies
+# Install frontend dependencies
 npm install
 
-# Start the development server
+# Set up environment variables
+cp .env.example .env
+# Edit .env file with your configuration
+
+# Install backend dependencies
+cd server
+npm install
+
+# Start the backend server
+npm run dev
+
+# In a new terminal, start the frontend development server
+cd ..
 npm run dev
 ```
 
 ## Development
 
+### Backend Development
+
+The backend is built with Express.js and MongoDB. To develop:
+
+1. Ensure MongoDB is running locally or update the connection string in `.env`
+2. Use `npm run dev` in the server directory to start the server with hot-reload
+3. API endpoints are available at `http://localhost:5000/api`
+
+### Frontend Development
+
+The frontend is built with React and Vite. To develop:
+
+1. Run `npm run dev` in the root directory
+2. Access the app at `http://localhost:8080`
+
 ### Adding New Properties
+
 Properties can be added through the "Add Property" page, accessible from the dashboard. The form includes fields for:
 
 - Property details (title, description, price)
@@ -209,26 +252,29 @@ Properties can be added through the "Add Property" page, accessible from the das
 - Amenities
 - Images and floor plans
 
-### Customization
-The UI can be customized through:
-
-- Tailwind configuration (`tailwind.config.ts`)
-- Component styling (individual component files)
-- Global styles (`src/index.css`)
-
 ## Deployment
 
-The application can be deployed to various hosting platforms:
+The application consists of two parts that need to be deployed:
 
-1. **Vercel** (recommended)
-2. **Netlify**
-3. **GitHub Pages**
+### Backend Deployment
+1. **Setup environment variables** for production
+2. **Build the server**: Ensure all dependencies are installed
+3. **Deploy to a hosting service** like:
+   - Heroku
+   - Digital Ocean
+   - AWS
+   - Railway
 
-For production builds:
+### Frontend Deployment
+1. **Build the React app**: `npm run build`
+2. **Deploy to a hosting service** like:
+   - Vercel (recommended)
+   - Netlify
+   - GitHub Pages
+   - Firebase Hosting
 
-```sh
-npm run build
-```
+### MongoDB Deployment
+For production, use MongoDB Atlas to host your database securely.
 
 ## Future Roadmap
 
@@ -256,10 +302,10 @@ npm run build
    - Build analytics and statistics
    - Add saved properties for buyers
 
-5. **Phase 5: Backend Integration** (In Progress)
+5. **Phase 5: Backend Integration** ✅
    - Connect to MongoDB for data storage
-   - Implement Firebase for messaging
-   - Set up real API endpoints
+   - Implement real API endpoints
+   - Set up authentication server
    - Replace mock data with real data
 
 6. **Phase 6: Advanced Features** (Planned)
@@ -269,42 +315,47 @@ npm run build
    - Build appointment scheduling
    - Add map integration for property locations
 
-## How can I edit this code?
+## How to Run this MERN Stack Application
 
-There are several ways of editing your application.
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB (local installation or MongoDB Atlas account)
+- npm or yarn
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
+### Running the Backend
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Navigate to the server directory
+cd server
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Set up environment variables (copy from .env.example)
+cp .env.example .env
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Edit .env with your MongoDB connection string and JWT secret
+
+# Start the server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Running the Frontend
+```sh
+# From the project root
+npm install
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+# Start the frontend development server
+npm run dev
+```
 
-**Use GitHub Codespaces**
+### Accessing the Application
+- Frontend: http://localhost:8080
+- Backend API: http://localhost:5000/api
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Test Accounts
+For testing, you can register new accounts or use these credentials if provided in the seed data:
+
+- Admin: admin@jugyah.com / password
+- Agent: agent@jugyah.com / password
+- Owner: owner@jugyah.com / password
+- Buyer: buyer@jugyah.com / password

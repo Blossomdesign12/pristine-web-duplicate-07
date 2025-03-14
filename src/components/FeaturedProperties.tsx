@@ -5,12 +5,18 @@ import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
 import PropertyCard from './PropertyCard';
 import { Link } from 'react-router-dom';
-import { getFeaturedProperties } from '@/lib/data';
+import { useQuery } from '@tanstack/react-query';
+import { getFeaturedProperties } from '@/services/propertyService';
+import { Skeleton } from './ui/skeleton';
 
 const FeaturedProperties = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const featuredProperties = getFeaturedProperties();
+  
+  const { data: featuredProperties, isLoading, error } = useQuery({
+    queryKey: ['featuredProperties'],
+    queryFn: getFeaturedProperties
+  });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -62,15 +68,35 @@ const FeaturedProperties = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {featuredProperties.map((property, index) => (
-            <PropertyCard 
-              key={property.id} 
-              property={property} 
-              index={index}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-lg overflow-hidden shadow-md">
+                <Skeleton className="h-56 w-full" />
+                <div className="p-6 space-y-4">
+                  <Skeleton className="h-7 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-6 w-1/3" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-500">Failed to load featured properties. Please try again later.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {featuredProperties?.map((property, index) => (
+              <PropertyCard 
+                key={property.id} 
+                property={property} 
+                index={index}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

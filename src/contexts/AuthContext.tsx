@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const checkAuth = async () => {
       try {
         if (isAuthenticated()) {
-          const currentUser = getCurrentUser();
+          const currentUser = await getCurrentUser();
           if (currentUser) {
             setUser(currentUser);
           }
