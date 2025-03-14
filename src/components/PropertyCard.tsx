@@ -159,7 +159,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1 text-estate-gray">
                 <Bed size={16} />
-                <span className="text-sm">{property.features.bedrooms}</span>
+                <span className="text-sm">{property.features.bedrooms} BHK</span>
               </div>
               <div className="flex items-center gap-1 text-estate-gray">
                 <Bath size={16} />

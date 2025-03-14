@@ -8,9 +8,9 @@ const PropertyCategorySection = () => {
     <section className="py-16 bg-white">
       <div className="container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Find Your Perfect Property</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Find Your Perfect Property in Mumbai</h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Whether you're looking to buy, rent, or list a property, we have the tools and expertise to help you succeed.
+            Whether you're looking to buy, rent, or list a property in Mumbai and surrounding areas, we have the tools and expertise to help you succeed.
           </p>
         </div>
         
@@ -23,7 +23,7 @@ const PropertyCategorySection = () => {
               </div>
               <h3 className="text-2xl font-bold mb-4">Buy</h3>
               <p className="text-gray-600 mb-6 flex-grow">
-                Find your dream home from our exclusive listings of properties for sale.
+                Find your dream home from our exclusive listings of properties for sale across Mumbai.
               </p>
               <Link to="/properties?type=for-sale" className="block mt-auto">
                 <Button variant="default" className="w-full gap-2">
@@ -42,7 +42,7 @@ const PropertyCategorySection = () => {
               </div>
               <h3 className="text-2xl font-bold mb-4">Rent</h3>
               <p className="text-gray-600 mb-6 flex-grow">
-                Discover a wide range of rental properties to fit your lifestyle and budget.
+                Discover a wide range of rental properties in Mumbai's most desirable neighborhoods.
               </p>
               <Link to="/properties?type=for-rent" className="block mt-auto">
                 <Button variant="default" className="w-full gap-2">
@@ -61,7 +61,7 @@ const PropertyCategorySection = () => {
               </div>
               <h3 className="text-2xl font-bold mb-4">List</h3>
               <p className="text-gray-600 mb-6 flex-grow">
-                List your property with us and reach thousands of potential buyers or renters.
+                List your Mumbai property with us and reach thousands of potential buyers or renters.
               </p>
               <Link to="/add-property" className="block mt-auto">
                 <Button variant="default" className="w-full gap-2">

@@ -4,7 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Bed, Bath, Square, MapPin, Calendar, Heart, 
   Share2, Printer, ChevronLeft, ChevronRight, 
-  Phone, Mail, User, Check 
+  Phone, Mail, User, Check, LayoutPlanIcon
 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ const PropertyDetails = () => {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showFloorPlan, setShowFloorPlan] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -152,7 +153,7 @@ const PropertyDetails = () => {
             <div className="flex flex-wrap gap-4 mb-8">
               <div className="flex items-center gap-1 text-estate-gray">
                 <Bed size={18} />
-                <span className="font-medium">{property.features.bedrooms}</span> Bedrooms
+                <span className="font-medium">{property.features.bedrooms} BHK</span>
               </div>
               <div className="flex items-center gap-1 text-estate-gray">
                 <Bath size={18} />
@@ -181,7 +182,39 @@ const PropertyDetails = () => {
                 <Printer size={18} />
                 <span>Print</span>
               </Button>
+              {property.features.floorPlan && (
+                <Button onClick={() => setShowFloorPlan(!showFloorPlan)} variant="outline" className="gap-2">
+                  <Square size={18} />
+                  <span>Floor Plan</span>
+                </Button>
+              )}
             </div>
+            
+            {/* Floor Plan Modal */}
+            {showFloorPlan && property.features.floorPlan && (
+              <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-auto p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold">Floor Plan</h3>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => setShowFloorPlan(false)}
+                      className="rounded-full"
+                    >
+                      <X size={24} />
+                    </Button>
+                  </div>
+                  <div className="overflow-auto">
+                    <img 
+                      src={property.features.floorPlan} 
+                      alt="Floor Plan" 
+                      className="w-full h-auto"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
         
@@ -217,8 +250,8 @@ const PropertyDetails = () => {
                       <span className="font-medium">{property.features.area} sq ft</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-estate-gray">Bedrooms:</span>
-                      <span className="font-medium">{property.features.bedrooms}</span>
+                      <span className="text-estate-gray">Configuration:</span>
+                      <span className="font-medium">{property.features.bedrooms} BHK</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-estate-gray">Bathrooms:</span>
@@ -230,6 +263,25 @@ const PropertyDetails = () => {
                     </div>
                   </div>
                 </div>
+                
+                {/* Floor Plan Section */}
+                {property.features.floorPlan && (
+                  <div className="bg-white p-6 rounded-xl shadow-sm mb-8">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-2xl font-bold">Floor Plan</h2>
+                      <Button variant="outline" size="sm" onClick={() => setShowFloorPlan(true)}>
+                        View Full Size
+                      </Button>
+                    </div>
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <img 
+                        src={property.features.floorPlan} 
+                        alt="Floor Plan" 
+                        className="w-full h-auto"
+                      />
+                    </div>
+                  </div>
+                )}
                 
                 {/* Features and Amenities */}
                 <PropertyFeatures amenities={property.amenities} />

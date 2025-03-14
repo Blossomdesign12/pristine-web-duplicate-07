@@ -1,4 +1,3 @@
-
 export interface Property {
   id: string;
   title: string;
@@ -14,12 +13,13 @@ export interface Property {
     lng?: number;
   };
   features: {
-    bedrooms: number;
+    bedrooms: number; // BHK
     bathrooms: number;
     area: number; // square feet
     yearBuilt: number;
-    propertyType: 'apartment' | 'house' | 'condo' | 'townhouse' | 'land';
+    propertyType: 'apartment' | 'house' | 'villa' | 'plot' | 'penthouse';
     status: 'for-sale' | 'for-rent' | 'sold' | 'pending';
+    floorPlan?: string; // URL to floor plan image
   };
   amenities: string[];
   images: string[];
@@ -37,25 +37,26 @@ export interface Property {
 export const properties: Property[] = [
   {
     id: "prop-1",
-    title: "Modern Apartment with Ocean View",
-    description: "Luxurious apartment with breathtaking ocean views, modern finishes, and resort-style amenities. This stunning property features an open floor plan with floor-to-ceiling windows, a gourmet kitchen with high-end appliances, and a spacious balcony perfect for entertaining.",
-    price: 850000,
+    title: "Modern 3 BHK Apartment in Powai",
+    description: "Luxurious 3 BHK apartment with breathtaking lake views, modern finishes, and resort-style amenities. This stunning property features an open floor plan with floor-to-ceiling windows, a gourmet kitchen with high-end appliances, and a spacious balcony perfect for entertaining.",
+    price: 18500000,
     location: {
-      address: "123 Coastal Drive",
-      city: "Miami",
-      state: "FL",
-      zip: "33101",
-      country: "USA",
-      lat: 25.761681,
-      lng: -80.191788
+      address: "123 Lake Vista Road",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zip: "400076",
+      country: "India",
+      lat: 19.116587,
+      lng: 72.889780
     },
     features: {
       bedrooms: 3,
       bathrooms: 2,
-      area: 1800,
+      area: 1650,
       yearBuilt: 2019,
       propertyType: "apartment",
-      status: "for-sale"
+      status: "for-sale",
+      floorPlan: "https://images.unsplash.com/photo-1604014438576-9e97f3c26a25?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     amenities: ["Swimming Pool", "Fitness Center", "Parking", "24/7 Security", "Pet-Friendly", "Elevator"],
     images: [
@@ -66,9 +67,9 @@ export const properties: Property[] = [
     ],
     agent: {
       id: "agent-1",
-      name: "Sarah Johnson",
-      phone: "(305) 555-1234",
-      email: "sarah.j@realestate.com",
+      name: "Priya Sharma",
+      phone: "(022) 2555-1234",
+      email: "priya.s@realestate.com",
       image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
     },
     featured: true,
@@ -76,25 +77,26 @@ export const properties: Property[] = [
   },
   {
     id: "prop-2",
-    title: "Spacious Family Home in Quiet Neighborhood",
-    description: "Beautiful family home with plenty of space for entertaining. Features include a large backyard, updated kitchen, and a finished basement. Located in a quiet neighborhood with excellent schools.",
-    price: 650000,
+    title: "Spacious 4 BHK Villa in Juhu",
+    description: "Beautiful family home with plenty of space for entertaining. Features include a large backyard, updated kitchen, and a finished basement. Located in the prestigious Juhu area with excellent schools nearby.",
+    price: 75000000,
     location: {
-      address: "456 Maple Street",
-      city: "Austin",
-      state: "TX",
-      zip: "78701",
-      country: "USA",
-      lat: 30.267153,
-      lng: -97.743057
+      address: "456 Juhu Beach Road",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zip: "400049",
+      country: "India",
+      lat: 19.086167,
+      lng: 72.826363
     },
     features: {
       bedrooms: 4,
-      bathrooms: 3,
-      area: 2500,
-      yearBuilt: 2005,
-      propertyType: "house",
-      status: "for-sale"
+      bathrooms: 4,
+      area: 3200,
+      yearBuilt: 2010,
+      propertyType: "villa",
+      status: "for-sale",
+      floorPlan: "https://images.unsplash.com/photo-1604014237800-1c9102c219da?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     amenities: ["Garden", "Garage", "Fireplace", "Central AC", "Basement", "Patio"],
     images: [
@@ -105,9 +107,9 @@ export const properties: Property[] = [
     ],
     agent: {
       id: "agent-2",
-      name: "Michael Thompson",
-      phone: "(512) 555-5678",
-      email: "michael.t@realestate.com",
+      name: "Vikram Malhotra",
+      phone: "(022) 2555-5678",
+      email: "vikram.m@realestate.com",
       image: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
     },
     featured: true,
@@ -115,25 +117,26 @@ export const properties: Property[] = [
   },
   {
     id: "prop-3",
-    title: "Downtown Luxury Condo",
-    description: "Stunning luxury condo in the heart of downtown. Walking distance to shops, restaurants, and entertainment. Features high-end finishes, an open floor plan, and amazing city views.",
-    price: 750000,
+    title: "Luxury 2 BHK Condo in Worli",
+    description: "Stunning luxury condo in the heart of Worli with sea views. Walking distance to shops, restaurants, and entertainment. Features high-end finishes, an open floor plan, and amazing city views.",
+    price: 25000000,
     location: {
-      address: "789 Urban Avenue",
-      city: "Chicago",
-      state: "IL",
-      zip: "60601",
-      country: "USA",
-      lat: 41.878114,
-      lng: -87.629798
+      address: "789 Sea Face Road",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zip: "400018",
+      country: "India",
+      lat: 19.009602,
+      lng: 72.815323
     },
     features: {
       bedrooms: 2,
       bathrooms: 2,
-      area: 1500,
+      area: 1200,
       yearBuilt: 2018,
-      propertyType: "condo",
-      status: "for-sale"
+      propertyType: "apartment",
+      status: "for-sale",
+      floorPlan: "https://images.unsplash.com/photo-1604014237256-11d475e2a2d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     amenities: ["Concierge", "Fitness Center", "Rooftop Terrace", "Private Parking", "Security System", "Elevator"],
     images: [
@@ -144,9 +147,9 @@ export const properties: Property[] = [
     ],
     agent: {
       id: "agent-3",
-      name: "Amanda Garcia",
-      phone: "(312) 555-9012",
-      email: "amanda.g@realestate.com",
+      name: "Anjali Desai",
+      phone: "(022) 2555-9012",
+      email: "anjali.d@realestate.com",
       image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
     },
     featured: false,
@@ -154,25 +157,26 @@ export const properties: Property[] = [
   },
   {
     id: "prop-4",
-    title: "Charming Townhouse Near City Center",
-    description: "Beautifully renovated townhouse located minutes from downtown. Features modern kitchen, hardwood floors throughout, and a private patio. Perfect for urban professionals.",
-    price: 420000,
+    title: "Charming 3 BHK Townhouse in Bandra",
+    description: "Beautifully renovated townhouse located minutes from Bandra Bandstand. Features modern kitchen, hardwood floors throughout, and a private patio. Perfect for urban professionals.",
+    price: 32000000,
     location: {
-      address: "101 Central Street",
-      city: "Seattle",
-      state: "WA",
-      zip: "98101",
-      country: "USA",
-      lat: 47.606209,
-      lng: -122.332071
+      address: "101 Hill Road",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zip: "400050",
+      country: "India",
+      lat: 19.058383,
+      lng: 72.828214
     },
     features: {
       bedrooms: 3,
-      bathrooms: 2.5,
-      area: 1700,
-      yearBuilt: 2010,
-      propertyType: "townhouse",
-      status: "for-sale"
+      bathrooms: 3,
+      area: 1800,
+      yearBuilt: 2015,
+      propertyType: "apartment",
+      status: "for-sale",
+      floorPlan: "https://images.unsplash.com/photo-1604014438487-b2c27bdc5d51?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     amenities: ["Private Patio", "Hardwood Floors", "Modern Appliances", "Parking Space", "Storage Unit", "Close to Transit"],
     images: [
@@ -183,9 +187,9 @@ export const properties: Property[] = [
     ],
     agent: {
       id: "agent-2",
-      name: "Michael Thompson",
-      phone: "(512) 555-5678",
-      email: "michael.t@realestate.com",
+      name: "Vikram Malhotra",
+      phone: "(022) 2555-5678",
+      email: "vikram.m@realestate.com",
       image: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
     },
     featured: false,
@@ -193,25 +197,26 @@ export const properties: Property[] = [
   },
   {
     id: "prop-5",
-    title: "Elegant Victorian with Modern Updates",
-    description: "Stunning Victorian home with modern updates throughout. Original architectural details preserved while incorporating contemporary amenities. Features a chef's kitchen, spacious primary suite, and beautiful garden.",
-    price: 925000,
+    title: "Elegant 5 BHK Heritage Bungalow in Malabar Hill",
+    description: "Stunning heritage bungalow with modern updates throughout. Original architectural details preserved while incorporating contemporary amenities. Features a chef's kitchen, spacious primary suite, and beautiful garden.",
+    price: 125000000,
     location: {
-      address: "555 Heritage Lane",
-      city: "San Francisco",
-      state: "CA",
-      zip: "94110",
-      country: "USA",
-      lat: 37.773972,
-      lng: -122.431297
+      address: "555 Ridge Road",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zip: "400006",
+      country: "India",
+      lat: 18.956310,
+      lng: 72.804565
     },
     features: {
       bedrooms: 5,
-      bathrooms: 3.5,
-      area: 3200,
-      yearBuilt: 1902,
+      bathrooms: 5,
+      area: 5500,
+      yearBuilt: 1945,
       propertyType: "house",
-      status: "for-sale"
+      status: "for-sale",
+      floorPlan: "https://images.unsplash.com/photo-1604014307827-76ae479d65e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     amenities: ["Original Details", "Garden", "Chef's Kitchen", "Home Office", "High Ceilings", "Wine Cellar"],
     images: [
@@ -222,9 +227,9 @@ export const properties: Property[] = [
     ],
     agent: {
       id: "agent-1",
-      name: "Sarah Johnson",
-      phone: "(305) 555-1234",
-      email: "sarah.j@realestate.com",
+      name: "Priya Sharma",
+      phone: "(022) 2555-1234",
+      email: "priya.s@realestate.com",
       image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
     },
     featured: true,
@@ -232,27 +237,28 @@ export const properties: Property[] = [
   },
   {
     id: "prop-6",
-    title: "Modern Countryside Retreat",
-    description: "Escape to this modern countryside retreat offering tranquility and luxury. Expansive views, open-concept design, and premium finishes. Perfect for those seeking space and serenity.",
-    price: 1250000,
+    title: "Modern 4 BHK Penthouse in Andheri",
+    description: "Escape to this modern penthouse offering tranquility and luxury. Expansive views, open-concept design, and premium finishes. Perfect for those seeking space and serenity.",
+    price: 45000000,
     location: {
-      address: "777 Rural Route",
-      city: "Aspen",
-      state: "CO",
-      zip: "81611",
-      country: "USA",
-      lat: 39.1911,
-      lng: -106.8175
+      address: "777 Oshiwara Garden",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zip: "400053",
+      country: "India",
+      lat: 19.136788,
+      lng: 72.826503
     },
     features: {
       bedrooms: 4,
       bathrooms: 4,
-      area: 3800,
+      area: 3000,
       yearBuilt: 2021,
-      propertyType: "house",
-      status: "for-sale"
+      propertyType: "penthouse",
+      status: "for-sale",
+      floorPlan: "https://images.unsplash.com/photo-1604014438396-3273645c64f7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
-    amenities: ["Mountain Views", "Smart Home", "Heated Floors", "Sauna", "Guest House", "Solar Panels"],
+    amenities: ["City Views", "Smart Home", "Heated Floors", "Jacuzzi", "Private Terrace", "Solar Panels"],
     images: [
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       "https://images.unsplash.com/photo-1560185007-cde436f6a4d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
@@ -261,9 +267,9 @@ export const properties: Property[] = [
     ],
     agent: {
       id: "agent-3",
-      name: "Amanda Garcia",
-      phone: "(312) 555-9012",
-      email: "amanda.g@realestate.com",
+      name: "Anjali Desai",
+      phone: "(022) 2555-9012",
+      email: "anjali.d@realestate.com",
       image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
     },
     featured: false,
@@ -276,14 +282,14 @@ export const agents = properties.map(property => property.agent)
     index === self.findIndex((a) => a.id === agent.id)
   );
 
-export const cities = [...new Set(properties.map(property => property.location.city))];
+export const cities = ["Mumbai", "Pune", "Thane", "Navi Mumbai", "Bangalore", "Delhi", "Hyderabad", "Chennai"];
 
 export const propertyTypes = [
   { value: 'apartment', label: 'Apartment' },
   { value: 'house', label: 'House' },
-  { value: 'condo', label: 'Condo' },
-  { value: 'townhouse', label: 'Townhouse' },
-  { value: 'land', label: 'Land' }
+  { value: 'villa', label: 'Villa' },
+  { value: 'penthouse', label: 'Penthouse' },
+  { value: 'plot', label: 'Plot' }
 ];
 
 export const statusTypes = [
@@ -294,10 +300,11 @@ export const statusTypes = [
 ];
 
 export function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0
+    currency: 'INR',
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0
   }).format(price);
 }
 
