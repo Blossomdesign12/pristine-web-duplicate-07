@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Send, Paperclip, MoreVertical, CheckCircle, Phone, Video } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-// import Layout from "@/components/Layout";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Sample messages data
@@ -158,8 +159,9 @@ const Messages = () => {
   };
   
   return (
-    <Layout>
-      <div className="container mx-auto py-6">
+    <div className="bg-background min-h-screen flex flex-col">
+      <Header />
+      <div className="container mx-auto py-6 flex-1">
         <div className="text-2xl font-bold mb-6">Messages</div>
         
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -220,7 +222,7 @@ const Messages = () => {
                           </p>
                         </div>
                         {conversation.unread > 0 && (
-                          <Badge variant="default" className="ml-2">
+                          <Badge className="ml-2 bg-black text-white hover:bg-black/90">
                             {conversation.unread}
                           </Badge>
                         )}
@@ -285,7 +287,7 @@ const Messages = () => {
                               <Card
                                 className={`max-w-md ${
                                   message.senderId === "user"
-                                    ? "bg-estate-primary text-white"
+                                    ? "bg-black text-white"
                                     : ""
                                 }`}
                               >
@@ -300,7 +302,7 @@ const Messages = () => {
                               >
                                 {message.time}
                                 {message.senderId === "user" && (
-                                  <CheckCircle className="h-3 w-3 inline ml-1 text-estate-primary" />
+                                  <CheckCircle className="h-3 w-3 inline ml-1 text-black" />
                                 )}
                               </div>
                             </div>
@@ -329,6 +331,7 @@ const Messages = () => {
                             size="icon"
                             onClick={handleSendMessage}
                             disabled={!messageText.trim()}
+                            className="bg-black hover:bg-black/90"
                           >
                             <Send className="h-4 w-4" />
                           </Button>
@@ -358,7 +361,8 @@ const Messages = () => {
           </Tabs>
         </div>
       </div>
-    </Layout>
+      <Footer />
+    </div>
   );
 };
 

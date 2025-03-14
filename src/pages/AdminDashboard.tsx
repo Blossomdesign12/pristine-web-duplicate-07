@@ -1,31 +1,9 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { 
-  Users, 
-  Home, 
-  DollarSign, 
-  Settings, 
-  ChevronDown, 
-  Search,
-  Filter, 
-  Eye, 
-  Edit, 
-  Trash,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  BarChart3,
-  PieChart,
-  LineChart,
-  User,
-  Building2,
-  Activity
-} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -34,681 +12,580 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useAuth } from "@/contexts/AuthContext";
-import { properties, agents } from "@/lib/data";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import {
+  Users,
+  Home,
+  BarChart3,
+  Settings,
+  Search,
+  Plus,
+  MoreHorizontal,
+  ArrowUpRight,
+  ArrowDownRight,
+  LucideDollarSign,
+  Building,
+  UserCheck,
+  Activity,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+
+// Sample data for charts
+const revenueData = [
+  { name: "Jan", value: 12400 },
+  { name: "Feb", value: 14800 },
+  { name: "Mar", value: 11200 },
+  { name: "Apr", value: 18600 },
+  { name: "May", value: 16400 },
+  { name: "Jun", value: 21200 },
+];
+
+const userActivityData = [
+  { name: "Mon", value: 340 },
+  { name: "Tue", value: 580 },
+  { name: "Wed", value: 420 },
+  { name: "Thu", value: 720 },
+  { name: "Fri", value: 680 },
+  { name: "Sat", value: 890 },
+  { name: "Sun", value: 540 },
+];
+
+const propertyTypeData = [
+  { name: "Houses", value: 45 },
+  { name: "Apartments", value: 35 },
+  { name: "Commercial", value: 10 },
+  { name: "Land", value: 10 },
+];
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+
+// Sample user and property data
+const users = [
+  {
+    id: 1,
+    name: "Jane Cooper",
+    email: "jane.cooper@example.com",
+    role: "Agent",
+    status: "Active",
+    joined: "Jan 12, 2023",
+    listings: 8,
+  },
+  {
+    id: 2,
+    name: "Robert Fox",
+    email: "robert.fox@example.com",
+    role: "Buyer",
+    status: "Active",
+    joined: "Feb 4, 2023",
+    listings: 0,
+  },
+  {
+    id: 3,
+    name: "Wade Warren",
+    email: "wade.warren@example.com",
+    role: "Owner",
+    status: "Inactive",
+    joined: "Mar 15, 2023",
+    listings: 3,
+  },
+  {
+    id: 4,
+    name: "Esther Howard",
+    email: "esther.howard@example.com",
+    role: "Agent",
+    status: "Active",
+    joined: "Apr 28, 2023",
+    listings: 12,
+  },
+  {
+    id: 5,
+    name: "Cameron Williamson",
+    email: "cameron.williamson@example.com",
+    role: "Buyer",
+    status: "Active",
+    joined: "May 10, 2023",
+    listings: 0,
+  },
+];
+
+const properties = [
+  {
+    id: 1,
+    title: "Modern Apartment in Downtown",
+    price: 350000,
+    status: "For Sale",
+    type: "Apartment",
+    location: "New York",
+    date: "Jun 2, 2023",
+    views: 234,
+  },
+  {
+    id: 2,
+    title: "Luxury Villa with Pool",
+    price: 1200000,
+    status: "For Sale",
+    type: "House",
+    location: "Los Angeles",
+    date: "Jun 8, 2023",
+    views: 456,
+  },
+  {
+    id: 3,
+    title: "Office Space in Business District",
+    price: 4500,
+    status: "For Rent",
+    type: "Commercial",
+    location: "Chicago",
+    date: "Jun 12, 2023",
+    views: 128,
+  },
+  {
+    id: 4,
+    title: "Cozy Studio Near University",
+    price: 1200,
+    status: "For Rent",
+    type: "Apartment",
+    location: "Boston",
+    date: "Jun 15, 2023",
+    views: 189,
+  },
+  {
+    id: 5,
+    title: "Family Home with Garden",
+    price: 520000,
+    status: "For Sale",
+    type: "House",
+    location: "Seattle",
+    date: "Jun 18, 2023",
+    views: 312,
+  },
+];
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  
-  // Mock data for users
-  const [users] = useState([
-    { id: 1, name: "John Smith", email: "john@example.com", role: "agent", status: "active", joined: "2023-05-15" },
-    { id: 2, name: "Maria Rodriguez", email: "maria@example.com", role: "owner", status: "active", joined: "2023-06-22" },
-    { id: 3, name: "Robert Lee", email: "robert@example.com", role: "buyer", status: "active", joined: "2023-07-10" },
-    { id: 4, name: "Sarah Johnson", email: "sarah@example.com", role: "agent", status: "active", joined: "2023-08-05" },
-    { id: 5, name: "David Miller", email: "david@example.com", role: "owner", status: "pending", joined: "2023-09-18" },
-    { id: 6, name: "Lisa Wang", email: "lisa@example.com", role: "buyer", status: "active", joined: "2023-10-01" },
-    { id: 7, name: "Michael Brown", email: "michael@example.com", role: "agent", status: "active", joined: "2023-11-14" },
-    { id: 8, name: "Jennifer Davis", email: "jennifer@example.com", role: "owner", status: "inactive", joined: "2023-12-20" },
-    { id: 9, name: "William Johnson", email: "william@example.com", role: "admin", status: "active", joined: "2023-02-28" },
-    { id: 10, name: "Emma Wilson", email: "emma@example.com", role: "buyer", status: "pending", joined: "2023-04-09" },
-  ]);
-  
-  // Mock analytics data
-  const analyticsData = {
-    totalUsers: users.length,
-    totalProperties: properties.length,
-    totalAgents: agents.length,
-    revenue: 125800,
-    propertyViews: 2450,
-    pendingApprovals: users.filter(u => u.status === "pending").length,
-    recentActivity: [
-      { id: 1, type: "property_added", user: "John Smith", time: "2 hours ago", details: "Added a new property in San Francisco" },
-      { id: 2, type: "user_registered", user: "Emma Wilson", time: "5 hours ago", details: "New user registered" },
-      { id: 3, type: "property_sold", user: "Sarah Johnson", time: "Yesterday", details: "Property #1245 marked as sold" },
-      { id: 4, type: "agent_approved", user: "Admin", time: "2 days ago", details: "New agent Michael Brown approved" }
-    ]
+  const [searchUser, setSearchUser] = useState("");
+  const [searchProperty, setSearchProperty] = useState("");
+
+  // Filter users based on search term
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchUser.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchUser.toLowerCase())
+  );
+
+  // Filter properties based on search term
+  const filteredProperties = properties.filter(
+    (property) =>
+      property.title.toLowerCase().includes(searchProperty.toLowerCase()) ||
+      property.location.toLowerCase().includes(searchProperty.toLowerCase())
+  );
+
+  // Format price
+  const formatPrice = (price: number) => {
+    return price >= 10000
+      ? `$${(price / 1000).toFixed(0)}k`
+      : `$${price}`;
   };
-  
-  const handleApproveUser = (id: number) => {
-    toast({
-      title: "User Approved",
-      description: "User has been successfully approved.",
-    });
-    // In a real app, this would call an API to update the user status
-  };
-  
-  const handleRejectUser = (id: number) => {
-    toast({
-      title: "User Rejected",
-      description: "User has been rejected.",
-      variant: "destructive",
-    });
-    // In a real app, this would call an API to update the user status
-  };
-  
-  const handleDeleteProperty = (id: number) => {
-    toast({
-      title: "Property Deleted",
-      description: "Property has been successfully deleted.",
-      variant: "destructive",
-    });
-    // In a real app, this would call an API to delete the property
-  };
-  
-  // Mock user data when no user is authenticated
-  const mockUser = user || {
-    name: "Admin User",
-    role: "admin",
-    avatar: "https://via.placeholder.com/40"
-  };
-  
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Building2 className="h-6 w-6 text-estate-primary" />
-            <span className="font-bold text-xl">Admin Portal</span>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input placeholder="Search..." className="pl-10 w-64" />
-            </div>
-            
-            <div className="flex items-center space-x-2">
-              <img
-                src={mockUser.avatar}
-                alt={mockUser.name}
-                className="h-8 w-8 rounded-full object-cover"
-              />
-              <div className="hidden md:block">
-                <p className="text-sm font-medium">{mockUser.name}</p>
-                <p className="text-xs text-gray-500 capitalize">{mockUser.role}</p>
-              </div>
-            </div>
-            
-            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-              <Home className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-[#f9f9f9]">
+      <Header />
       
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="container mx-auto py-6 flex-1">
+        <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <div className="flex space-x-2">
-            <Button variant="outline" className="flex items-center">
-              <Filter className="mr-2 h-4 w-4" />
-              Filter
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-            <Button variant="outline" onClick={() => window.print()}>Export Data</Button>
-          </div>
+          <Button className="bg-black hover:bg-black/90 text-white">
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Property
+          </Button>
         </div>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white border border-gray-200 rounded-lg p-1">
-            <TabsTrigger value="overview" className="rounded-md">Overview</TabsTrigger>
-            <TabsTrigger value="users" className="rounded-md">Users</TabsTrigger>
-            <TabsTrigger value="properties" className="rounded-md">Properties</TabsTrigger>
-            <TabsTrigger value="analytics" className="rounded-md">Analytics</TabsTrigger>
-            <TabsTrigger value="settings" className="rounded-md">Settings</TabsTrigger>
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid grid-cols-4 max-w-[600px]">
+            <TabsTrigger value="overview" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="properties" className="gap-2">
+              <Home className="h-4 w-4" />
+              <span className="hidden sm:inline">Properties</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Settings</span>
+            </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="overview" className="space-y-6">
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Overview Tab */}
+          <TabsContent value="overview">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-500">Total Users</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Total Revenue
+                  </CardTitle>
+                  <LucideDollarSign className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-2xl font-bold">{analyticsData.totalUsers}</div>
-                      <p className="text-xs text-green-500">+3 this month</p>
-                    </div>
-                    <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                      <Users className="h-6 w-6 text-purple-600" />
-                    </div>
-                  </div>
+                  <div className="text-2xl font-bold">$86,432</div>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-green-500 inline-flex items-center">
+                      <ArrowUpRight className="mr-1 h-3 w-3" />
+                      +12.5%
+                    </span>{" "}
+                    from last month
+                  </p>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-500">Properties</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Properties Listed
+                  </CardTitle>
+                  <Building className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-2xl font-bold">{analyticsData.totalProperties}</div>
-                      <p className="text-xs text-green-500">+5 this month</p>
-                    </div>
-                    <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Home className="h-6 w-6 text-blue-600" />
-                    </div>
-                  </div>
+                  <div className="text-2xl font-bold">2,856</div>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-green-500 inline-flex items-center">
+                      <ArrowUpRight className="mr-1 h-3 w-3" />
+                      +24.3%
+                    </span>{" "}
+                    from last month
+                  </p>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-500">Agents</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Active Users
+                  </CardTitle>
+                  <UserCheck className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-2xl font-bold">{analyticsData.totalAgents}</div>
-                      <p className="text-xs text-green-500">+1 this month</p>
-                    </div>
-                    <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <Users className="h-6 w-6 text-green-600" />
-                    </div>
-                  </div>
+                  <div className="text-2xl font-bold">12,234</div>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-green-500 inline-flex items-center">
+                      <ArrowUpRight className="mr-1 h-3 w-3" />
+                      +8.2%
+                    </span>{" "}
+                    from last month
+                  </p>
                 </CardContent>
               </Card>
               
               <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-500">Revenue</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Conversion Rate
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-2xl font-bold">${analyticsData.revenue.toLocaleString()}</div>
-                      <p className="text-xs text-green-500">+8% from last month</p>
-                    </div>
-                    <div className="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center">
-                      <DollarSign className="h-6 w-6 text-amber-600" />
-                    </div>
-                  </div>
+                  <div className="text-2xl font-bold">3.2%</div>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-red-500 inline-flex items-center">
+                      <ArrowDownRight className="mr-1 h-3 w-3" />
+                      -1.1%
+                    </span>{" "}
+                    from last month
+                  </p>
                 </CardContent>
               </Card>
             </div>
             
-            {/* Alerts and Notifications */}
-            {analyticsData.pendingApprovals > 0 && (
-              <Alert className="bg-amber-50 border-amber-200">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
-                <AlertTitle className="text-amber-800">Pending Approvals</AlertTitle>
-                <AlertDescription className="text-amber-700">
-                  There are {analyticsData.pendingApprovals} users waiting for approval.
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Activity */}
-              <Card>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7 mt-6">
+              <Card className="lg:col-span-4">
                 <CardHeader>
-                  <CardTitle className="text-lg">Recent Activity</CardTitle>
+                  <CardTitle>Revenue Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[320px]">
-                    <div className="space-y-4">
-                      {analyticsData.recentActivity.map((activity) => (
-                        <div key={activity.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                          <div className="flex items-start">
-                            <div className="mr-4 mt-1">
-                              {activity.type === "property_added" && (
-                                <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                                  <Home className="h-4 w-4 text-green-600" />
-                                </div>
-                              )}
-                              {activity.type === "user_registered" && (
-                                <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                  <User className="h-4 w-4 text-blue-600" />
-                                </div>
-                              )}
-                              {activity.type === "property_sold" && (
-                                <div className="h-8 w-8 bg-amber-100 rounded-full flex items-center justify-center">
-                                  <DollarSign className="h-4 w-4 text-amber-600" />
-                                </div>
-                              )}
-                              {activity.type === "agent_approved" && (
-                                <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                  <CheckCircle className="h-4 w-4 text-purple-600" />
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium text-sm">{activity.details}</p>
-                              <div className="flex text-xs text-gray-500 mt-1">
-                                <span>{activity.user}</span>
-                                <span className="mx-1">•</span>
-                                <span>{activity.time}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={revenueData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#000000" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
               
-              {/* Pending Approvals */}
+              <Card className="lg:col-span-3">
+                <CardHeader>
+                  <CardTitle>Property Distribution</CardTitle>
+                </CardHeader>
+                <CardContent className="flex justify-center">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={propertyTypeData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={100}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {propertyTypeData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="mt-6">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle className="text-lg">Pending Approvals</CardTitle>
-                  <Button variant="outline" size="sm">View All</Button>
+                <CardHeader>
+                  <CardTitle>User Activity</CardTitle>
+                  <CardDescription>User interactions over the past week</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[320px]">
-                    <div className="space-y-4">
-                      {users.filter(user => user.status === "pending").map((user) => (
-                        <div key={user.id} className="border border-gray-100 rounded-lg p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center">
-                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-                                <User className="h-6 w-6 text-gray-500" />
-                              </div>
-                              <div>
-                                <p className="font-medium">{user.name}</p>
-                                <p className="text-xs text-gray-500">{user.email}</p>
-                              </div>
-                            </div>
-                            <Badge variant="outline" className="capitalize">{user.role}</Badge>
-                          </div>
-                          <div className="flex items-center justify-end mt-4 space-x-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700"
-                              onClick={() => handleApproveUser(user.id)}
-                            >
-                              <CheckCircle className="mr-1 h-4 w-4" />
-                              Approve
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
-                              onClick={() => handleRejectUser(user.id)}
-                            >
-                              <XCircle className="mr-1 h-4 w-4" />
-                              Reject
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      {users.filter(user => user.status === "pending").length === 0 && (
-                        <div className="flex flex-col items-center justify-center h-64 text-center px-4">
-                          <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
-                          <h3 className="text-lg font-medium">All clear!</h3>
-                          <p className="text-gray-500 mt-1">No pending approvals at the moment.</p>
-                        </div>
-                      )}
-                    </div>
-                  </ScrollArea>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={userActivityData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#000000"
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
           
-          <TabsContent value="users" className="space-y-6">
+          {/* Users Tab */}
+          <TabsContent value="users">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>User Management</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input placeholder="Search users..." className="pl-10 w-[250px]" />
-                    </div>
-                    <Button variant="outline">
-                      <Filter className="mr-2 h-4 w-4" />
-                      Filter
-                    </Button>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <CardTitle>Registered Users</CardTitle>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Search users..."
+                      className="pl-8 w-full sm:w-[300px]"
+                      value={searchUser}
+                      onChange={(e) => setSearchUser(e.target.value)}
+                    />
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
+                <ScrollArea className="h-[400px]">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>User</TableHead>
+                        <TableHead>Name</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Joined Date</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>Joined</TableHead>
+                        <TableHead>Listings</TableHead>
+                        <TableHead></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {users.map((user) => (
+                      {filteredUsers.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell>
-                            <div className="flex items-center">
-                              <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-                                <User className="h-5 w-5 text-gray-500" />
-                              </div>
-                              <div>
-                                <div className="font-medium">{user.name}</div>
-                                <div className="text-sm text-gray-500">{user.email}</div>
-                              </div>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{user.name}</span>
+                              <span className="text-sm text-muted-foreground">
+                                {user.email}
+                              </span>
                             </div>
                           </TableCell>
+                          <TableCell>{user.role}</TableCell>
                           <TableCell>
-                            <Badge 
-                              variant="outline" 
-                              className={`capitalize ${
-                                user.role === 'admin' ? 'bg-purple-50 text-purple-800 border-purple-200' : 
-                                user.role === 'agent' ? 'bg-blue-50 text-blue-800 border-blue-200' : 
-                                user.role === 'owner' ? 'bg-green-50 text-green-800 border-green-200' : 
-                                'bg-gray-50 text-gray-800 border-gray-200'
-                              }`}
-                            >
-                              {user.role}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant="outline" 
-                              className={`capitalize ${
-                                user.status === 'active' ? 'bg-green-50 text-green-800 border-green-200' : 
-                                user.status === 'pending' ? 'bg-amber-50 text-amber-800 border-amber-200' : 
-                                'bg-red-50 text-red-800 border-red-200'
-                              }`}
+                            <Badge
+                              variant={user.status === "Active" ? "default" : "secondary"}
+                              className={
+                                user.status === "Active"
+                                  ? "bg-green-100 text-green-800 hover:bg-green-100 hover:text-green-800"
+                                  : "bg-gray-100 text-gray-800 hover:bg-gray-100 hover:text-gray-800"
+                              }
                             >
                               {user.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>{new Date(user.joined).toLocaleDateString()}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end space-x-2">
-                              <Button variant="ghost" size="icon">
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              {user.status === "pending" && (
-                                <>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon"
-                                    className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                    onClick={() => handleApproveUser(user.id)}
-                                  >
-                                    <CheckCircle className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="icon"
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    onClick={() => handleRejectUser(user.id)}
-                                  >
-                                    <XCircle className="h-4 w-4" />
-                                  </Button>
-                                </>
-                              )}
-                            </div>
+                          <TableCell>{user.joined}</TableCell>
+                          <TableCell>{user.listings}</TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
-                </div>
+                </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>
           
-          <TabsContent value="properties" className="space-y-6">
+          {/* Properties Tab */}
+          <TabsContent value="properties">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Property Management</CardTitle>
-                  <div className="flex items-center space-x-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input placeholder="Search properties..." className="pl-10 w-[250px]" />
-                    </div>
-                    <Button variant="outline">
-                      <Filter className="mr-2 h-4 w-4" />
-                      Filter
-                    </Button>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <CardTitle>Listed Properties</CardTitle>
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Search properties..."
+                      className="pl-8 w-full sm:w-[300px]"
+                      value={searchProperty}
+                      onChange={(e) => setSearchProperty(e.target.value)}
+                    />
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="rounded-md border">
+                <ScrollArea className="h-[400px]">
                   <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Property</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Agent</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Views</TableHead>
+                        <TableHead></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {properties.slice(0, 10).map((property) => (
+                      {filteredProperties.map((property) => (
                         <TableRow key={property.id}>
                           <TableCell>
-                            <div className="flex items-center">
-                              <img 
-                                src={property.images[0]} 
-                                alt={property.title} 
-                                className="w-10 h-10 object-cover rounded-md mr-3"
-                              />
-                              <div>
-                                <div className="font-medium truncate max-w-[250px]">{property.title}</div>
-                                <div className="text-sm text-gray-500">{property.location.city}, {property.location.state}</div>
-                              </div>
+                            <div className="font-medium">{property.title}</div>
+                            <div className="text-sm text-muted-foreground">
+                              Added: {property.date}
                             </div>
                           </TableCell>
-                          <TableCell>${property.price.toLocaleString()}</TableCell>
                           <TableCell>
-                            <Badge 
-                              variant="outline" 
-                              className={`capitalize ${
-                                property.features.status === 'for-sale' ? 'bg-green-50 text-green-800 border-green-200' : 
-                                property.features.status === 'for-rent' ? 'bg-blue-50 text-blue-800 border-blue-200' : 
-                                property.features.status === 'sold' ? 'bg-purple-50 text-purple-800 border-purple-200' : 
-                                'bg-amber-50 text-amber-800 border-amber-200'
-                              }`}
+                            {typeof property.price === 'number' ? formatPrice(property.price) : property.price}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={
+                                property.status === "For Sale"
+                                  ? "border-blue-500 text-blue-500"
+                                  : "border-purple-500 text-purple-500"
+                              }
                             >
-                              {property.features.status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                              {property.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>{property.agent.name}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end space-x-2">
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                onClick={() => navigate(`/property/${property.id}`)}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                onClick={() => handleDeleteProperty(property.id)}
-                              >
-                                <Trash className="h-4 w-4" />
-                              </Button>
-                            </div>
+                          <TableCell>{property.type}</TableCell>
+                          <TableCell>{property.location}</TableCell>
+                          <TableCell>{property.views}</TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
                   </Table>
-                </div>
+                </ScrollArea>
               </CardContent>
             </Card>
           </TabsContent>
           
-          <TabsContent value="analytics" className="space-y-6">
+          {/* Settings Tab */}
+          <TabsContent value="settings">
             <Card>
               <CardHeader>
-                <CardTitle>Analytics Overview</CardTitle>
+                <CardTitle>Dashboard Settings</CardTitle>
+                <CardDescription>
+                  Manage your dashboard preferences and configurations.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-medium">Property Types</h3>
-                      <PieChart className="h-5 w-5 text-gray-500" />
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">General Settings</h3>
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <label htmlFor="siteName">Site Name</label>
+                      <Input id="siteName" defaultValue="Jugyah Real Estate" />
                     </div>
-                    <div className="h-64 flex items-center justify-center border-t pt-4">
-                      <div className="text-center">
-                        <p className="text-gray-500 mb-2">Pie chart visualization would appear here</p>
-                        <div className="flex justify-center space-x-4 text-sm">
-                          <div className="flex items-center">
-                            <div className="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
-                            <span>Houses (45%)</span>
-                          </div>
-                          <div className="flex items-center">
-                            <div className="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
-                            <span>Apartments (30%)</span>
-                          </div>
-                          <div className="flex items-center">
-                            <div className="w-3 h-3 bg-purple-500 rounded-full mr-1"></div>
-                            <span>Condos (25%)</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-medium">Monthly Sales</h3>
-                      <BarChart3 className="h-5 w-5 text-gray-500" />
-                    </div>
-                    <div className="h-64 flex items-center justify-center border-t pt-4">
-                      <div className="text-center">
-                        <p className="text-gray-500">Bar chart visualization would appear here</p>
-                      </div>
+                    <div className="grid gap-2">
+                      <label htmlFor="siteDescription">Site Description</label>
+                      <Input
+                        id="siteDescription"
+                        defaultValue="Find your perfect property with our expert guidance"
+                      />
                     </div>
                   </div>
                 </div>
                 
-                <div className="mt-6 border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-medium">Website Traffic</h3>
-                    <LineChart className="h-5 w-5 text-gray-500" />
-                  </div>
-                  <div className="h-64 flex items-center justify-center border-t pt-4">
-                    <div className="text-center">
-                      <p className="text-gray-500">Line chart visualization would appear here</p>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium">Admin Preferences</h3>
+                  <div className="grid gap-4">
+                    <div className="grid gap-2">
+                      <label htmlFor="email">Admin Email</label>
+                      <Input id="email" type="email" defaultValue="admin@jugyah.com" />
+                    </div>
+                    <div className="grid gap-2">
+                      <label htmlFor="notifications">Notification Email</label>
+                      <Input
+                        id="notifications"
+                        type="email"
+                        defaultValue="notifications@jugyah.com"
+                      />
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>System Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">General Settings</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-sm font-medium">Site Name</label>
-                          <Input defaultValue="FindHome Admin Portal" />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Contact Email</label>
-                          <Input defaultValue="admin@findhome.com" />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium">Support Phone</label>
-                          <Input defaultValue="+1 (555) 123-4567" />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-lg font-medium mb-4">Notification Settings</h3>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between border p-3 rounded-lg">
-                          <div>
-                            <p className="font-medium">Email Notifications</p>
-                            <p className="text-sm text-gray-500">Receive email notifications</p>
-                          </div>
-                          <Button variant="outline">Configure</Button>
-                        </div>
-                        <div className="flex items-center justify-between border p-3 rounded-lg">
-                          <div>
-                            <p className="font-medium">SMS Notifications</p>
-                            <p className="text-sm text-gray-500">Receive SMS notifications</p>
-                          </div>
-                          <Button variant="outline">Configure</Button>
-                        </div>
-                        <div className="flex items-center justify-between border p-3 rounded-lg">
-                          <div>
-                            <p className="font-medium">System Alerts</p>
-                            <p className="text-sm text-gray-500">Configure system alerts</p>
-                          </div>
-                          <Button variant="outline">Configure</Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Security Settings</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between border p-3 rounded-lg">
-                        <div>
-                          <p className="font-medium">Two-Factor Authentication</p>
-                          <p className="text-sm text-gray-500">Add an extra layer of security</p>
-                        </div>
-                        <Button variant="outline">Configure</Button>
-                      </div>
-                      <div className="flex items-center justify-between border p-3 rounded-lg">
-                        <div>
-                          <p className="font-medium">Password Policy</p>
-                          <p className="text-sm text-gray-500">Manage password requirements</p>
-                        </div>
-                        <Button variant="outline">Configure</Button>
-                      </div>
-                      <div className="flex items-center justify-between border p-3 rounded-lg">
-                        <div>
-                          <p className="font-medium">API Access</p>
-                          <p className="text-sm text-gray-500">Manage API keys and permissions</p>
-                        </div>
-                        <Button variant="outline">Configure</Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end space-x-2 pt-4 border-t">
-                    <Button variant="outline">Cancel</Button>
-                    <Button>Save Changes</Button>
-                  </div>
-                </div>
+                
+                <Button className="bg-black hover:bg-black/90 text-white">Save Changes</Button>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
       </div>
+      
+      <Footer />
     </div>
   );
 };

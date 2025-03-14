@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Search, MapPin, Home, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { cn } from '@/lib/utils';
 import { cities, propertyTypes } from '@/lib/data';
+import { Link } from 'react-router-dom';
 
 const Hero = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,7 +50,7 @@ const Hero = () => {
   return (
     <div ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-estate-dark/50 z-10"></div>
+      <div className="absolute inset-0 bg-black/70 z-10"></div>
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
@@ -71,9 +71,6 @@ const Hero = () => {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
           )}
         >
-          {/* <div className="inline-block px-3 py-1 bg-estate-primary/20 backdrop-blur-sm text-white rounded-full mb-4 animate-fade-in">
-            <p className="text-sm font-medium">Find Your Dream Home Today</p>
-          </div> */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 max-w-4xl mt-[70px] leading-tight">
             Discover Your Perfect Property With Our Expert Guidance
           </h1>
@@ -109,7 +106,7 @@ const Hero = () => {
                 <MapPin size={18} />
               </div>
               <select
-                className="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-estate-primary/50"
+                className="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black/50"
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
               >
@@ -127,7 +124,7 @@ const Hero = () => {
                 <Home size={18} />
               </div>
               <select
-                className="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-estate-primary/50"
+                className="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black/50"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
@@ -140,11 +137,53 @@ const Hero = () => {
               </select>
             </div>
             
-            <Button className="h-12 px-6 bg-estate-primary hover:bg-estate-primary/90 text-white gap-2" type="submit">
+            <Button className="h-12 px-6 bg-black hover:bg-black/90 text-white gap-2" type="submit">
               <span>Search</span>
               <ArrowRight size={16} />
             </Button>
           </form>
+        </div>
+        
+        {/* Buy Rent List Section */}
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
+          <Link to="/properties?type=for-sale" className="group">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 text-center transition-all hover:bg-white/20 border border-white/20">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-all">
+                <Home className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Buy</h3>
+              <p className="text-white/80 mb-4">Find your dream home from our exclusive listings of properties for sale.</p>
+              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                Browse Properties
+              </Button>
+            </div>
+          </Link>
+          
+          <Link to="/properties?type=for-rent" className="group">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 text-center transition-all hover:bg-white/20 border border-white/20">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-all">
+                <MapPin className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Rent</h3>
+              <p className="text-white/80 mb-4">Discover a wide range of rental properties to fit your lifestyle and budget.</p>
+              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                Explore Rentals
+              </Button>
+            </div>
+          </Link>
+          
+          <Link to="/add-property" className="group">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 text-center transition-all hover:bg-white/20 border border-white/20">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-all">
+                <ArrowRight className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">List</h3>
+              <p className="text-white/80 mb-4">List your property with us and reach thousands of potential buyers or renters.</p>
+              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
+                List Your Property
+              </Button>
+            </div>
+          </Link>
         </div>
       </div>
     </div>
