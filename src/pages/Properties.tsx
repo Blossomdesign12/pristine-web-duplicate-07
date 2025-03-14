@@ -1,8 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Layout from "@/components/Layout";
 import PropertySearch from "@/components/PropertySearch";
 import PropertyCard from "@/components/PropertyCard";
 import { Building2, GridIcon, LayoutList, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -93,8 +92,8 @@ const Properties = () => {
           onClick={() => handlePageChange(i)}
           className={`w-10 h-10 flex items-center justify-center rounded-md transition-colors ${
             currentPage === i 
-              ? 'bg-estate-primary text-white' 
-              : 'bg-white border border-gray-200 hover:border-estate-primary hover:text-estate-primary'
+              ? 'bg-black text-white' 
+              : 'bg-white border border-gray-200 hover:border-black hover:text-black'
           }`}
         >
           {i}
@@ -107,7 +106,7 @@ const Properties = () => {
         <button
           onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
-          className="w-10 h-10 flex items-center justify-center rounded-md bg-white border border-gray-200 hover:border-estate-primary hover:text-estate-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-10 h-10 flex items-center justify-center rounded-md bg-white border border-gray-200 hover:border-black hover:text-black disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ChevronLeft size={18} />
         </button>
@@ -117,7 +116,7 @@ const Properties = () => {
         <button
           onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
-          className="w-10 h-10 flex items-center justify-center rounded-md bg-white border border-gray-200 hover:border-estate-primary hover:text-estate-primary disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-10 h-10 flex items-center justify-center rounded-md bg-white border border-gray-200 hover:border-black hover:text-black disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ChevronRight size={18} />
         </button>
@@ -126,12 +125,10 @@ const Properties = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-estate-light">
-      <Header />
-      
+    <Layout>
       <main className="flex-grow pt-20 pb-16">
         {/* Hero Section */}
-        <section className="bg-estate-primary py-12 md:py-20">
+        <section className="bg-black py-12 md:py-20">
           <div className="container text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">
               Find Your Perfect Property
@@ -150,8 +147,8 @@ const Properties = () => {
         {/* Properties Section */}
         <section className="container">
           <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="text-estate-gray">
-              <p>Showing <span className="font-medium text-estate-dark">{properties.length}</span> properties</p>
+            <div className="text-gray-600">
+              <p>Showing <span className="font-medium text-black">{properties.length}</span> properties</p>
             </div>
             
             <div className="flex items-center gap-3">
@@ -160,7 +157,7 @@ const Properties = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => setViewMode('grid')}
-                  className={viewMode === 'grid' ? 'text-estate-primary' : 'text-estate-gray'}
+                  className={viewMode === 'grid' ? 'text-black' : 'text-gray-500'}
                   aria-label="Grid view"
                 >
                   <GridIcon size={20} />
@@ -169,7 +166,7 @@ const Properties = () => {
                   variant="ghost"
                   size="icon"
                   onClick={() => setViewMode('list')}
-                  className={viewMode === 'list' ? 'text-estate-primary' : 'text-estate-gray'}
+                  className={viewMode === 'list' ? 'text-black' : 'text-gray-500'}
                   aria-label="List view"
                 >
                   <LayoutList size={20} />
@@ -177,9 +174,9 @@ const Properties = () => {
               </div>
               
               <div className="flex items-center relative">
-                <ArrowUpDown size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-estate-gray" />
+                <ArrowUpDown size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
                 <select
-                  className="pl-10 pr-4 py-2 border border-gray-200 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-estate-primary/50"
+                  className="pl-10 pr-4 py-2 border border-gray-200 rounded-md appearance-none focus:outline-none focus:ring-2 focus:ring-black/50"
                   value={sortOption}
                   onChange={(e) => setSortOption(e.target.value)}
                 >
@@ -211,16 +208,16 @@ const Properties = () => {
             </>
           ) : (
             <div className="bg-white p-8 rounded-lg shadow-sm text-center">
-              <div className="w-16 h-16 bg-estate-primary/10 text-estate-primary rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-black/10 text-black rounded-full flex items-center justify-center mx-auto mb-4">
                 <Building2 size={24} />
               </div>
               <h3 className="text-xl font-semibold mb-2">No Properties Found</h3>
-              <p className="text-estate-gray mb-6">
+              <p className="text-gray-600 mb-6">
                 We couldn't find any properties matching your search criteria. Try adjusting your filters or search terms.
               </p>
               <Button 
                 onClick={() => window.location.href = '/properties'}
-                className="bg-estate-primary hover:bg-estate-primary/90"
+                className="bg-black hover:bg-black/90"
               >
                 View All Properties
               </Button>
@@ -228,9 +225,7 @@ const Properties = () => {
           )}
         </section>
       </main>
-      
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 

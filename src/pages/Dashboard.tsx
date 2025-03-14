@@ -24,6 +24,7 @@ import BuyerDashboard from "@/components/dashboard/BuyerDashboard";
 import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import AgentDashboard from "@/components/dashboard/AgentDashboard";
 import AdminDashboard from "@/components/dashboard/AdminDashboard";
+import SettingsPanel from "@/components/dashboard/SettingsPanel";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -34,6 +35,10 @@ const Dashboard = () => {
   const role = user?.role || "buyer";
 
   const renderDashboardContent = () => {
+    if (activeTab === "settings") {
+      return <SettingsPanel />;
+    }
+    
     switch (role) {
       case "buyer":
         return <BuyerDashboard activeTab={activeTab} />;
@@ -66,7 +71,7 @@ const Dashboard = () => {
         <div className="h-full flex flex-col">
           <div className="p-4 border-b border-gray-200">
             <Link to="/" className="flex items-center space-x-2">
-          <img src="https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" alt="" />
+              <img src="https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" alt="" />
             </Link>
           </div>
           
@@ -93,6 +98,17 @@ const Dashboard = () => {
               <LayoutDashboard className="mr-2 h-5 w-5" />
               Overview
             </Button>
+            
+            {/* Add Property Link available to all users */}
+            <Link to="/add-property" className="block">
+              <Button
+                variant="ghost"
+                className="w-full justify-start"
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Add Property
+              </Button>
+            </Link>
             
             {(role === "buyer" || !user) && (
               <>
@@ -246,24 +262,12 @@ const Dashboard = () => {
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-2xl font-bold">Dashboard</h1>
-            {(role === "owner" || role === "agent") && (
-              <Button 
-                className="bg-estate-primary hover:bg-estate-primary/90"
-                onClick={() => navigate("/add-property")}
-              >
+            <Link to="/add-property">
+              <Button className="bg-black hover:bg-black/90">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Property
               </Button>
-            )}
-            {role === "admin" && (
-              <Button 
-                className="bg-estate-primary hover:bg-estate-primary/90"
-                onClick={() => navigate("/admin")}
-              >
-                <Shield className="mr-2 h-4 w-4" />
-                Admin Portal
-              </Button>
-            )}
+            </Link>
           </div>
           
           {renderDashboardContent()}

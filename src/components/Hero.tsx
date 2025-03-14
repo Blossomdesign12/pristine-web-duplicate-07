@@ -143,48 +143,6 @@ const Hero = () => {
             </Button>
           </form>
         </div>
-        
-        {/* Buy Rent List Section */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
-          <Link to="/properties?type=for-sale" className="group">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 text-center transition-all hover:bg-white/20 border border-white/20">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-all">
-                <Home className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Buy</h3>
-              <p className="text-white/80 mb-4">Find your dream home from our exclusive listings of properties for sale.</p>
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
-                Browse Properties
-              </Button>
-            </div>
-          </Link>
-          
-          <Link to="/properties?type=for-rent" className="group">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 text-center transition-all hover:bg-white/20 border border-white/20">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-all">
-                <MapPin className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">Rent</h3>
-              <p className="text-white/80 mb-4">Discover a wide range of rental properties to fit your lifestyle and budget.</p>
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
-                Explore Rentals
-              </Button>
-            </div>
-          </Link>
-          
-          <Link to="/add-property" className="group">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 text-center transition-all hover:bg-white/20 border border-white/20">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-white/30 transition-all">
-                <ArrowRight className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">List</h3>
-              <p className="text-white/80 mb-4">List your property with us and reach thousands of potential buyers or renters.</p>
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-black">
-                List Your Property
-              </Button>
-            </div>
-          </Link>
-        </div>
       </div>
     </div>
   );
