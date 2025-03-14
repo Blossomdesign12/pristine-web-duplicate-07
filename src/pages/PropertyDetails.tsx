@@ -1,10 +1,9 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Bed, Bath, Square, MapPin, Calendar, Heart, 
   Share2, Printer, ChevronLeft, ChevronRight, 
-  Phone, Mail, User, Check, LayoutPlanIcon
+  Phone, Mail, User, Check, LayoutIcon, X
 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
