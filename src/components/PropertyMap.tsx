@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -94,7 +95,7 @@ const PropertyMap = ({
               </div>`
             )
         )
-        .addTo(map.current!);
+        .addTo(map);
       
       markers.current.push(marker);
     });

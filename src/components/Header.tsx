@@ -1,17 +1,18 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User, LogIn, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { isAuthenticated, currentUser, logout } = useAuth();
-  const isMobile = useMobile();
+  const { isAuthenticated, user, logout } = useAuth();
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -130,7 +131,7 @@ const Header = () => {
             <div className="relative group">
               <Button variant="ghost" className="gap-2 hover:bg-black/5" onClick={() => {}}>
                 <User size={18} />
-                <span>{currentUser?.displayName || 'Account'}</span>
+                <span>{user?.name || 'Account'}</span>
                 <ChevronDown size={16} />
               </Button>
               <div className="absolute right-0 mt-1 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">

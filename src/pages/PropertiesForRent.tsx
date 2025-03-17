@@ -160,7 +160,7 @@ const PropertiesForRent = () => {
         
         {/* Search Section */}
         <section className="container -mt-8 mb-12">
-          <PropertySearch defaultStatus="for-rent" />
+          <PropertySearch />
         </section>
         
         {/* Properties Section */}

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import PropertyCard from './PropertyCard';
-import { Property, getAllProperties } from '@/lib/data';
+import { Property, searchProperties } from '@/lib/data';
 
 interface SimilarPropertiesProps {
   currentPropertyId: string;
@@ -17,7 +17,7 @@ const SimilarProperties = ({ currentPropertyId, propertyType, city }: SimilarPro
   
   useEffect(() => {
     // Get all properties
-    const allProperties = getAllProperties();
+    const allProperties = searchProperties();
     
     // Find similar properties based on type and city, excluding the current property
     const similar = allProperties.filter(property => 
