@@ -51,8 +51,12 @@ const Header = () => {
       <div className="container flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold">
-          <img src="https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" alt="" />
-        </Link>
+        <img 
+    src={isScrolled 
+      ? "https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" 
+      : "https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631498/jugyahwhite.ff1dd762_gmcu0m.svg"} 
+    alt="Logo" 
+  />        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-1">
