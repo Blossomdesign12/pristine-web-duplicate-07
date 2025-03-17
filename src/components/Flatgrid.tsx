@@ -12,6 +12,7 @@ export default function FlatsGrid() {
   
     return (
       <div className="container mx-auto px-4 py-8">
+        <h2 className="mb-9">Popular Neighbourhoods</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {flats.map((flat, index) => (
             <div

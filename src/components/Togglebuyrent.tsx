@@ -36,7 +36,7 @@ export default function FlatsListing() {
 
   return (
     <div className="bg-[#f3f4f6]">
-    <div className="max-w-7xl m-10 p-6 bg-[#f3f4f6]">
+    <div className="max-w-7xl  p-[59px] mx-5 bg-[#f3f4f6]">
       <div className="flex gap-2 mb-9">
         <button
           className={`px-4 py-2 rounded-md ${

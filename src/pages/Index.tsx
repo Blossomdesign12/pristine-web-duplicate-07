@@ -284,8 +284,8 @@ const Index = () => {
         </div>
       </section>
     </main>
-      <Togglebuyrent/>
-      
+      {/* <Togglebuyrent/> */}
+
       <Footer />
     </div>
   );

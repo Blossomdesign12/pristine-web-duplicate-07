@@ -11,9 +11,10 @@ const Footer = () => {
   return (
 
 
-    <footer className="bg-[#0d1829] text-white">
-      {/* <Togglebuyrent/> */}
-      <div className="container py-16">
+    <footer className=" ">
+      <Togglebuyrent/>
+      <div className='bg-[#0d1829] text-white'>
+      <div className="container py-16 ">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <Link to="/" className="flex items-center gap-2 mb-6">
@@ -153,6 +154,7 @@ const Footer = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </footer>
   );
