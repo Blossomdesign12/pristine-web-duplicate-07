@@ -50,8 +50,8 @@ function App() {
   }
 
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Index />} />
@@ -80,8 +80,8 @@ function App() {
         </Routes>
         
         <Toaster />
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
