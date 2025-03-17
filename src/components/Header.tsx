@@ -41,14 +41,20 @@ const Header = () => {
     <header 
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 backdrop-blur-md",
-        isScrolled ? "py-3 bg-white/90 shadow-sm" : "py-4 bg-transparent",
-        isMenuOpen && isMobile && "bg-white/90 h-screen"
+        isScrolled ? "py-3 bg-white shadow-sm" : "py-4 bg-transparent",
+        isMenuOpen && isMobile && "bg-white h-screen"
       )}
     >
       <div className="container flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 z-50">
-          <div className="flex items-center space-x-1">
-           <img src="https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" alt="" />
+          <div className="flex items-center">
+            <img 
+              src={isScrolled || isMobile || isMenuOpen ? 
+                "https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" : 
+                "https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631498/jugyahwhite.ff1dd762_gmcu0m.svg"} 
+              alt="Jugyah Logo" 
+              className="h-10"
+            />
           </div>
         </Link>
         
@@ -58,30 +64,33 @@ const Header = () => {
               variant="ghost" 
               size="icon" 
               onClick={toggleMenu}
-              className="text-foreground"
+              className={isScrolled || isMenuOpen ? "text-jugyah-dark" : "text-white"}
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </Button>
           ) : (
             <nav className="flex items-center gap-6">
-              <NavLinks />
+              <NavLinks isScrolled={isScrolled} />
               <div className="flex items-center gap-3">
                 {isLoggedIn ? (
                   <Link to="/dashboard">
-                    <Button className="bg-estate-primary hover:bg-estate-primary/90">
+                    <Button className="bg-jugyah-blue hover:bg-jugyah-blue/90 rounded-full">
                       Dashboard
                     </Button>
                   </Link>
                 ) : (
                   <>
                     <Link to="/login">
-                      <Button variant="outline" className="text-estate-primary border-estate-primary hover:bg-estate-primary/10">
+                      <Button variant="outline" className={cn(
+                        "border-jugyah-blue text-jugyah-blue hover:bg-jugyah-blue/10 rounded-full",
+                        !isScrolled && "border-white text-white hover:bg-white/10"
+                      )}>
                         Login
                       </Button>
                     </Link>
                     <Link to="/register">
-                      <Button className="bg-estate-primary hover:bg-estate-primary/90">
-                        Register
+                      <Button className="bg-jugyah-blue hover:bg-jugyah-blue/90 rounded-full">
+                        Sign Up
                       </Button>
                     </Link>
                   </>
@@ -105,20 +114,20 @@ const Header = () => {
             <div className="flex flex-col gap-3 mt-4">
               {isLoggedIn ? (
                 <Link to="/dashboard">
-                  <Button className="w-full bg-estate-primary hover:bg-estate-primary/90">
+                  <Button className="w-full bg-jugyah-blue hover:bg-jugyah-blue/90 rounded-full">
                     Dashboard
                   </Button>
                 </Link>
               ) : (
                 <>
                   <Link to="/login">
-                    <Button variant="outline" className="w-full text-estate-primary border-estate-primary hover:bg-estate-primary/10">
+                    <Button variant="outline" className="w-full text-jugyah-blue border-jugyah-blue hover:bg-jugyah-blue/10 rounded-full">
                       Login
                     </Button>
                   </Link>
                   <Link to="/register">
-                    <Button className="w-full bg-estate-primary hover:bg-estate-primary/90">
-                      Register
+                    <Button className="w-full bg-jugyah-blue hover:bg-jugyah-blue/90 rounded-full">
+                      Sign Up
                     </Button>
                   </Link>
                 </>
@@ -131,7 +140,7 @@ const Header = () => {
   );
 };
 
-const NavLinks = () => {
+const NavLinks = ({ isScrolled }: { isScrolled: boolean }) => {
   const location = useLocation();
   
   const isActiveLink = (path: string) => {
@@ -140,21 +149,26 @@ const NavLinks = () => {
     return false;
   };
   
+  const linkClass = (path: string) => cn(
+    "flex items-center gap-1 font-medium transition-colors",
+    isActiveLink(path) ? "text-jugyah-blue" : isScrolled ? "text-jugyah-dark hover:text-jugyah-blue" : "text-white hover:text-white/80"
+  );
+  
   return (
     <>
-      <Link to="/" className={cn("flex items-center gap-1 font-medium hover:text-estate-primary transition-colors", isActiveLink('/') && "text-estate-primary")}>
+      <Link to="/" className={linkClass('/')}>
         <Home size={16} />
         <span>Home</span>
       </Link>
-      <Link to="/properties" className={cn("flex items-center gap-1 font-medium hover:text-estate-primary transition-colors", isActiveLink('/properties') && "text-estate-primary")}>
+      <Link to="/properties" className={linkClass('/properties')}>
         <Building2 size={16} />
         <span>Properties</span>
       </Link>
-      <Link to="/agents" className={cn("flex items-center gap-1 font-medium hover:text-estate-primary transition-colors", isActiveLink('/agents') && "text-estate-primary")}>
+      <Link to="/agents" className={linkClass('/agents')}>
         <User size={16} />
         <span>Agents</span>
       </Link>
-      <Link to="/contact" className={cn("flex items-center gap-1 font-medium hover:text-estate-primary transition-colors", isActiveLink('/contact') && "text-estate-primary")}>
+      <Link to="/contact" className={linkClass('/contact')}>
         <Phone size={16} />
         <span>Contact</span>
       </Link>
@@ -167,25 +181,25 @@ const MobileNavLinks = () => {
     <>
       <Link to="/" className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <Home size={20} />
+          <Home size={20} className="text-jugyah-blue" />
           <span className="font-medium text-lg">Home</span>
         </div>
       </Link>
       <Link to="/properties" className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <Building2 size={20} />
+          <Building2 size={20} className="text-jugyah-blue" />
           <span className="font-medium text-lg">Properties</span>
         </div>
       </Link>
       <Link to="/agents" className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <User size={20} />
+          <User size={20} className="text-jugyah-blue" />
           <span className="font-medium text-lg">Agents</span>
         </div>
       </Link>
       <Link to="/contact" className="flex items-center justify-between py-3 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <Phone size={20} />
+          <Phone size={20} className="text-jugyah-blue" />
           <span className="font-medium text-lg">Contact</span>
         </div>
       </Link>

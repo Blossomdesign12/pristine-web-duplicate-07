@@ -4,7 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Mail, Send } from 'lucide-react';
+import { Mail, Send, User, Phone } from 'lucide-react';
 
 interface ContactFormProps {
   agentName: string;
@@ -41,58 +41,76 @@ const ContactForm = ({ agentName, propertyTitle }: ContactFormProps) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm">
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-        <Mail size={18} className="text-estate-primary" />
+        <Mail size={18} className="text-jugyah-blue" />
         <span>Contact Agent</span>
       </h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-estate-gray mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-600 mb-1">
             Your Name
           </label>
-          <Input
-            id="name"
-            name="name"
-            placeholder="Enter your full name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <User size={16} />
+            </div>
+            <Input
+              id="name"
+              name="name"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={handleChange}
+              className="pl-10 rounded-lg"
+              required
+            />
+          </div>
         </div>
         
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-estate-gray mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-600 mb-1">
             Email Address
           </label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="Enter your email address"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <Mail size={16} />
+            </div>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Enter your email address"
+              value={formData.email}
+              onChange={handleChange}
+              className="pl-10 rounded-lg"
+              required
+            />
+          </div>
         </div>
         
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-estate-gray mb-1">
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-600 mb-1">
             Phone Number
           </label>
-          <Input
-            id="phone"
-            name="phone"
-            placeholder="Enter your phone number"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-          />
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <Phone size={16} />
+            </div>
+            <Input
+              id="phone"
+              name="phone"
+              placeholder="Enter your phone number"
+              value={formData.phone}
+              onChange={handleChange}
+              className="pl-10 rounded-lg"
+              required
+            />
+          </div>
         </div>
         
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-estate-gray mb-1">
+          <label htmlFor="message" className="block text-sm font-medium text-gray-600 mb-1">
             Message
           </label>
           <Textarea
@@ -102,20 +120,21 @@ const ContactForm = ({ agentName, propertyTitle }: ContactFormProps) => {
             placeholder="Write your message here..."
             value={formData.message}
             onChange={handleChange}
+            className="rounded-lg"
             required
           />
         </div>
         
         <Button 
           type="submit" 
-          className="w-full bg-estate-primary hover:bg-estate-primary/90 gap-2"
+          className="w-full bg-jugyah-blue hover:bg-jugyah-blue/90 gap-2 rounded-lg"
           disabled={isSubmitting}
         >
           <Send size={18} />
           <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
         </Button>
         
-        <p className="text-xs text-estate-gray text-center">
+        <p className="text-xs text-gray-500 text-center">
           By submitting this form, you agree to our privacy policy and terms of service.
         </p>
       </form>

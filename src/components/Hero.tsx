@@ -50,11 +50,11 @@ const Hero = () => {
   return (
     <div ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-black/70 z-10"></div>
+      <div className="absolute inset-0 bg-black/60 z-10"></div>
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{ 
-          backgroundImage: "url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')",
+          backgroundImage: "url('https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
           transform: "scale(1.1)",
           filter: "blur(0px)",
           transition: "transform 15s ease-out",
@@ -72,30 +72,29 @@ const Hero = () => {
           )}
         >
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 max-w-4xl mt-[70px] leading-tight">
-            Discover Your Perfect Property With Our Expert Guidance
+            Find Your Perfect Home in Mumbai
           </h1>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Browse thousands of properties for sale and rent across the country. 
-            Find your dream home with our easy-to-use search tools.
+            Discover thousands of properties for sale and rent across Mumbai and surrounding areas.
           </p>
         </div>
         
         {/* Search Form */}
         <div 
           className={cn(
-            "w-full max-w-4xl bg-white/95 backdrop-blur-md rounded-xl p-4 shadow-lg transition-all duration-1000 transform",
+            "w-full max-w-4xl bg-white rounded-xl p-3 shadow-lg transition-all duration-1000 transform",
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12",
             "delay-300"
           )}
         >
-          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3">
+          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-2">
             <div className="flex-1 relative">
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                 <Search size={18} />
               </div>
               <Input
-                placeholder="Enter keywords, address..."
-                className="pl-10 h-12 border-gray-200"
+                placeholder="Search by location, project or landmark..."
+                className="pl-10 h-12 border-gray-200 rounded-lg"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -106,7 +105,7 @@ const Hero = () => {
                 <MapPin size={18} />
               </div>
               <select
-                className="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black/50"
+                className="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-jugyah-blue/50"
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
               >
@@ -124,7 +123,7 @@ const Hero = () => {
                 <Home size={18} />
               </div>
               <select
-                className="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-black/50"
+                className="w-full h-12 pl-10 pr-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-jugyah-blue/50"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
@@ -137,7 +136,7 @@ const Hero = () => {
               </select>
             </div>
             
-            <Button className="h-12 px-6 bg-black hover:bg-black/90 text-white gap-2" type="submit">
+            <Button className="h-12 px-6 bg-jugyah-blue hover:bg-jugyah-blue/90 text-white gap-2 rounded-lg" type="submit">
               <span>Search</span>
               <ArrowRight size={16} />
             </Button>

@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -53,11 +53,12 @@
   
   body {
     @apply bg-background text-foreground;
-    font-family: 'Figtree', sans-serif;
+    font-family: 'DM Sans', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
+    font-family: 'DM Sans', sans-serif;
   }
   
   h1 {
@@ -122,6 +123,11 @@
   
   .animate-on-scroll.is-visible {
     @apply opacity-100 translate-y-0;
+  }
+
+  /* Tag styling similar to jugyah.com */
+  .tag {
+    @apply px-2 py-1 text-xs font-medium rounded-md inline-block;
   }
 }
 
@@ -191,4 +197,25 @@
   100% {
     transform: scale(1.05);
   }
+}
+
+/* Jugyah.com specific styles */
+.btn-jugyah {
+  @apply rounded-full px-5 py-2.5 font-medium transition-all;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.btn-secondary {
+  @apply bg-white border border-gray-200 hover:bg-gray-50;
+}
+
+.property-badge {
+  @apply inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md;
+}
+
+.card-shadow {
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
 }

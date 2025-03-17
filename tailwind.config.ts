@@ -23,6 +23,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['DM Sans', 'sans-serif'],
+				figtree: ['Figtree', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -68,12 +72,22 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				estate: {
-					primary: '#2e59f6',
+					primary: '#0061ff',
 					secondary: '#fad029',
 					light: '#f7fafc',
 					dark: '#1a202c',
 					gray: '#718096',
 					lightGray: '#e2e8f0'
+				},
+				jugyah: {
+					blue: '#0061ff',
+					yellow: '#ffd200',
+					orange: '#ff6b00',
+					green: '#00c268',
+					red: '#ff3b30',
+					dark: '#1e1e1e',
+					gray: '#6e7491',
+					lightGray: '#f7f8fb',
 				}
 			},
 			borderRadius: {

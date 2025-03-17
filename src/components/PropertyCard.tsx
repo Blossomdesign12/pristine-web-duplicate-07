@@ -52,15 +52,15 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
   const getStatusColor = () => {
     switch (property.features.status) {
       case 'for-sale':
-        return 'bg-estate-primary text-white';
+        return 'bg-jugyah-blue text-white';
       case 'for-rent':
-        return 'bg-estate-secondary text-estate-dark';
+        return 'bg-jugyah-yellow text-jugyah-dark';
       case 'sold':
-        return 'bg-red-500 text-white';
+        return 'bg-jugyah-red text-white';
       case 'pending':
-        return 'bg-orange-500 text-white';
+        return 'bg-jugyah-orange text-white';
       default:
-        return 'bg-estate-primary text-white';
+        return 'bg-jugyah-blue text-white';
     }
   };
 
@@ -92,7 +92,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
         transitionDelay: `${Math.min(index * 75, 500)}ms`,
       }}
     >
-      <Link to={`/property/${property.id}`} className="group flex flex-col h-full">
+      <Link to={`/property/${property.id}`} className="group flex flex-col h-full bg-white border border-gray-100 rounded-xl overflow-hidden card-shadow">
         {/* Image Container */}
         <div className="relative overflow-hidden aspect-[4/3]">
           <div 
@@ -111,11 +111,11 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
           </div>
           
           <div className="absolute top-3 left-3 flex flex-col gap-2">
-            <span className={cn("tag", getStatusColor())}>
+            <span className={cn("property-badge", getStatusColor())}>
               {getStatusText()}
             </span>
             {property.featured && (
-              <span className="tag bg-estate-secondary text-estate-dark">
+              <span className="property-badge bg-jugyah-yellow text-jugyah-dark">
                 Featured
               </span>
             )}
@@ -125,14 +125,14 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
             onClick={toggleFavorite}
             className={cn(
               "absolute top-3 right-3 p-2 rounded-full transition-colors",
-              isFavorite ? "bg-red-500 text-white" : "bg-white text-gray-500 hover:text-red-500"
+              isFavorite ? "bg-jugyah-red text-white" : "bg-white text-gray-500 hover:text-jugyah-red"
             )}
           >
             <Heart size={18} fill={isFavorite ? "white" : "none"} />
           </button>
           
           <div className="absolute bottom-3 left-3">
-            <span className="tag bg-black/70 text-white">
+            <span className="property-badge bg-black/70 text-white">
               {property.features.propertyType.charAt(0).toUpperCase() + property.features.propertyType.slice(1)}
             </span>
           </div>
@@ -140,43 +140,44 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
         
         {/* Content */}
         <div className="p-4 flex flex-col flex-grow">
-          <div className="flex items-center gap-1 text-estate-gray mb-2">
-            <MapPin size={16} />
+          <div className="flex items-center gap-1 text-jugyah-gray mb-2">
+            <MapPin size={16} className="text-jugyah-blue" />
             <span className="text-sm truncate">
               {property.location.city}, {property.location.state}
             </span>
           </div>
           
-          <h3 className="text-lg font-semibold mb-2 line-clamp-1 group-hover:text-estate-primary transition-colors">
+          <h3 className="text-lg font-semibold mb-2 line-clamp-1 group-hover:text-jugyah-blue transition-colors">
             {property.title}
           </h3>
           
-          <p className="text-estate-gray text-sm mb-4 line-clamp-2 flex-grow">
+          <p className="text-jugyah-gray text-sm mb-4 line-clamp-2 flex-grow">
             {property.description}
           </p>
           
-          <div className="flex items-center justify-between border-t border-estate-lightGray pt-4">
+          <div className="flex items-center justify-between border-t border-gray-100 pt-4">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 text-estate-gray">
-                <Bed size={16} />
+              <div className="flex items-center gap-1 text-jugyah-gray">
+                <Bed size={16} className="text-jugyah-blue" />
                 <span className="text-sm">{property.features.bedrooms} BHK</span>
               </div>
-              <div className="flex items-center gap-1 text-estate-gray">
-                <Bath size={16} />
+              <div className="flex items-center gap-1 text-jugyah-gray">
+                <Bath size={16} className="text-jugyah-blue" />
                 <span className="text-sm">{property.features.bathrooms}</span>
               </div>
-              <div className="flex items-center gap-1 text-estate-gray">
-                <Square size={16} />
+              <div className="flex items-center gap-1 text-jugyah-gray">
+                <Square size={16} className="text-jugyah-blue" />
                 <span className="text-sm">{property.features.area} sq ft</span>
               </div>
             </div>
           </div>
           
           <div className="mt-4 flex items-center justify-between">
-            <div className="font-semibold text-lg text-estate-primary">
+            <div className="font-semibold text-lg text-jugyah-blue">
               {formatPrice(property.price)}
+              {property.features.status === 'for-rent' && <span className="text-xs text-jugyah-gray ml-1">/month</span>}
             </div>
-            <Button variant="outline" size="sm" className="text-xs border-estate-primary text-estate-primary hover:bg-estate-primary hover:text-white">
+            <Button variant="outline" size="sm" className="text-xs border-jugyah-blue text-jugyah-blue hover:bg-jugyah-blue hover:text-white rounded-full">
               View Details
             </Button>
           </div>

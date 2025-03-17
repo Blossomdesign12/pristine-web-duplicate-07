@@ -35,7 +35,7 @@ const FeaturedProperties = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="section bg-estate-light py-16 md:py-24">
+    <section ref={sectionRef} className="section bg-white py-16 md:py-24">
       <div className="container">
         <div 
           className={cn(
@@ -45,16 +45,13 @@ const FeaturedProperties = () => {
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <span className="inline-block px-3 py-1 bg-estate-primary/10 text-estate-primary rounded-full mb-2 text-sm font-medium">
-                Featured Properties
-              </span>
-              <h2 className="section-title">Discover Our Featured Listings</h2>
-              <p className="section-subtitle">
+              <h2 className="text-3xl md:text-4xl font-bold mb-2 font-sans">Featured Properties</h2>
+              <p className="text-gray-600 max-w-xl">
                 Explore our handpicked selection of premium properties that stand out for their exceptional features and prime locations.
               </p>
             </div>
             <Link to="/properties">
-              <Button variant="outline" className="border-estate-primary text-estate-primary hover:bg-estate-primary hover:text-white gap-2">
+              <Button variant="outline" className="border-estate-primary text-estate-primary hover:bg-estate-primary hover:text-white gap-2 rounded-full">
                 View All Properties
                 <ArrowRight size={16} />
               </Button>
