@@ -3,12 +3,16 @@ import { Link } from 'react-router-dom';
 import { Building2, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import Togglebuyrent from './Togglebuyrent'
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   return (
+
+
     <footer className="bg-[#0d1829] text-white">
+      <Togglebuyrent/>
       <div className="container py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>

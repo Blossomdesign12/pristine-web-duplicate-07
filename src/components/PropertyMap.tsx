@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Property } from '@/lib/data';
@@ -11,44 +10,35 @@ interface PropertyMapProps {
 }
 
 const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: PropertyMapProps) => {
-  const [mapLoaded, setMapLoaded] = useState(false);
-
-  useEffect(() => {
-    setMapLoaded(true);
-  }, []);
-
-  if (!mapLoaded) return <div>Loading map...</div>;
-
   return (
-    <MapContainer
-      center={[19.0760, 72.8777]}
-      zoom={10}
-      className="w-full h-full rounded-lg"
-      style={{ minHeight: '400px' }}
-    >
-      <TileLayer 
-       url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" 
-         
-      />
+    <div className="w-full h-full rounded-lg" style={{ minHeight: '400px' }}>
+      <MapContainer center={[19.0760, 72.8777]} zoom={10} className="w-full h-full">
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-      {properties.map(property => (
-        <Marker 
-          key={property.id} 
-          position={[property.location.lat || 0, property.location.lng || 0]}
-          eventHandlers={{
-            click: () => onPropertySelect && onPropertySelect(property.id),
-          }}
-        >
-          <Popup>
-            <div>
-              <h3 className="font-bold text-sm">{property.title}</h3>
-              <p className="text-xs">{formatPrice(property.price)}</p>
-              <p className="text-xs">{property.location.city}, {property.location.state}</p>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+        {properties.map(property => {
+          const { lat, lng, city, state } = property.location || {};
+          if (!lat || !lng) return null; // Ensure lat/lng are valid
+
+          return (
+            <Marker
+              key={property.id}
+              position={[lat, lng]}
+              eventHandlers={{
+                click: () => onPropertySelect && onPropertySelect(property.id),
+              }}
+            >
+              <Popup>
+                <div>
+                  <h3 className="font-bold text-sm">{property.title}</h3>
+                  <p className="text-xs">{formatPrice(property.price)}</p>
+                  <p className="text-xs">{city}, {state}</p>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+    </div>
   );
 };
 

@@ -51,7 +51,7 @@ const Header = () => {
       <div className="container flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="text-2xl font-bold">
-          FindHome
+          <img src="https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" alt="" />
         </Link>
 
         {/* Desktop Navigation */}
