@@ -1,59 +1,74 @@
 import { useState } from "react";
 
-type Listing = {
-  id: number;
-  location: string;
-  type: "Buying" | "Renting";
-};
-
-const flatListings: Listing[] = [
-  // Sample listings for demonstration
-  { id: 1, location: "Andheri West", type: "Buying" },
-  { id: 2, location: "Goregaon West", type: "Renting" },
-  { id: 3, location: "Dadar", type: "Buying" },
-  { id: 4, location: "Bandra", type: "Renting" },
+const categories = [
+  {
+    title: "Flats for sale in Mumbai",
+    locations: [
+      "Andheri West", "Mahim", "Mira Road", "Mulund", "Vile Parle West",
+      "Goregaon West", "Malabar Hill", "Byculla", "Andheri East", "Kurla",
+      "Bhayandar", "Bhandup", "Juhu", "Borivali East", "Colaba", "Kanjurmarg",
+      "Marol", "BKC", "Worli", "Ghatkopar West", "Jogeshwari East",
+      "Borivali West", "Haware City", "Mahalaxmi", "Powai", "Ghatkopar East",
+      "Matunga East", "Sion", "Jogeshwari West", "Dahisar", "Tardeo", "Grant Road"
+    ]
+  },
+  {
+    title: "Flats for sale in Thane",
+    locations: [
+      "Thane East", "Kolshet", "Waghbil", "Dombivli", "Beyond Thane", "Manpada",
+      "Anand Nagar", "Korum Mall", "Hiranandani Estate", "Ghodbunder Road",
+      "Majiwada", "Suraj Water Park", "Thane West"
+    ]
+  },
+  {
+    title: "Flats for sale in Navi Mumbai",
+    locations: [
+      "Panvel", "Kharghar", "Turbhe", "Nerul", "Khandaeshwar", "Ulwe", "Airoli",
+      "Taloja", "Vashi", "Seawood Darave", "Bamandongri", "Shilphata", "Ghansoli",
+      "Koparkhairane", "Sanpada", "Belapur CBD", "Kharkopar", "Navi Mumbai",
+      "Rabale", "Juinagar", "Mansarovar", "Diva"
+    ]
+  }
 ];
 
-const ToggleBuyRent = () => {
-  const [selected, setSelected] = useState<"Buying" | "Renting">("Buying");
-
-  // Filtered listings based on selected option
-  const filteredListings = flatListings.filter((listing) => listing.type === selected);
+export default function FlatsListing() {
+  const [activeTab, setActiveTab] = useState("buying");
 
   return (
-    <div className="p-6">
-      {/* Toggle Button */}
-      <div className="flex bg-gray-200 rounded-lg p-1 w-max mb-6">
-        {["Buying", "Renting"].map((option) => (
-          <button
-            key={option}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-              selected === option
-                ? "bg-gray-900 text-white shadow-md"
-                : "text-gray-500"
-            }`}
-            onClick={() => setSelected(option as "Buying" | "Renting")}
-          >
-            {option}
-          </button>
-        ))}
+    <div className="bg-[#f3f4f6]">
+    <div className="max-w-7xl m-10 p-6 bg-[#f3f4f6]">
+      <div className="flex gap-2 mb-9">
+        <button
+          className={`px-4 py-2 rounded-md ${
+            activeTab === "buying" ? "bg-black text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setActiveTab("buying")}
+        >
+          Buying
+        </button>
+        <button
+          className={`px-4 py-2 rounded-md ${
+            activeTab === "renting" ? "bg-black text-white" : "bg-gray-200"
+          }`}
+          onClick={() => setActiveTab("renting")}
+        >
+          Renting
+        </button>
       </div>
 
-      {/* Flat Listings */}
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {filteredListings.map((listing) => (
-            <div key={listing.id} className="bg-gray-100 p-4 rounded-lg shadow">
-              <h2 className="font-semibold text-gray-800">
-                Flats for {selected} in {listing.location}
-              </h2>
-              {/* You can add more details to listings */}
-            </div>
-          ))}
+      {categories.map((category, index) => (
+        <div key={index} className="mb-6">
+          <h2 className="text-lg font-semibold mb-2">{category.title}</h2>
+          <div className="grid grid-cols-3 gap-4 text-gray-700">
+            {category.locations.map((location, idx) => (
+              <p key={idx} className="hover:text-blue-500 cursor-pointer">
+                Flats for sale in {location}
+              </p>
+            ))}
+          </div>
         </div>
-      </div>
+      ))}
+    </div>
     </div>
   );
-};
-
-export default ToggleBuyRent;
+}

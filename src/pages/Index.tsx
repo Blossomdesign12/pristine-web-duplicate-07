@@ -10,6 +10,8 @@ import { getRecentProperties, formatPrice } from '@/lib/data';
 import PropertyCategorySection from '@/components/PropertyCategorySection';
 import FlatsGrid from '@/components/Flatgrid';
 import Sellrent from "@/components/Sellrent"
+import Togglebuyrent from "@/components/Togglebuyrent"
+import { Toggle } from '@/components/ui/toggle';
 
 const Index = () => {
   const recentProperties = getRecentProperties(3);
@@ -282,6 +284,7 @@ const Index = () => {
         </div>
       </section>
     </main>
+      <Togglebuyrent/>
       
       <Footer />
     </div>
