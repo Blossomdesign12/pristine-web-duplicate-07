@@ -1,107 +1,89 @@
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
+// Pages
+import Index from './pages/Index';
+import PropertyDetails from './pages/PropertyDetails';
+import Properties from './pages/Properties';
+import PropertiesForSale from './pages/PropertiesForSale';
+import PropertiesForRent from './pages/PropertiesForRent';
+import Loans from './pages/Loans';
+import Contact from './pages/Contact';
+import Agents from './pages/Agents';
+import AgentDetails from './pages/AgentDetails';
+import AddProperty from './pages/AddProperty';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import Messages from './pages/Messages';
+import Notifications from './pages/Notifications';
+import Profile from './pages/Profile';
+import NotFound from './pages/NotFound';
+
+// Components
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import PropertyDetails from "./pages/PropertyDetails";
-import PropertyListings from "./pages/PropertyListings";
-import Agents from "./pages/Agents";
-import AgentDetails from "./pages/AgentDetails";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
-import AddProperty from "./pages/AddProperty";
-import Profile from "./pages/Profile";
-import Messages from "./pages/Messages";
-import Notifications from "./pages/Notifications";
-import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from './components/ProtectedRoute';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
+// Context
+import { AuthProvider } from './contexts/AuthContext';
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/properties" element={<PropertyListings />} />
-            <Route path="/property/:id" element={<PropertyDetails />} />
-            <Route path="/agents" element={<Agents />} />
-            <Route path="/agent/:id" element={<AgentDetails />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute bypassAuth={true}>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute bypassAuth={true}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/add-property" 
-              element={
-                <ProtectedRoute bypassAuth={true}>
-                  <AddProperty />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute bypassAuth={true}>
-                  <Profile />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/messages" 
-              element={
-                <ProtectedRoute bypassAuth={true}>
-                  <Messages />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/notifications" 
-              element={
-                <ProtectedRoute bypassAuth={true}>
-                  <Notifications />
-                </ProtectedRoute>
-              } 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading assets or data
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  return (
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Index />} />
+          <Route path="/properties" element={<Properties />} />
+          <Route path="/properties-for-sale" element={<PropertiesForSale />} />
+          <Route path="/properties-for-rent" element={<PropertiesForRent />} />
+          <Route path="/property/:id" element={<PropertyDetails />} />
+          <Route path="/loans" element={<Loans />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/agents" element={<Agents />} />
+          <Route path="/agent/:id" element={<AgentDetails />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/add-property" element={<AddProperty />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
+          
+          {/* 404 and redirects */}
+          <Route path="/404" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Routes>
+        
+        <Toaster />
+      </Router>
+    </AuthProvider>
+  );
+}
 
 export default App;

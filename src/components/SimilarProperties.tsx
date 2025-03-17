@@ -4,28 +4,30 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import PropertyCard from './PropertyCard';
-import { Property } from '@/lib/data';
+import { Property, getAllProperties } from '@/lib/data';
 
 interface SimilarPropertiesProps {
   currentPropertyId: string;
   propertyType: string;
   city: string;
-  properties: Property[];
 }
 
-const SimilarProperties = ({ currentPropertyId, propertyType, city, properties }: SimilarPropertiesProps) => {
+const SimilarProperties = ({ currentPropertyId, propertyType, city }: SimilarPropertiesProps) => {
   const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
-
+  
   useEffect(() => {
+    // Get all properties
+    const allProperties = getAllProperties();
+    
     // Find similar properties based on type and city, excluding the current property
-    const similar = properties.filter(property => 
+    const similar = allProperties.filter(property => 
       property.id !== currentPropertyId && 
       (property.features.propertyType === propertyType || 
        property.location.city === city)
     ).slice(0, 3);
     
     setSimilarProperties(similar);
-  }, [currentPropertyId, propertyType, city, properties]);
+  }, [currentPropertyId, propertyType, city]);
 
   if (similarProperties.length === 0) {
     return null;
