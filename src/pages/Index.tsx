@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
 import { getRecentProperties, formatPrice } from '@/lib/data';
 import PropertyCategorySection from '@/components/PropertyCategorySection';
+import FlatsGrid from '@/components/Flatgrid';
+import Sellrent from "@/components/Sellrent"
 
 const Index = () => {
   const recentProperties = getRecentProperties(3);
@@ -249,7 +251,11 @@ const Index = () => {
           </div>
         </div>
       </section>
-      
+
+      <FlatsGrid/>
+
+      <Sellrent/>
+
       {/* CTA */}
       <section className="py-20 bg-estate-primary">
         <div className="container">

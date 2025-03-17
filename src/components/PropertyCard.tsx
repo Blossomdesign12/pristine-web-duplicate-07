@@ -89,7 +89,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
         "hover:shadow-md"
       )}
       style={{ 
-        transitionDelay: `${Math.min(index * 75, 500)}ms`,
+        transitionDelay: `${Math.min(index * 75, 500)}ms`,border:'1px solid #e0e0e0'
       }}
     >
       <Link to={`/property/${property.id}`} className="group flex flex-col h-full bg-white border border-gray-100 rounded-xl overflow-hidden card-shadow">
