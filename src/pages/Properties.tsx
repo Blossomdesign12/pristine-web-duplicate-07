@@ -4,7 +4,8 @@ import { useSearchParams } from 'react-router-dom';
 import Layout from "@/components/Layout";
 import PropertySearch from "@/components/PropertySearch";
 import PropertyCard from "@/components/PropertyCard";
-import { Building2, GridIcon, LayoutList, ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import PropertyMap from "@/components/PropertyMap";
+import { Building2, GridIcon, LayoutList, ArrowUpDown, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { searchProperties, Property } from '@/lib/data';
 
@@ -15,6 +16,8 @@ const Properties = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortOption, setSortOption] = useState('latest');
+  const [showMap, setShowMap] = useState(true);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | undefined>(undefined);
   const propertiesPerPage = 9;
 
   useEffect(() => {
@@ -66,6 +69,21 @@ const Properties = () => {
       top: 0,
       behavior: 'smooth'
     });
+  };
+
+  const handlePropertySelect = (propertyId: string) => {
+    setSelectedPropertyId(propertyId);
+    
+    // Find the property in the list
+    const property = properties.find(p => p.id === propertyId);
+    if (property) {
+      // Find the page that contains this property
+      const propertyIndex = properties.indexOf(property);
+      const page = Math.floor(propertyIndex / propertiesPerPage) + 1;
+      if (page !== currentPage) {
+        setCurrentPage(page);
+      }
+    }
   };
 
   // Get current page's properties
@@ -171,6 +189,15 @@ const Properties = () => {
                 >
                   <LayoutList size={20} />
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowMap(!showMap)}
+                  className={showMap ? 'text-black' : 'text-gray-500'}
+                  aria-label="Toggle map"
+                >
+                  <MapPin size={20} />
+                </Button>
               </div>
               
               <div className="flex items-center relative">
@@ -189,23 +216,43 @@ const Properties = () => {
           </div>
           
           {currentProperties.length > 0 ? (
-            <>
-              <div className={`grid ${
-                viewMode === 'grid' 
-                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' 
-                  : 'grid-cols-1 gap-4'
-              }`}>
-                {currentProperties.map((property, index) => (
-                  <PropertyCard key={property.id} property={property} index={index} />
-                ))}
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* Properties List */}
+              <div className={`${showMap ? 'lg:w-1/2' : 'w-full'}`}>
+                <div className={`grid ${
+                  viewMode === 'grid' 
+                    ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6' 
+                    : 'grid-cols-1 gap-4'
+                }`}>
+                  {currentProperties.map((property, index) => (
+                    <PropertyCard 
+                      key={property.id} 
+                      property={property} 
+                      index={index}
+                    />
+                  ))}
+                </div>
+                
+                {totalPages > 1 && (
+                  <div className="mt-12 flex justify-center">
+                    {renderPagination()}
+                  </div>
+                )}
               </div>
               
-              {totalPages > 1 && (
-                <div className="mt-12 flex justify-center">
-                  {renderPagination()}
+              {/* Map */}
+              {showMap && (
+                <div className="lg:w-1/2">
+                  <div className="sticky top-24 h-[calc(100vh-200px)]">
+                    <PropertyMap 
+                      properties={properties} 
+                      selectedPropertyId={selectedPropertyId}
+                      onPropertySelect={handlePropertySelect}
+                    />
+                  </div>
                 </div>
               )}
-            </>
+            </div>
           ) : (
             <div className="bg-white p-8 rounded-lg shadow-sm text-center">
               <div className="w-16 h-16 bg-black/10 text-black rounded-full flex items-center justify-center mx-auto mb-4">

@@ -51,7 +51,7 @@ const FeaturedProperties = () => {
               </p>
             </div>
             <Link to="/properties">
-              <Button variant="outline" className="border-estate-primary text-estate-primary hover:bg-estate-primary hover:text-white gap-2 rounded-full">
+              <Button variant="outline" className="border-black text-black hover:bg-black hover:text-white gap-2 rounded-full">
                 View All Properties
                 <ArrowRight size={16} />
               </Button>

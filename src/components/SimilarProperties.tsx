@@ -42,7 +42,7 @@ const SimilarProperties = ({ currentPropertyId, propertyType, city, properties }
             </p>
           </div>
           <Link to="/properties">
-            <Button variant="outline" className="border-jugyah-blue text-jugyah-blue hover:bg-jugyah-blue hover:text-white gap-2 rounded-full">
+            <Button variant="outline" className="border-black text-black hover:bg-black hover:text-white gap-2 rounded-full">
               View All Properties
               <ArrowRight size={16} />
             </Button>

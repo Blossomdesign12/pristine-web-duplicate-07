@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -71,23 +70,24 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				// Updated colors to use only black and white
 				estate: {
-					primary: '#0061ff',
-					secondary: '#fad029',
-					light: '#f7fafc',
-					dark: '#1a202c',
-					gray: '#718096',
-					lightGray: '#e2e8f0'
+					primary: '#000000',
+					secondary: '#FFFFFF',
+					light: '#F7F7F7',
+					dark: '#000000',
+					gray: '#666666',
+					lightGray: '#E5E5E5'
 				},
 				jugyah: {
-					blue: '#0061ff',
-					yellow: '#ffd200',
-					orange: '#ff6b00',
-					green: '#00c268',
-					red: '#ff3b30',
-					dark: '#1e1e1e',
-					gray: '#6e7491',
-					lightGray: '#f7f8fb',
+					blue: '#000000',
+					yellow: '#FFFFFF',
+					orange: '#333333',
+					green: '#000000',
+					red: '#000000',
+					dark: '#000000',
+					gray: '#666666',
+					lightGray: '#F7F7F7',
 				}
 			},
 			borderRadius: {

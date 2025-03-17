@@ -52,15 +52,15 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
   const getStatusColor = () => {
     switch (property.features.status) {
       case 'for-sale':
-        return 'bg-jugyah-blue text-white';
+        return 'bg-black text-white';
       case 'for-rent':
-        return 'bg-jugyah-yellow text-jugyah-dark';
+        return 'bg-white text-black border border-black';
       case 'sold':
-        return 'bg-jugyah-red text-white';
+        return 'bg-black text-white';
       case 'pending':
-        return 'bg-jugyah-orange text-white';
+        return 'bg-gray-500 text-white';
       default:
-        return 'bg-jugyah-blue text-white';
+        return 'bg-black text-white';
     }
   };
 
@@ -115,7 +115,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
               {getStatusText()}
             </span>
             {property.featured && (
-              <span className="property-badge bg-jugyah-yellow text-jugyah-dark">
+              <span className="property-badge bg-white text-black border border-black">
                 Featured
               </span>
             )}
@@ -125,7 +125,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
             onClick={toggleFavorite}
             className={cn(
               "absolute top-3 right-3 p-2 rounded-full transition-colors",
-              isFavorite ? "bg-jugyah-red text-white" : "bg-white text-gray-500 hover:text-jugyah-red"
+              isFavorite ? "bg-black text-white" : "bg-white text-gray-500 hover:text-black"
             )}
           >
             <Heart size={18} fill={isFavorite ? "white" : "none"} />
@@ -140,44 +140,44 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
         
         {/* Content */}
         <div className="p-4 flex flex-col flex-grow">
-          <div className="flex items-center gap-1 text-jugyah-gray mb-2">
-            <MapPin size={16} className="text-jugyah-blue" />
+          <div className="flex items-center gap-1 text-gray-600 mb-2">
+            <MapPin size={16} className="text-black" />
             <span className="text-sm truncate">
               {property.location.city}, {property.location.state}
             </span>
           </div>
           
-          <h3 className="text-lg font-semibold mb-2 line-clamp-1 group-hover:text-jugyah-blue transition-colors">
+          <h3 className="text-lg font-semibold mb-2 line-clamp-1 group-hover:text-black transition-colors">
             {property.title}
           </h3>
           
-          <p className="text-jugyah-gray text-sm mb-4 line-clamp-2 flex-grow">
+          <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow">
             {property.description}
           </p>
           
           <div className="flex items-center justify-between border-t border-gray-100 pt-4">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 text-jugyah-gray">
-                <Bed size={16} className="text-jugyah-blue" />
+              <div className="flex items-center gap-1 text-gray-600">
+                <Bed size={16} className="text-black" />
                 <span className="text-sm">{property.features.bedrooms} BHK</span>
               </div>
-              <div className="flex items-center gap-1 text-jugyah-gray">
-                <Bath size={16} className="text-jugyah-blue" />
+              <div className="flex items-center gap-1 text-gray-600">
+                <Bath size={16} className="text-black" />
                 <span className="text-sm">{property.features.bathrooms}</span>
               </div>
-              <div className="flex items-center gap-1 text-jugyah-gray">
-                <Square size={16} className="text-jugyah-blue" />
+              <div className="flex items-center gap-1 text-gray-600">
+                <Square size={16} className="text-black" />
                 <span className="text-sm">{property.features.area} sq ft</span>
               </div>
             </div>
           </div>
           
           <div className="mt-4 flex items-center justify-between">
-            <div className="font-semibold text-lg text-jugyah-blue">
+            <div className="font-semibold text-lg text-black">
               {formatPrice(property.price)}
-              {property.features.status === 'for-rent' && <span className="text-xs text-jugyah-gray ml-1">/month</span>}
+              {property.features.status === 'for-rent' && <span className="text-xs text-gray-600 ml-1">/month</span>}
             </div>
-            <Button variant="outline" size="sm" className="text-xs border-jugyah-blue text-jugyah-blue hover:bg-jugyah-blue hover:text-white rounded-full">
+            <Button variant="outline" size="sm" className="text-xs border-black text-black hover:bg-black hover:text-white rounded-full">
               View Details
             </Button>
           </div>
