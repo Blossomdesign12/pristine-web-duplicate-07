@@ -27,10 +27,10 @@ const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: Prope
   return (
     <div className="w-full h-full rounded-lg" style={{ minHeight: '400px' }}>
       <MapContainer 
-        className="w-full h-full rounded-lg" 
-        style={{ height: '100%', minHeight: '400px' }}
         center={defaultCenter}
         zoom={10}
+        className="w-full h-full rounded-lg" 
+        style={{ height: '100%', minHeight: '400px' }}
       >
         <TileLayer 
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -39,7 +39,7 @@ const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: Prope
 
         {properties.map(property => {
           const { lat, lng } = property.location || {};
-          if (!lat || !lng) return null; // Ensure lat/lng are valid
+          if (!lat || !lng) return null;
 
           return (
             <Marker
