@@ -300,7 +300,7 @@ const Header = () => {
                 ) : (
                   <>
                     <Link to="/login">
-                      <Button variant={isTransparent ? "outline" : "ghost"} className={isTransparent ? "border-white text-white hover:bg-white hover:text-black" : ""}>
+                      <Button variant={isTransparent ? "outline" : "ghost"} className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"}>
                         Sign In
                       </Button>
                     </Link>
@@ -312,7 +312,7 @@ const Header = () => {
                   </>
                 )}
                 <Link to="/add-property" className="ml-4">
-                  <Button variant={isTransparent ? "outline" : "outline"} className={isTransparent ? "border-white text-white hover:bg-white hover:text-black gap-2" : "border-black text-black hover:bg-black hover:text-white gap-2"}>
+                  <Button variant={isTransparent ? "outline" : "outline"} className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"}>
                     <Plus size={16} />
                     <span>Add Property</span>
                   </Button>

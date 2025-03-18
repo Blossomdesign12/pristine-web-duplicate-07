@@ -244,13 +244,13 @@ const PropertiesForSale = () => {
               {/* Map */}
               {showMap && (
                 <div className="lg:w-1/2">
-                  <div className="sticky top-24 h-[calc(100vh-200px)]">
+                  {/* <div className="sticky top-24 h-[calc(100vh-200px)]">
                     <PropertyMap 
                       properties={properties} 
                       selectedPropertyId={selectedPropertyId}
                       onPropertySelect={handlePropertySelect}
                     />
-                  </div>
+                  </div> */}
                 </div>
               )}
             </div>

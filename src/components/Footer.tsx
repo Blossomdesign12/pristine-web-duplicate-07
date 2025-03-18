@@ -13,7 +13,7 @@ const Footer = () => {
 
     <footer className=" ">
       <Togglebuyrent/>
-      <div className='bg-[#0d1829] text-white'>
+      <div className='bg-black text-white'>
       <div className="container py-16 ">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
