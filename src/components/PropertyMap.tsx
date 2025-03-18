@@ -4,7 +4,6 @@ import 'leaflet/dist/leaflet.css';
 import { Property } from '@/lib/data';
 import { formatPrice } from '@/lib/data';
 import L from 'leaflet';
-import { useEffect } from 'react';
 
 interface PropertyMapProps {
   properties: Property[];
@@ -26,6 +25,7 @@ const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: Prope
   
   return (
     <div className="w-full h-full rounded-lg" style={{ minHeight: '400px' }}>
+      {/* Map temporarily commented out for development
       <MapContainer 
         className="w-full h-full rounded-lg" 
         style={{ height: '100%', minHeight: '400px' }}
@@ -39,7 +39,7 @@ const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: Prope
 
         {properties.map(property => {
           const { lat, lng } = property.location || {};
-          if (!lat || !lng) return null; // Ensure lat/lng are valid
+          if (!lat || !lng) return null;
 
           return (
             <Marker
@@ -60,6 +60,10 @@ const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: Prope
           );
         })}
       </MapContainer>
+      */}
+      <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg">
+        <p className="text-gray-500">Map temporarily disabled</p>
+      </div>
     </div>
   );
 };
