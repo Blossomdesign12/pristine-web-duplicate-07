@@ -22,13 +22,14 @@ L.Icon.Default.mergeOptions({
 
 const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: PropertyMapProps) => {
   // Center on Mumbai coordinates by default
-  const defaultCenter: [number, number] = [19.0760, 72.8777];
+  const defaultCenter = [19.0760, 72.8777] as [number, number];
   
   return (
     <div className="w-full h-full rounded-lg" style={{ minHeight: '400px' }}>
       <MapContainer 
-        center={defaultCenter}
+        center={defaultCenter as L.LatLngExpression}
         zoom={10}
+        scrollWheelZoom={false}
         className="w-full h-full rounded-lg" 
         style={{ height: '100%', minHeight: '400px' }}
       >
@@ -44,7 +45,7 @@ const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: Prope
           return (
             <Marker
               key={property.id}
-              position={[lat, lng]}
+              position={[lat, lng] as L.LatLngExpression}
               eventHandlers={{
                 click: () => onPropertySelect && onPropertySelect(property.id),
               }}
