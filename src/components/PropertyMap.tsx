@@ -29,18 +29,12 @@ const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: Prope
       <MapContainer 
         className="w-full h-full rounded-lg" 
         style={{ height: '100%', minHeight: '400px' }}
-        // Pass all props that require special typing via the spread operator
-        {...{
-          center: defaultCenter,
-          zoom: 10
-        }}
+        center={defaultCenter}
+        zoom={10}
       >
         <TileLayer 
-          // Pass TileLayer props the same way
-          {...{
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          }}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
         {properties.map(property => {
