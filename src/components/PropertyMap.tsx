@@ -26,10 +26,20 @@ const PropertyMap = ({ properties, selectedPropertyId, onPropertySelect }: Prope
   
   return (
     <div className="w-full h-full rounded-lg" style={{ minHeight: '400px' }}>
-      <MapContainer center={defaultCenter} zoom={10} className="w-full h-full rounded-lg" style={{ height: '100%', minHeight: '400px' }}>
+      <MapContainer 
+        zoom={10} 
+        className="w-full h-full rounded-lg" 
+        style={{ height: '100%', minHeight: '400px' }}
+        // The center prop is not directly supported in the type definition
+        // so we need to pass it with proper typing
+        {...{center: defaultCenter}}
+      >
         <TileLayer 
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
+          // The attribution and url props need to be passed differently
+          {...{
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          }}
         />
 
         {properties.map(property => {

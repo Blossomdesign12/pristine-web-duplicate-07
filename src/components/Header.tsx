@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -276,7 +275,7 @@ const Header = () => {
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" className="gap-2">
                         <User size={18} />
-                        <span>{user?.displayName || 'Account'}</span>
+                        <span>{user?.name || 'Account'}</span>
                         <ChevronDown size={16} />
                       </Button>
                     </DropdownMenuTrigger>
