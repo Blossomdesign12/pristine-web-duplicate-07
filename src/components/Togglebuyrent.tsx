@@ -1,4 +1,6 @@
+
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const categories = [
   {
@@ -34,41 +36,60 @@ const categories = [
 export default function FlatsListing() {
   const [activeTab, setActiveTab] = useState("buying");
 
-  return (
-    <div className="bg-[#f3f4f6]">
-    <div className="max-w-7xl  p-[59px] mx-5 bg-[#f3f4f6]">
-      <div className="flex gap-2 mb-9">
-        <button
-          className={`px-4 py-2 rounded-md ${
-            activeTab === "buying" ? "bg-black text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setActiveTab("buying")}
-        >
-          Buying
-        </button>
-        <button
-          className={`px-4 py-2 rounded-md ${
-            activeTab === "renting" ? "bg-black text-white" : "bg-gray-200"
-          }`}
-          onClick={() => setActiveTab("renting")}
-        >
-          Renting
-        </button>
-      </div>
+  const getRentLocations = (locations: string[]) => {
+    return locations.map(loc => `Flats for rent in ${loc}`);
+  };
 
-      {categories.map((category, index) => (
-        <div key={index} className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">{category.title}</h2>
-          <div className="grid grid-cols-3 gap-4 text-gray-700">
-            {category.locations.map((location, idx) => (
-              <p key={idx} className="hover:text-blue-500 cursor-pointer">
-                Flats for sale in {location}
-              </p>
-            ))}
+  return (
+    <div className="bg-[#f8f9fa] py-16">
+      <div className="container mx-auto px-4">
+        <div className="mb-8">
+          <div className="inline-flex bg-gray-200 rounded-lg p-1">
+            <button
+              className={`px-6 py-2 rounded-md ${
+                activeTab === "buying" ? "bg-black text-white" : "bg-transparent text-gray-700"
+              } font-medium transition-all`}
+              onClick={() => setActiveTab("buying")}
+            >
+              Buying
+            </button>
+            <button
+              className={`px-6 py-2 rounded-md ${
+                activeTab === "renting" ? "bg-black text-white" : "bg-transparent text-gray-700"
+              } font-medium transition-all`}
+              onClick={() => setActiveTab("renting")}
+            >
+              Renting
+            </button>
           </div>
         </div>
-      ))}
-    </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {categories.map((category, index) => (
+            <div key={index} className="mb-6">
+              <h2 className="text-lg font-semibold mb-4">
+                {activeTab === "buying" 
+                  ? category.title 
+                  : category.title.replace("sale", "rent")}
+              </h2>
+              <div className="space-y-2">
+                {(activeTab === "buying" 
+                  ? category.locations.map(loc => `Flats for sale in ${loc}`) 
+                  : getRentLocations(category.locations)
+                ).map((location, idx) => (
+                  <Link 
+                    key={idx} 
+                    to={`/properties?q=${location}`}
+                    className="block text-gray-700 hover:text-blue-600 hover:underline"
+                  >
+                    {location}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
