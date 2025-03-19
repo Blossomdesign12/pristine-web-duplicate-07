@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -25,19 +26,28 @@ const categories = [
     title: "Flats for sale in Mumbai",
     locations: [
       "Andheri West", "Mahim", "Mira Road", "Mulund", "Vile Parle West",
-      "Goregaon West", "Malabar Hill", "Byculla", "Andheri East", "Kurla"
+      "Goregaon West", "Malabar Hill", "Byculla", "Andheri East", "Kurla",
+      "Bhayandar", "Bhandup", "Juhu", "Borivali East", "Colaba", "Kanjurmarg",
+      "Marol", "BKC", "Worli", "Ghatkopar West", "Jogeshwari East",
+      "Borivali West", "Haware City", "Mahalaxmi", "Powai", "Ghatkopar East",
+      "Matunga East", "Sion", "Jogeshwari West", "Dahisar", "Tardeo", "Grant Road"
     ]
   },
   {
     title: "Flats for sale in Thane",
     locations: [
-      "Thane East", "Kolshet", "Waghbil", "Dombivli", "Beyond Thane"
+      "Thane East", "Kolshet", "Waghbil", "Dombivli", "Beyond Thane", "Manpada",
+      "Anand Nagar", "Korum Mall", "Hiranandani Estate", "Ghodbunder Road",
+      "Majiwada", "Suraj Water Park", "Thane West"
     ]
   },
   {
     title: "Flats for sale in Navi Mumbai",
     locations: [
-      "Panvel", "Kharghar", "Turbhe", "Nerul", "Khandaeshwar"
+      "Panvel", "Kharghar", "Turbhe", "Nerul", "Khandaeshwar", "Ulwe", "Airoli",
+      "Taloja", "Vashi", "Seawood Darave", "Bamandongri", "Shilphata", "Ghansoli",
+      "Koparkhairane", "Sanpada", "Belapur CBD", "Kharkopar", "Navi Mumbai",
+      "Rabale", "Juinagar", "Mansarovar", "Diva"
     ]
   }
 ];
@@ -67,6 +77,19 @@ const Header = () => {
   const extractCity = (title: string) => {
     const parts = title.split(" in ");
     return parts[parts.length - 1];
+  };
+
+  // Function to handle location click and generate the correct URL
+  const handleLocationClick = (location: string, city: string, isSale: boolean) => {
+    // Format for URL parameter
+    const locationType = isSale ? "sale" : "rent";
+    const fullLocation = `Flats for ${locationType} in ${location}`;
+    const queryParam = encodeURIComponent(fullLocation);
+    const cityParam = encodeURIComponent(city);
+    
+    // Route to the appropriate page
+    const route = isSale ? "properties-for-sale" : "properties-for-rent";
+    return `/${route}?q=${queryParam}&city=${cityParam}`;
   };
 
   useEffect(() => {
@@ -138,7 +161,7 @@ const Header = () => {
                       For Sale
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="grid grid-cols-3 gap-4 p-6 w-[800px]">
+                      <div className="grid grid-cols-4 gap-4 p-6 w-[1000px]">
                         <div>
                           <h3 className="text-lg font-semibold mb-3">Property Types</h3>
                           <ul className="space-y-2">
@@ -172,39 +195,6 @@ const Header = () => {
                             <li>
                               <Link to="/properties-for-sale?city=Navi Mumbai" className="text-sm hover:underline">Navi Mumbai</Link>
                             </li>
-                            
-                            {/* Location links from Togglebuyrent */}
-                            <div className="mt-3">
-                              <details className="cursor-pointer">
-                                <summary className="text-sm font-medium">Mumbai Areas</summary>
-                                <ul className="ml-3 mt-1 space-y-1 text-xs">
-                                  {categories[0].locations.slice(0, 8).map((location, idx) => (
-                                    <li key={idx}>
-                                      <Link to={`/properties-for-sale?q=${encodeURIComponent(`Flats for sale in ${location}`)}&city=Mumbai`} 
-                                        className="hover:underline">
-                                        {location}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </details>
-                            </div>
-                            
-                            <div className="mt-2">
-                              <details className="cursor-pointer">
-                                <summary className="text-sm font-medium">Thane Areas</summary>
-                                <ul className="ml-3 mt-1 space-y-1 text-xs">
-                                  {categories[1].locations.slice(0, 5).map((location, idx) => (
-                                    <li key={idx}>
-                                      <Link to={`/properties-for-sale?q=${encodeURIComponent(`Flats for sale in ${location}`)}&city=Thane`} 
-                                        className="hover:underline">
-                                        {location}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </details>
-                            </div>
                           </ul>
                         </div>
                         
@@ -225,14 +215,63 @@ const Header = () => {
                             </li>
                           </ul>
                         </div>
+                        
+                        <div>
+                          <h3 className="text-lg font-semibold mb-3">Mumbai Areas</h3>
+                          <div className="grid grid-cols-2 gap-1">
+                            {categories[0].locations.slice(0, 16).map((location, idx) => (
+                              <Link
+                                key={idx}
+                                to={handleLocationClick(location, "Mumbai", true)}
+                                className="text-sm hover:underline truncate pr-2"
+                              >
+                                {location}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                       
-                      <div className="bg-gray-50 p-4 flex justify-between items-center">
-                        <p className="text-sm text-gray-600">Looking for property in a specific area?</p>
-                        <Link to="/properties-for-sale">
-                          <Button variant="outline" className="border-black text-black">Browse All Properties</Button>
-                        </Link>
+                      <div className="grid grid-cols-3 gap-4 px-6 pb-6">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Thane Areas</h3>
+                          <div className="grid grid-cols-2 gap-1">
+                            {categories[1].locations.slice(0, 10).map((location, idx) => (
+                              <Link
+                                key={idx}
+                                to={handleLocationClick(location, "Thane", true)}
+                                className="text-sm hover:underline truncate pr-2"
+                              >
+                                {location}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Navi Mumbai Areas</h3>
+                          <div className="grid grid-cols-2 gap-1">
+                            {categories[2].locations.slice(0, 10).map((location, idx) => (
+                              <Link
+                                key={idx}
+                                to={handleLocationClick(location, "Navi Mumbai", true)}
+                                className="text-sm hover:underline truncate pr-2"
+                              >
+                                {location}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-end">
+                          <Link to="/properties-for-sale">
+                            <Button variant="outline" className="border-black text-black">
+                              Browse All Properties
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
+                      
                     </NavigationMenuContent>
                   </NavigationMenuItem>
                   
@@ -243,7 +282,7 @@ const Header = () => {
                       For Rent
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <div className="grid grid-cols-3 gap-4 p-6 w-[800px]">
+                      <div className="grid grid-cols-4 gap-4 p-6 w-[1000px]">
                         <div>
                           <h3 className="text-lg font-semibold mb-3">Property Types</h3>
                           <ul className="space-y-2">
@@ -277,39 +316,6 @@ const Header = () => {
                             <li>
                               <Link to="/properties-for-rent?city=Navi Mumbai" className="text-sm hover:underline">Navi Mumbai</Link>
                             </li>
-                            
-                            {/* Location links from Togglebuyrent */}
-                            <div className="mt-3">
-                              <details className="cursor-pointer">
-                                <summary className="text-sm font-medium">Mumbai Areas</summary>
-                                <ul className="ml-3 mt-1 space-y-1 text-xs">
-                                  {categories[0].locations.slice(0, 8).map((location, idx) => (
-                                    <li key={idx}>
-                                      <Link to={`/properties-for-rent?q=${encodeURIComponent(`Flats for rent in ${location}`)}&city=Mumbai`} 
-                                        className="hover:underline">
-                                        {location}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </details>
-                            </div>
-                            
-                            <div className="mt-2">
-                              <details className="cursor-pointer">
-                                <summary className="text-sm font-medium">Thane Areas</summary>
-                                <ul className="ml-3 mt-1 space-y-1 text-xs">
-                                  {categories[1].locations.slice(0, 5).map((location, idx) => (
-                                    <li key={idx}>
-                                      <Link to={`/properties-for-rent?q=${encodeURIComponent(`Flats for rent in ${location}`)}&city=Thane`} 
-                                        className="hover:underline">
-                                        {location}
-                                      </Link>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </details>
-                            </div>
                           </ul>
                         </div>
                         
@@ -330,13 +336,61 @@ const Header = () => {
                             </li>
                           </ul>
                         </div>
+                        
+                        <div>
+                          <h3 className="text-lg font-semibold mb-3">Mumbai Areas</h3>
+                          <div className="grid grid-cols-2 gap-1">
+                            {categories[0].locations.slice(0, 16).map((location, idx) => (
+                              <Link
+                                key={idx}
+                                to={handleLocationClick(location, "Mumbai", false)}
+                                className="text-sm hover:underline truncate pr-2"
+                              >
+                                {location}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                       
-                      <div className="bg-gray-50 p-4 flex justify-between items-center">
-                        <p className="text-sm text-gray-600">Looking for rentals in a specific area?</p>
-                        <Link to="/properties-for-rent">
-                          <Button variant="outline" className="border-black text-black">Browse All Rentals</Button>
-                        </Link>
+                      <div className="grid grid-cols-3 gap-4 px-6 pb-6">
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Thane Areas</h3>
+                          <div className="grid grid-cols-2 gap-1">
+                            {categories[1].locations.slice(0, 10).map((location, idx) => (
+                              <Link
+                                key={idx}
+                                to={handleLocationClick(location, "Thane", false)}
+                                className="text-sm hover:underline truncate pr-2"
+                              >
+                                {location}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">Navi Mumbai Areas</h3>
+                          <div className="grid grid-cols-2 gap-1">
+                            {categories[2].locations.slice(0, 10).map((location, idx) => (
+                              <Link
+                                key={idx}
+                                to={handleLocationClick(location, "Navi Mumbai", false)}
+                                className="text-sm hover:underline truncate pr-2"
+                              >
+                                {location}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-end">
+                          <Link to="/properties-for-rent">
+                            <Button variant="outline" className="border-black text-black">
+                              Browse All Rentals
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     </NavigationMenuContent>
                   </NavigationMenuItem>

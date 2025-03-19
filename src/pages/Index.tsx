@@ -50,12 +50,12 @@ const Index = () => {
       <main className="flex-grow">
         <Hero />
       
-      <PropertyCategorySection />
-      
-      <FeaturedProperties />
-      
-      {/* About Section */}
-      <section className="section bg-white">
+        <PropertyCategorySection />
+        
+        <FeaturedProperties />
+        
+        {/* About Section */}
+        <section className="section bg-white">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="animate-on-scroll">
@@ -128,8 +128,8 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Why Choose Us */}
-      <section className="section bg-estate-primary/5">
+        {/* Why Choose Us */}
+        <section className="section bg-estate-primary/5">
         <div className="container text-center">
           <div className="max-w-2xl mx-auto mb-12 animate-on-scroll">
             <span className="inline-block px-3 py-1 bg-estate-primary/10 text-estate-primary rounded-full mb-2 text-sm font-medium">
@@ -175,8 +175,8 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Recent Properties */}
-      <section className="section bg-white">
+        {/* Recent Properties */}
+        <section className="section bg-white">
         <div className="container">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-12 animate-on-scroll">
             <div>
@@ -255,14 +255,17 @@ const Index = () => {
         </div>
       </section>
 
-      <FlatsGrid/>
+        <FlatsGrid/>
 
-      <Sellrent/>
+        <Sellrent/>
 
-      <TestimonialSection />
+        <TestimonialSection />
 
-      {/* CTA */}
-      <section className="py-20 bg-estate-primary">
+        {/* Property Locations */}
+        <Togglebuyrent />
+
+        {/* CTA */}
+        <section className="py-20 bg-estate-primary">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center text-white animate-on-scroll">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Find Your Dream Home?</h2>
@@ -286,8 +289,7 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </main>
-      {/* <Togglebuyrent/> */}
+      </main>
 
       <Footer />
     </div>
