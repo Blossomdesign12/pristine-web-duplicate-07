@@ -19,6 +19,29 @@ import { Menu, X, ChevronDown, User, Plus } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Import the categories from Togglebuyrent to keep data consistent
+const categories = [
+  {
+    title: "Flats for sale in Mumbai",
+    locations: [
+      "Andheri West", "Mahim", "Mira Road", "Mulund", "Vile Parle West",
+      "Goregaon West", "Malabar Hill", "Byculla", "Andheri East", "Kurla"
+    ]
+  },
+  {
+    title: "Flats for sale in Thane",
+    locations: [
+      "Thane East", "Kolshet", "Waghbil", "Dombivli", "Beyond Thane"
+    ]
+  },
+  {
+    title: "Flats for sale in Navi Mumbai",
+    locations: [
+      "Panvel", "Kharghar", "Turbhe", "Nerul", "Khandaeshwar"
+    ]
+  }
+];
+
 const Header = () => {
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
@@ -26,6 +49,26 @@ const Header = () => {
   const isMobile = useIsMobile();
   const { user, isAuthenticated, logout } = useAuth();
   
+  // Format location for URL parameters
+  const formatLocationLink = (location: string, isSale: boolean) => {
+    const fullLocation = isSale 
+      ? `Flats for sale in ${location}` 
+      : `Flats for rent in ${location}`;
+    const queryParam = encodeURIComponent(fullLocation);
+    const cityMatch = location.match(/in\s+([^\s]+)$/);
+    const city = cityMatch ? cityMatch[1] : '';
+    const cityParam = encodeURIComponent(city);
+    
+    const route = isSale ? "properties-for-sale" : "properties-for-rent";
+    return `/${route}?q=${queryParam}&city=${cityParam}`;
+  };
+
+  // Extract city from title
+  const extractCity = (title: string) => {
+    const parts = title.split(" in ");
+    return parts[parts.length - 1];
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const offset = window.scrollY;
@@ -129,12 +172,39 @@ const Header = () => {
                             <li>
                               <Link to="/properties-for-sale?city=Navi Mumbai" className="text-sm hover:underline">Navi Mumbai</Link>
                             </li>
-                            <li>
-                              <Link to="/properties-for-sale?city=Pune" className="text-sm hover:underline">Pune</Link>
-                            </li>
-                            <li>
-                              <Link to="/properties-for-sale?city=Bangalore" className="text-sm hover:underline">Bangalore</Link>
-                            </li>
+                            
+                            {/* Location links from Togglebuyrent */}
+                            <div className="mt-3">
+                              <details className="cursor-pointer">
+                                <summary className="text-sm font-medium">Mumbai Areas</summary>
+                                <ul className="ml-3 mt-1 space-y-1 text-xs">
+                                  {categories[0].locations.slice(0, 8).map((location, idx) => (
+                                    <li key={idx}>
+                                      <Link to={`/properties-for-sale?q=${encodeURIComponent(`Flats for sale in ${location}`)}&city=Mumbai`} 
+                                        className="hover:underline">
+                                        {location}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </details>
+                            </div>
+                            
+                            <div className="mt-2">
+                              <details className="cursor-pointer">
+                                <summary className="text-sm font-medium">Thane Areas</summary>
+                                <ul className="ml-3 mt-1 space-y-1 text-xs">
+                                  {categories[1].locations.slice(0, 5).map((location, idx) => (
+                                    <li key={idx}>
+                                      <Link to={`/properties-for-sale?q=${encodeURIComponent(`Flats for sale in ${location}`)}&city=Thane`} 
+                                        className="hover:underline">
+                                        {location}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </details>
+                            </div>
                           </ul>
                         </div>
                         
@@ -207,12 +277,39 @@ const Header = () => {
                             <li>
                               <Link to="/properties-for-rent?city=Navi Mumbai" className="text-sm hover:underline">Navi Mumbai</Link>
                             </li>
-                            <li>
-                              <Link to="/properties-for-rent?city=Pune" className="text-sm hover:underline">Pune</Link>
-                            </li>
-                            <li>
-                              <Link to="/properties-for-rent?city=Bangalore" className="text-sm hover:underline">Bangalore</Link>
-                            </li>
+                            
+                            {/* Location links from Togglebuyrent */}
+                            <div className="mt-3">
+                              <details className="cursor-pointer">
+                                <summary className="text-sm font-medium">Mumbai Areas</summary>
+                                <ul className="ml-3 mt-1 space-y-1 text-xs">
+                                  {categories[0].locations.slice(0, 8).map((location, idx) => (
+                                    <li key={idx}>
+                                      <Link to={`/properties-for-rent?q=${encodeURIComponent(`Flats for rent in ${location}`)}&city=Mumbai`} 
+                                        className="hover:underline">
+                                        {location}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </details>
+                            </div>
+                            
+                            <div className="mt-2">
+                              <details className="cursor-pointer">
+                                <summary className="text-sm font-medium">Thane Areas</summary>
+                                <ul className="ml-3 mt-1 space-y-1 text-xs">
+                                  {categories[1].locations.slice(0, 5).map((location, idx) => (
+                                    <li key={idx}>
+                                      <Link to={`/properties-for-rent?q=${encodeURIComponent(`Flats for rent in ${location}`)}&city=Thane`} 
+                                        className="hover:underline">
+                                        {location}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </details>
+                            </div>
                           </ul>
                         </div>
                         
@@ -366,6 +463,24 @@ const Header = () => {
                       Villas
                     </Link>
                   </li>
+                  
+                  {/* Add Mumbai areas section */}
+                  <li className="mt-2">
+                    <details className="cursor-pointer">
+                      <summary className="text-gray-700 font-medium">Mumbai Areas</summary>
+                      <ul className="ml-3 mt-1 space-y-1">
+                        {categories[0].locations.slice(0, 6).map((location, idx) => (
+                          <li key={idx}>
+                            <Link to={`/properties-for-sale?q=${encodeURIComponent(`Flats for sale in ${location}`)}&city=Mumbai`} 
+                              className="text-gray-600 text-sm hover:text-black">
+                              {location}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  </li>
+                  
                   <li>
                     <Link to="/properties-for-sale" className="text-gray-700 hover:text-black font-medium">
                       View All For Sale
@@ -392,6 +507,24 @@ const Header = () => {
                       Villas
                     </Link>
                   </li>
+                  
+                  {/* Add Mumbai areas section */}
+                  <li className="mt-2">
+                    <details className="cursor-pointer">
+                      <summary className="text-gray-700 font-medium">Mumbai Areas</summary>
+                      <ul className="ml-3 mt-1 space-y-1">
+                        {categories[0].locations.slice(0, 6).map((location, idx) => (
+                          <li key={idx}>
+                            <Link to={`/properties-for-rent?q=${encodeURIComponent(`Flats for rent in ${location}`)}&city=Mumbai`} 
+                              className="text-gray-600 text-sm hover:text-black">
+                              {location}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  </li>
+                  
                   <li>
                     <Link to="/properties-for-rent" className="text-gray-700 hover:text-black font-medium">
                       View All For Rent
