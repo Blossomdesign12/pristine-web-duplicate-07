@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const categories = [
   {
@@ -33,11 +33,28 @@ const categories = [
   }
 ];
 
-export default function FlatsListing() {
+export default function Togglebuyrent() {
   const [activeTab, setActiveTab] = useState("buying");
+  const navigate = useNavigate();
 
   const getRentLocations = (locations: string[]) => {
     return locations.map(loc => `Flats for rent in ${loc}`);
+  };
+
+  const handleLocationClick = (location: string, city: string) => {
+    // Format for URL parameter
+    const queryParam = encodeURIComponent(location);
+    const cityParam = encodeURIComponent(city.split(" ")[2]); // Extract city name
+    
+    // Route to the appropriate page
+    const route = activeTab === "buying" ? "properties-for-sale" : "properties-for-rent";
+    return `/${route}?q=${queryParam}&city=${cityParam}`;
+  };
+
+  const extractCity = (title: string) => {
+    // Extract city from the title (e.g., "Flats for sale in Mumbai" -> "Mumbai")
+    const parts = title.split(" in ");
+    return parts[parts.length - 1];
   };
 
   return (
@@ -65,29 +82,32 @@ export default function FlatsListing() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {categories.map((category, index) => (
-            <div key={index} className="mb-6">
-              <h2 className="text-lg font-semibold mb-4">
-                {activeTab === "buying" 
-                  ? category.title 
-                  : category.title.replace("sale", "rent")}
-              </h2>
-              <div className="space-y-2">
-                {(activeTab === "buying" 
-                  ? category.locations.map(loc => `Flats for sale in ${loc}`) 
-                  : getRentLocations(category.locations)
-                ).map((location, idx) => (
-                  <Link 
-                    key={idx} 
-                    to={`/properties?q=${location}`}
-                    className="block text-gray-700 hover:text-blue-600 hover:underline"
-                  >
-                    {location}
-                  </Link>
-                ))}
+          {categories.map((category, index) => {
+            const city = extractCity(category.title);
+            return (
+              <div key={index} className="mb-6">
+                <h2 className="text-lg font-semibold mb-4">
+                  {activeTab === "buying" 
+                    ? category.title 
+                    : category.title.replace("sale", "rent")}
+                </h2>
+                <div className="space-y-2">
+                  {(activeTab === "buying" 
+                    ? category.locations.map(loc => `Flats for sale in ${loc}`) 
+                    : getRentLocations(category.locations)
+                  ).map((location, idx) => (
+                    <Link 
+                      key={idx} 
+                      to={handleLocationClick(location, city)}
+                      className="block text-gray-700 hover:text-blue-600 hover:underline"
+                    >
+                      {location}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
