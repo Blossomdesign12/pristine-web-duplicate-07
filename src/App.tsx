@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 
-
 // Pages
 import Index from './pages/Index';
 import PropertyDetails from './pages/PropertyDetails';
@@ -23,6 +22,7 @@ import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
+import SiteMap from './pages/SiteMap';
 
 // Components
 import { Toaster } from "@/components/ui/toaster";
@@ -31,10 +31,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Context
 import { AuthProvider } from './contexts/AuthContext';
 
+// Initialize dummy data
+import { initializeDatabase } from './lib/dummy-properties';
+
 function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Initialize the database with dummy properties
+    initializeDatabase();
+    
     // Simulate loading assets or data
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -67,6 +73,7 @@ function App() {
           <Route path="/agent/:id" element={<AgentDetails />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/sitemap" element={<SiteMap />} />
           
           {/* Protected Routes */}
           {/* <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

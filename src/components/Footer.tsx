@@ -9,8 +9,6 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-
-
     <footer className=" ">
       <Togglebuyrent/>
       <div className='bg-black text-white'>
@@ -94,6 +92,12 @@ const Footer = () => {
                   <span>Sign Up</span>
                 </Link>
               </li>
+              <li>
+                <Link to="/sitemap" className="text-gray-400 hover:text-white transition-colors flex items-center gap-2">
+                  <ArrowRight size={14} className="text-jugyah-blue" />
+                  <span>Site Map</span>
+                </Link>
+              </li>
             </ul>
           </div>
           
@@ -150,6 +154,9 @@ const Footer = () => {
               </Link>
               <Link to="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Terms of Service
+              </Link>
+              <Link to="/sitemap" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Site Map
               </Link>
             </div>
           </div>
