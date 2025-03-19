@@ -23,7 +23,6 @@ import Messages from './pages/Messages';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
-import SiteMap from './pages/SiteMap';
 
 // Components
 import { Toaster } from "@/components/ui/toaster";
@@ -68,7 +67,6 @@ function App() {
           <Route path="/agent/:id" element={<AgentDetails />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/sitemap" element={<SiteMap />} />
           
           {/* Protected Routes */}
           {/* <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

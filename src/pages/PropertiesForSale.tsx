@@ -7,8 +7,7 @@ import PropertyCard from "@/components/PropertyCard";
 import PropertyMap from "@/components/PropertyMap";
 import { Building2, GridIcon, LayoutList, ArrowUpDown, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Property } from '@/lib/data';
-import { saleProperties } from '@/lib/dummyProperties';
+import { searchProperties, Property } from '@/lib/data';
 
 const PropertiesForSale = () => {
   const [searchParams] = useSearchParams();
@@ -33,75 +32,35 @@ const PropertiesForSale = () => {
     const beds = searchParams.get('beds') ? parseInt(searchParams.get('beds')!) : undefined;
     const baths = searchParams.get('baths') ? parseInt(searchParams.get('baths')!) : undefined;
     
-    // Filter properties from our dummy sale properties
-    let filteredProperties = [...saleProperties];
-    
-    // Filter by query in title or description
-    if (query) {
-      filteredProperties = filteredProperties.filter(property => 
-        property.title.toLowerCase().includes(query.toLowerCase()) ||
-        property.description.toLowerCase().includes(query.toLowerCase())
-      );
-    }
-    
-    // Filter by city
-    if (city) {
-      filteredProperties = filteredProperties.filter(property => 
-        property.location.city === city
-      );
-    }
-    
-    // Filter by property type
-    if (propertyType) {
-      filteredProperties = filteredProperties.filter(property => 
-        property.features.propertyType === propertyType
-      );
-    }
-    
-    // Filter by price range
-    if (minPrice) {
-      filteredProperties = filteredProperties.filter(property => 
-        property.price >= minPrice
-      );
-    }
-    
-    if (maxPrice) {
-      filteredProperties = filteredProperties.filter(property => 
-        property.price <= maxPrice
-      );
-    }
-    
-    // Filter by bedrooms
-    if (beds) {
-      filteredProperties = filteredProperties.filter(property => 
-        property.features.bedrooms >= beds
-      );
-    }
-    
-    // Filter by bathrooms
-    if (baths) {
-      filteredProperties = filteredProperties.filter(property => 
-        property.features.bathrooms >= baths
-      );
-    }
+    // Search properties based on filters, include only properties for sale
+    const filteredProperties = searchProperties(query, {
+      city,
+      propertyType,
+      minPrice,
+      maxPrice,
+      bedrooms: beds,
+      bathrooms: baths,
+      status: 'for-sale'
+    });
     
     // Sort properties
+    let sortedProperties = [...filteredProperties];
     switch (sortOption) {
       case 'latest':
-        filteredProperties.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        sortedProperties.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
       case 'price-low':
-        filteredProperties.sort((a, b) => a.price - b.price);
+        sortedProperties.sort((a, b) => a.price - b.price);
         break;
       case 'price-high':
-        filteredProperties.sort((a, b) => b.price - a.price);
+        sortedProperties.sort((a, b) => b.price - a.price);
         break;
       default:
         break;
     }
     
-    setProperties(filteredProperties);
-    setTotalPages(Math.ceil(filteredProperties.length / propertiesPerPage));
+    setProperties(sortedProperties);
+    setTotalPages(Math.ceil(sortedProperties.length / propertiesPerPage));
     setCurrentPage(1); // Reset to first page on new search
   }, [searchParams, sortOption]);
 
@@ -285,11 +244,11 @@ const PropertiesForSale = () => {
               {/* Map */}
               {showMap && (
                 <div className="lg:w-1/2">
-                  <div className="sticky top-24 h-[calc(100vh-200px)]">
+                  <div className="sticky top-24 h-screen">
                     <PropertyMap 
                       properties={properties} 
                       selectedPropertyId={selectedPropertyId}
-                      onPropertySelect={setSelectedPropertyId}
+                      onPropertySelect={handlePropertySelect}
                     />
                   </div>
                 </div>
