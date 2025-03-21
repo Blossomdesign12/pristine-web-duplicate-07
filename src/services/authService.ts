@@ -1,95 +1,90 @@
 
-// This is a mock implementation of JWT auth
-// In a real app, this would communicate with your backend API
-
 import { User, UserRole } from "@/contexts/AuthContext";
 
-// Mock JWT token generation function
-const generateToken = (user: User): string => {
-  // In a real application, this would create a proper JWT token using jsonwebtoken package
-  // The token would be created on the server side, not client side
-  return `mock-jwt-token-${user.id}-${Date.now()}`;
-};
+const API_URL = "http://localhost:5000";
 
-// Mock token verification function
-const verifyToken = (token: string): User | null => {
-  // In a real application, this would decode and verify the JWT token
-  // This should be done on the server side
-  if (token && token.startsWith('mock-jwt-token-')) {
-    const parts = token.split('-');
-    const userId = parts[3];
-    
-    // Get user from localStorage (simulating a database lookup)
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      return JSON.parse(userStr);
-    }
+// Helper to parse JWT token
+const parseJwt = (token: string) => {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch (e) {
+    return null;
   }
-  return null;
 };
 
-// Mock login function
-export const loginUser = async (email: string, password: string): Promise<{ user: User; token: string }> => {
-  // In a real application, this would make an API call to your server
-  // to validate credentials and get a JWT token
-  console.log("Login attempt:", { email, password });
-  
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  // Simulate successful login with mock user data
-  const mockUser: User = {
-    id: "user-1",
-    email,
-    name: email.split('@')[0],
-    role: "owner", // default role
-    avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&h=120&q=80"
-  };
-  
-  // Generate a token
-  const token = generateToken(mockUser);
-  
-  // Store token and user in localStorage
-  localStorage.setItem("authToken", token);
-  localStorage.setItem("user", JSON.stringify(mockUser));
-  
-  return { user: mockUser, token };
+// Login user with email and password
+export const loginUser = async (
+  email: string,
+  password: string
+): Promise<{ user: User; token: string }> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Login failed");
+    }
+
+    const data = await response.json();
+    
+    // Store token in localStorage
+    localStorage.setItem("authToken", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    
+    return { 
+      user: data.user, 
+      token: data.token 
+    };
+  } catch (error) {
+    console.error("Login error:", error);
+    throw error;
+  }
 };
 
-// Mock register function
+// Register a new user
 export const registerUser = async (
-  email: string, 
-  password: string, 
-  name: string, 
+  email: string,
+  password: string,
+  name: string,
   role: UserRole
 ): Promise<{ user: User; token: string }> => {
-  // In a real application, this would make an API call to your server
-  // to create a new user and get a JWT token
-  console.log("Registration attempt:", { email, password, name, role });
-  
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Simulate successful registration
-  const mockUser: User = {
-    id: "user-" + Date.now(),
-    email,
-    name,
-    role,
-    avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-1.2.1&auto=format&fit=crop&w=120&h=120&q=80"
-  };
-  
-  // Generate a token
-  const token = generateToken(mockUser);
-  
-  // Store token and user in localStorage
-  localStorage.setItem("authToken", token);
-  localStorage.setItem("user", JSON.stringify(mockUser));
-  
-  return { user: mockUser, token };
+  try {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password, name, role }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Registration failed");
+    }
+
+    const data = await response.json();
+    
+    // Store token in localStorage
+    localStorage.setItem("authToken", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    
+    return { 
+      user: data.user, 
+      token: data.token 
+    };
+  } catch (error) {
+    console.error("Registration error:", error);
+    throw error;
+  }
 };
 
-// Mock logout function
+// Logout user
 export const logoutUser = (): void => {
   localStorage.removeItem("authToken");
   localStorage.removeItem("user");
@@ -98,13 +93,86 @@ export const logoutUser = (): void => {
 // Check if user is authenticated
 export const isAuthenticated = (): boolean => {
   const token = localStorage.getItem("authToken");
-  return !!token;
+  if (!token) return false;
+  
+  // Check if token is expired
+  const decodedToken = parseJwt(token);
+  if (!decodedToken) return false;
+  
+  const isExpired = decodedToken.exp * 1000 < Date.now();
+  if (isExpired) {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    return false;
+  }
+  
+  return true;
 };
 
 // Get the current user
 export const getCurrentUser = (): User | null => {
-  const token = localStorage.getItem("authToken");
-  if (!token) return null;
+  if (!isAuthenticated()) return null;
   
-  return verifyToken(token);
+  const userStr = localStorage.getItem("user");
+  if (!userStr) return null;
+  
+  return JSON.parse(userStr);
+};
+
+// Get user details from server (to refresh user data)
+export const fetchUserDetails = async (): Promise<User> => {
+  const token = localStorage.getItem("authToken");
+  if (!token) throw new Error("Not authenticated");
+  
+  try {
+    const response = await fetch(`${API_URL}/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user details");
+    }
+
+    const data = await response.json();
+    
+    // Update stored user
+    localStorage.setItem("user", JSON.stringify(data.user));
+    
+    return data.user;
+  } catch (error) {
+    console.error("Fetch user details error:", error);
+    throw error;
+  }
+};
+
+// Helper to handle OAuth redirect
+export const handleOAuthRedirect = (): void => {
+  // Check if URL contains token parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  
+  if (token) {
+    // Store token in localStorage
+    localStorage.setItem("authToken", token);
+    
+    // Fetch user details
+    fetchUserDetails()
+      .then(user => {
+        localStorage.setItem("user", JSON.stringify(user));
+        
+        // Clean URL by removing token parameter
+        const url = new URL(window.location.href);
+        url.searchParams.delete('token');
+        window.history.replaceState({}, document.title, url.toString());
+        
+        // Refresh page to update auth state
+        window.location.reload();
+      })
+      .catch(error => {
+        console.error("OAuth redirect error:", error);
+        logoutUser();
+      });
+  }
 };

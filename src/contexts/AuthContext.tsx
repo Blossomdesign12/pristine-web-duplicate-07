@@ -2,7 +2,14 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
-import { loginUser, registerUser, logoutUser, getCurrentUser, isAuthenticated } from "@/services/authService";
+import { 
+  loginUser, 
+  registerUser, 
+  logoutUser, 
+  getCurrentUser, 
+  isAuthenticated,
+  fetchUserDetails
+} from "@/services/authService";
 
 export type UserRole = "owner" | "agent" | "buyer" | "admin";
 
@@ -23,6 +30,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,12 +56,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const currentUser = getCurrentUser();
           if (currentUser) {
             setUser(currentUser);
+            
+            // Optionally refresh user data from server
+            try {
+              const updatedUser = await fetchUserDetails();
+              setUser(updatedUser);
+            } catch (error) {
+              console.warn("Could not refresh user data:", error);
+              // Continue with stored user data
+            }
           }
         }
       } catch (error) {
         console.error("Auth check error:", error);
         // If token is invalid, clear it
         localStorage.removeItem("authToken");
+        localStorage.removeItem("user");
       } finally {
         setIsLoading(false);
       }
@@ -65,7 +83,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Use our JWT authentication service
       const { user: loggedInUser } = await loginUser(email, password);
       setUser(loggedInUser);
       
@@ -82,6 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Please check your credentials and try again.",
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +108,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (email: string, password: string, name: string, role: UserRole) => {
     setIsLoading(true);
     try {
-      // Use our JWT authentication service
       const { user: registeredUser } = await registerUser(email, password, name, role);
       setUser(registeredUser);
       
@@ -107,13 +124,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Please try again with different credentials.",
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const updatedUser = await fetchUserDetails();
+      setUser(updatedUser);
+    } catch (error) {
+      console.error("Failed to refresh user:", error);
+      throw error;
+    }
+  };
+
   const logout = () => {
-    // Use our JWT authentication service
     logoutUser();
     setUser(null);
     
@@ -134,6 +161,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         register,
         logout,
+        refreshUser,
       }}
     >
       {children}

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,11 @@ const Register = ({ isOpen, onClose }) => {
       console.error("Registration error:", err);
       setError("Registration failed. Please try again.");
     }
+  };
+
+  // Function to handle OAuth logins
+  const handleOAuthLogin = (provider: 'google' | 'facebook') => {
+    window.location.href = `http://localhost:5000/auth/${provider}`;
   };
 
   if (!isOpen) return null;
@@ -81,6 +87,22 @@ const Register = ({ isOpen, onClose }) => {
               <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" required />
             </div>
           </div>
+
+          <div>
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Input 
+                id="confirmPassword" 
+                type="password" 
+                placeholder="••••••••" 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                className="pl-10" 
+                required 
+              />
+            </div>
+          </div>
   
           <div>
             <Label htmlFor="role">I want to</Label>
@@ -108,16 +130,23 @@ const Register = ({ isOpen, onClose }) => {
           </div>
   
           <div className="flex space-x-4">
-            <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
+            <button 
+              type="button"
+              onClick={() => handleOAuthLogin('google')}
+              className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+            >
               <FaGoogle className="h-5 w-5 mr-2" />
               Google
             </button>
-            <button className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
+            <button 
+              type="button"
+              onClick={() => handleOAuthLogin('facebook')}
+              className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+            >
               <FaFacebook className="h-5 w-5 mr-2 text-blue-600" />
               Facebook
             </button>
           </div>
-        
         </div>
   
         <div className="mt-4 text-center">
@@ -131,7 +160,6 @@ const Register = ({ isOpen, onClose }) => {
       </div>
     </div>
   </>
-  
   );
 };
 
