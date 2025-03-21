@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import PropertyCard from '@/components/PropertyCard';
 import Pagination from '@/components/Pagination';
-import { getPropertiesByStatus } from '@/lib/dummy-properties';
+import { searchProperties, Property } from '@/lib/data';
 import { MapPin, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,12 +17,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const PropertiesForSale = () => {
-  const [properties, setProperties] = useState([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [propertiesPerPage] = useState(8);
   const [showMap, setShowMap] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredProperties, setFilteredProperties] = useState([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [filters, setFilters] = useState({
     priceMin: 0,
     priceMax: 10000000,
@@ -34,7 +34,7 @@ const PropertiesForSale = () => {
 
   useEffect(() => {
     // Fetch properties with status "for-sale"
-    const fetchedProperties = getPropertiesByStatus('for-sale');
+    const fetchedProperties = searchProperties('', { status: 'for-sale' });
     setProperties(fetchedProperties);
     setFilteredProperties(fetchedProperties);
   }, []);
@@ -45,9 +45,9 @@ const PropertiesForSale = () => {
   const currentProperties = filteredProperties.slice(indexOfFirstProperty, indexOfLastProperty);
 
   // Change page
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  const handleFilterChange = (e) => {
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFilters({
       ...filters,
@@ -60,8 +60,8 @@ const PropertiesForSale = () => {
       return (
         property.price >= filters.priceMin &&
         property.price <= filters.priceMax &&
-        (filters.bedrooms === 0 || property.bedrooms >= filters.bedrooms) &&
-        (filters.propertyType === 'all' || property.type === filters.propertyType)
+        (filters.bedrooms === 0 || property.features.bedrooms >= filters.bedrooms) &&
+        (filters.propertyType === 'all' || property.features.propertyType === filters.propertyType)
       );
     });
 
@@ -71,9 +71,9 @@ const PropertiesForSale = () => {
     } else if (sortBy === 'price-desc') {
       filtered = filtered.sort((a, b) => b.price - a.price);
     } else if (sortBy === 'date-desc') {
-      filtered = filtered.sort((a, b) => new Date(b.listedDate) - new Date(a.listedDate));
+      filtered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     } else if (sortBy === 'date-asc') {
-      filtered = filtered.sort((a, b) => new Date(a.listedDate) - new Date(b.listedDate));
+      filtered = filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
 
     setFilteredProperties(filtered);
@@ -85,6 +85,14 @@ const PropertiesForSale = () => {
   }, [filters, sortBy]);
 
   const propertyTypes = ['apartment', 'house', 'condo', 'townhouse', 'villa', 'land'];
+  
+  // Calculate total pages for pagination
+  const totalPages = Math.ceil(filteredProperties.length / propertiesPerPage);
+  
+  // Function to handle property card click
+  const handlePropertyClick = (propertyId: string) => {
+    navigate(`/property/${propertyId}`);
+  };
 
   return (
     <Layout>
@@ -235,16 +243,15 @@ const PropertiesForSale = () => {
                       <PropertyCard
                         key={property.id}
                         property={property}
-                        onClick={() => navigate(`/property/${property.id}`)}
+                        index={properties.indexOf(property)}
                       />
                     ))}
                   </div>
-                  <div className="mt-12">
+                  <div className="mt-12 flex justify-center">
                     <Pagination
-                      itemsPerPage={propertiesPerPage}
-                      totalItems={filteredProperties.length}
-                      paginate={paginate}
                       currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={paginate}
                     />
                   </div>
                 </>
