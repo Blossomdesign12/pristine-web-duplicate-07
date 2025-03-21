@@ -261,7 +261,6 @@ const Index = () => {
 
         <TestimonialSection />
 
-        {/* Property Locations */}
 
         {/* CTA */}
         <section className="py-20 bg-estate-primary">

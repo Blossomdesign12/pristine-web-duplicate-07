@@ -1,6 +1,9 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import Login from '@/pages/Login'; 
+import Register from '@/pages/Register';
+
 import { 
   NavigationMenu,
   NavigationMenuContent,
@@ -53,11 +56,15 @@ const categories = [
 ];
 
 const Header = () => {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
   const { user, isAuthenticated, logout } = useAuth();
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+
   
   // Format location for URL parameters
   const formatLocationLink = (location: string, isSale: boolean) => {
@@ -450,16 +457,15 @@ const Header = () => {
                   </DropdownMenu>
                 ) : (
                   <>
-                    <Link to="/login">
-                      <Button variant={isTransparent ? "outline" : "ghost"} className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"}>
+                   <Button variant="outline" className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"} onClick={() => setIsLoginOpen(true)} >
                         Sign In
                       </Button>
-                    </Link>
-                    <Link to="/register" className="ml-2">
-                      <Button className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"}>
+                      <Login isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+                      <Button style={{marginLeft:'5px'}} onClick={() => setIsRegisterOpen(true)} className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90" }>
                         Sign Up
                       </Button>
-                    </Link>
+                      <Register isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+
                   </>
                 )}
                 <Link to="/add-property" className="ml-4">
@@ -613,16 +619,18 @@ const Header = () => {
                   </>
                 ) : (
                   <>
-                    <Link to="/login" className="w-full">
-                      <Button variant="outline" className="w-full">
+                    {/* <Link to="/login" className="w-full"> */}
+                      <Button variant="outline" onClick={() => setIsLoginOpen(true)} className="w-full">
                         Sign In
                       </Button>
-                    </Link>
-                    <Link to="/register" className="w-full">
-                      <Button className="w-full bg-black text-white hover:bg-black/90">
+                      <Login isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+
+                    {/* </Link> */}
+                      <Button onClick={() => setIsRegisterOpen(true)} className="w-full bg-black text-white hover:bg-black/90">
                         Sign Up
                       </Button>
-                    </Link>
+                      <Register isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+
                   </>
                 )}
                 <Link to="/add-property" className="w-full">
