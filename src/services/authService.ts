@@ -147,7 +147,7 @@ export const fetchUserDetails = async (): Promise<User> => {
   }
 };
 
-// Helper to handle OAuth redirect
+// Handle OAuth redirect
 export const handleOAuthRedirect = (): void => {
   // Check if URL contains token parameter
   const urlParams = new URLSearchParams(window.location.search);

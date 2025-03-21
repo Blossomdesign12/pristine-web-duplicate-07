@@ -8,6 +8,7 @@ import { Mail, Lock, ArrowRight, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { FaGoogle, FaFacebook } from "react-icons/fa6";
 import { handleOAuthRedirect } from "@/services/authService";
+import { toast } from "@/hooks/use-toast";
 
 const Login = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
   const [email, setEmail] = useState("");
@@ -28,12 +29,23 @@ const Login = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
     
     try {
       await login(email, password);
+      toast({
+        title: "Login successful",
+        description: "Welcome back to RealEstate!",
+      });
+      
       const from = location.state?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
-      onClose();
+      
+      if (onClose) onClose();
     } catch (err) {
       console.error("Login error:", err);
       setError("Invalid email or password. Please try again.");
+      toast({
+        title: "Login failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
+      });
     }
   };
 
