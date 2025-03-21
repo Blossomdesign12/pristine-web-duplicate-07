@@ -148,7 +148,7 @@ export const fetchUserDetails = async (): Promise<User> => {
 };
 
 // Handle OAuth redirect
-export const handleOAuthRedirect = (): void => {
+export const handleOAuthRedirect = (): boolean => {
   // Check if URL contains token parameter
   const urlParams = new URLSearchParams(window.location.search);
   const token = urlParams.get('token');
@@ -167,12 +167,16 @@ export const handleOAuthRedirect = (): void => {
         url.searchParams.delete('token');
         window.history.replaceState({}, document.title, url.toString());
         
-        // Refresh page to update auth state
-        window.location.reload();
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
       })
       .catch(error => {
         console.error("OAuth redirect error:", error);
         logoutUser();
       });
+    
+    return true; // Return true to indicate a redirect was handled
   }
+  
+  return false; // Return false if no redirect was handled
 };

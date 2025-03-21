@@ -31,28 +31,49 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Context
 import { AuthProvider } from './contexts/AuthContext';
 
+// Services
+import { handleOAuthRedirect } from './services/authService';
+
 // Initialize dummy data
 import { initializeDatabase } from './lib/dummy-properties';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [handlingOAuth, setHandlingOAuth] = useState(false);
 
   useEffect(() => {
-    // Initialize the database with dummy properties
-    initializeDatabase();
-    
-    // Simulate loading assets or data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
+    // First check if we're handling an OAuth redirect
+    const isHandlingRedirect = handleOAuthRedirect();
+    setHandlingOAuth(isHandlingRedirect);
 
-    return () => clearTimeout(timer);
+    if (!isHandlingRedirect) {
+      // Initialize the database with dummy properties
+      initializeDatabase();
+      
+      // Simulate loading assets or data
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+
+      return () => clearTimeout(timer);
+    }
   }, []);
 
-  if (isLoading) {
+  if (isLoading && !handlingOAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // If we're handling OAuth redirect, don't render the app
+  // The redirect is managed by handleOAuthRedirect()
+  if (handlingOAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
+        <p className="ml-4 text-gray-700">Completing authentication...</p>
       </div>
     );
   }

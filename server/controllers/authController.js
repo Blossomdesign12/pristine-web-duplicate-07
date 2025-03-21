@@ -162,7 +162,11 @@ exports.oauthSuccess = (req, res) => {
   
   const token = createToken(req.user);
   
-  // Redirect to frontend with token
-  // In a production app, you might want to use a more secure approach
-  res.redirect(`/?token=${token}`);
+  // Use absolute URL to ensure token is properly passed
+  // Frontend will handle reading the token from URL and authenticating
+  const frontendBaseUrl = process.env.NODE_ENV === 'production' 
+    ? 'https://your-production-domain.com' 
+    : 'http://localhost:5173';
+  
+  res.redirect(`${frontendBaseUrl}/?token=${token}`);
 };
