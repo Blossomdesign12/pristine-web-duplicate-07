@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
+import 'ol/ol.css';
 
 // Pages
 import Index from './pages/Index';

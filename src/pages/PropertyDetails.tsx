@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Bed, Bath, Square, MapPin, Calendar, Heart, 
   Share2, Printer, ChevronLeft, ChevronRight, 
-  Phone, Mail, User, Check, LayoutIcon, X
+  Phone, Mail, User, Check, X
 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import SimilarProperties from '@/components/SimilarProperties';
 import PropertyFeatures from '@/components/PropertyFeatures';
 import PropertyGallery from '@/components/PropertyGallery';
 import ContactForm from '@/components/ContactForm';
+import PropertyMap from '@/components/PropertyMap';
 
 const PropertyDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -297,11 +299,13 @@ const PropertyDetails = () => {
                     </div>
                   </div>
                   
-                  <div className="aspect-video bg-estate-light rounded-lg flex items-center justify-center">
-                    <div className="text-center p-8">
-                      <p className="mb-4">Map view will be available soon.</p>
-                      <p className="text-sm text-estate-gray">This property is located in {property.location.city}, {property.location.state}.</p>
-                    </div>
+                  <div className="aspect-video rounded-lg overflow-hidden">
+                    {/* Map view */}
+                    <PropertyMap 
+                      properties={[property]} 
+                      selectedPropertyId={property.id}
+                      singleProperty={true} 
+                    />
                   </div>
                 </div>
               </div>
