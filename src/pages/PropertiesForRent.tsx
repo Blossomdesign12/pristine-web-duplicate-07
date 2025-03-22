@@ -1,263 +1,285 @@
 
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Layout from '@/components/Layout';
-import PropertyCard from '@/components/PropertyCard';
-import Pagination from '@/components/Pagination';
-import { searchProperties, Property } from '@/lib/data';
-import { MapPin, SlidersHorizontal } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Layout from "@/components/Layout";
+import PropertyCard from "@/components/PropertyCard";
+import Pagination from "@/components/Pagination";
+import { Button } from "@/components/ui/button";
+import { FilterX, SlidersHorizontal, Search as SearchIcon } from "lucide-react";
+import { Property } from "@/lib/data";
+import { getPropertiesByStatus } from "@/services/propertyService";
 
 const PropertiesForRent = () => {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [propertiesPerPage] = useState(8);
-  const [showMap, setShowMap] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-  const [filters, setFilters] = useState({
-    priceMin: 0,
-    priceMax: 10000,
-    bedrooms: 0,
-    propertyType: 'all',
-  });
-  const [sortBy, setSortBy] = useState('default');
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Fetch properties with status "for-rent"
-    const fetchedProperties = searchProperties('', { status: 'for-rent' });
-    setProperties(fetchedProperties);
-    setFilteredProperties(fetchedProperties);
-  }, []);
-
-  // Get current properties for pagination
-  const indexOfLastProperty = currentPage * propertiesPerPage;
-  const indexOfFirstProperty = indexOfLastProperty - propertiesPerPage;
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Filter states
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [bedrooms, setBedrooms] = useState("");
+  const [propertyType, setPropertyType] = useState("");
+  const [sortOption, setSortOption] = useState("newest");
+  
+  const itemsPerPage = 9;
+  
+  // Calculate pagination
+  const indexOfLastProperty = currentPage * itemsPerPage;
+  const indexOfFirstProperty = indexOfLastProperty - itemsPerPage;
   const currentProperties = filteredProperties.slice(indexOfFirstProperty, indexOfLastProperty);
-
-  // Change page
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFilters({
-      ...filters,
-      [name]: value,
-    });
-  };
-
-  const applyFilters = () => {
-    let filtered = properties.filter(property => {
-      return (
-        property.price >= filters.priceMin &&
-        property.price <= filters.priceMax &&
-        (filters.bedrooms === 0 || property.features.bedrooms >= filters.bedrooms) &&
-        (filters.propertyType === 'all' || property.features.propertyType === filters.propertyType)
-      );
-    });
-
-    // Apply sorting
-    if (sortBy === 'price-asc') {
-      filtered = filtered.sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price-desc') {
-      filtered = filtered.sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'date-desc') {
-      filtered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } else if (sortBy === 'date-asc') {
-      filtered = filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    }
-
-    setFilteredProperties(filtered);
-    setCurrentPage(1);
-  };
-
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+  
+  // Fetch properties
   useEffect(() => {
-    applyFilters();
-  }, [filters, sortBy]);
-
-  const propertyTypes = ['apartment', 'house', 'condo', 'townhouse', 'villa', 'land'];
+    const fetchProperties = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getPropertiesByStatus("for-rent");
+        setProperties(data);
+        setFilteredProperties(data);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+        setError("Failed to load properties. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchProperties();
+  }, []);
   
-  // Calculate total pages for pagination
-  const totalPages = Math.ceil(filteredProperties.length / propertiesPerPage);
+  // Apply filters and search
+  useEffect(() => {
+    let result = [...properties];
+    
+    // Apply search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (property) =>
+          property.title.toLowerCase().includes(query) ||
+          property.description.toLowerCase().includes(query) ||
+          property.location.city.toLowerCase().includes(query)
+      );
+    }
+    
+    // Apply filters
+    if (minPrice) {
+      result = result.filter((property) => property.price >= parseInt(minPrice));
+    }
+    
+    if (maxPrice) {
+      result = result.filter((property) => property.price <= parseInt(maxPrice));
+    }
+    
+    if (bedrooms) {
+      result = result.filter((property) => property.features.bedrooms >= parseInt(bedrooms));
+    }
+    
+    if (propertyType) {
+      result = result.filter((property) => property.features.propertyType === propertyType);
+    }
+    
+    // Apply sorting
+    switch (sortOption) {
+      case "newest":
+        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case "oldest":
+        result.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case "price-high":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "price-low":
+        result.sort((a, b) => a.price - b.price);
+        break;
+    }
+    
+    setFilteredProperties(result);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [properties, searchQuery, minPrice, maxPrice, bedrooms, propertyType, sortOption]);
   
-  // Function to handle property card click
-  const handlePropertyClick = (propertyId: string) => {
-    navigate(`/property/${propertyId}`);
+  const resetFilters = () => {
+    setSearchQuery("");
+    setMinPrice("");
+    setMaxPrice("");
+    setBedrooms("");
+    setPropertyType("");
+    setSortOption("newest");
+  };
+  
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
     <Layout>
       <div className="bg-gray-50 py-12">
         <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">Properties For Rent</h1>
-            <div className="flex space-x-4">
+          <h1 className="text-3xl font-bold mb-8">Properties For Rent</h1>
+          
+          {/* Search and Filters */}
+          <div className="bg-white p-4 rounded-lg shadow-sm mb-8">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Search properties..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-black/5 focus:border-black"
+                />
+                <SearchIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              </div>
+              
               <Button 
                 variant="outline" 
+                className="md:w-auto"
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center"
               >
-                <SlidersHorizontal className="mr-2 h-4 w-4" />
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
                 Filters
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowMap(!showMap)}
-                className="flex items-center"
+              
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="border rounded-md px-4 py-2 focus:ring-2 focus:ring-black/5 focus:border-black"
               >
-                <MapPin className="mr-2 h-4 w-4" />
-                {showMap ? 'Hide Map' : 'Show Map'}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">Sort By</Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuLabel>Sort Properties</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setSortBy('default')}>
-                    Default
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('price-asc')}>
-                    Price: Low to High
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('price-desc')}>
-                    Price: High to Low
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('date-desc')}>
-                    Newest First
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('date-asc')}>
-                    Oldest First
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="price-low">Price: Low to High</option>
+              </select>
             </div>
-          </div>
-
-          {showFilters && (
-            <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-              <h2 className="text-xl font-semibold mb-4">Filter Properties</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Min Price (Monthly)
-                  </label>
-                  <input
-                    type="range"
-                    name="priceMin"
-                    min="0"
-                    max="10000"
-                    step="100"
-                    value={filters.priceMin}
-                    onChange={handleFilterChange}
-                    className="w-full"
-                  />
-                  <span className="text-sm">${filters.priceMin.toLocaleString()}</span>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Max Price (Monthly)
-                  </label>
-                  <input
-                    type="range"
-                    name="priceMax"
-                    min="0"
-                    max="10000"
-                    step="100"
-                    value={filters.priceMax}
-                    onChange={handleFilterChange}
-                    className="w-full"
-                  />
-                  <span className="text-sm">${filters.priceMax.toLocaleString()}</span>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Min Bedrooms
-                  </label>
-                  <select
-                    name="bedrooms"
-                    value={filters.bedrooms}
-                    onChange={handleFilterChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-estate-primary focus:ring focus:ring-estate-primary focus:ring-opacity-50"
-                  >
-                    <option value="0">Any</option>
-                    <option value="1">1+</option>
-                    <option value="2">2+</option>
-                    <option value="3">3+</option>
-                    <option value="4">4+</option>
-                    <option value="5">5+</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Property Type
-                  </label>
-                  <select
-                    name="propertyType"
-                    value={filters.propertyType}
-                    onChange={handleFilterChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-estate-primary focus:ring focus:ring-estate-primary focus:ring-opacity-50"
-                  >
-                    <option value="all">All Types</option>
-                    {propertyTypes.map(type => (
-                      <option key={type} value={type}>
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {showMap ? (
-            <div className="bg-white rounded-lg shadow-md p-4 mb-8">
-              <div className="h-[500px] bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-                Interactive Map Coming Soon
-              </div>
-            </div>
-          ) : (
-            <>
-              {filteredProperties.length === 0 ? (
-                <div className="text-center py-12">
-                  <h3 className="text-xl font-semibold text-gray-700">No properties found matching your criteria</h3>
-                  <p className="mt-2 text-gray-500">Try adjusting your filters to see more results.</p>
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {currentProperties.map((property) => (
-                      <PropertyCard
-                        key={property.id}
-                        property={property}
-                        index={properties.indexOf(property)}
-                      />
-                    ))}
-                  </div>
-                  <div className="mt-12 flex justify-center">
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={paginate}
+            
+            {showFilters && (
+              <div className="mt-4 border-t pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Min Price</label>
+                    <input
+                      type="number"
+                      placeholder="Min Price"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-black/5 focus:border-black"
                     />
                   </div>
-                </>
-              )}
-            </>
-          )}
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Max Price</label>
+                    <input
+                      type="number"
+                      placeholder="Max Price"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-black/5 focus:border-black"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Bedrooms</label>
+                    <select
+                      value={bedrooms}
+                      onChange={(e) => setBedrooms(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-black/5 focus:border-black"
+                    >
+                      <option value="">Any</option>
+                      <option value="1">1+</option>
+                      <option value="2">2+</option>
+                      <option value="3">3+</option>
+                      <option value="4">4+</option>
+                      <option value="5">5+</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Property Type</label>
+                    <select
+                      value={propertyType}
+                      onChange={(e) => setPropertyType(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-black/5 focus:border-black"
+                    >
+                      <option value="">Any</option>
+                      <option value="apartment">Apartment</option>
+                      <option value="house">House</option>
+                      <option value="villa">Villa</option>
+                      <option value="penthouse">Penthouse</option>
+                      <option value="plot">Plot</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="mt-4 flex justify-end">
+                  <Button 
+                    variant="outline" 
+                    onClick={resetFilters}
+                    className="flex items-center"
+                  >
+                    <FilterX className="h-4 w-4 mr-2" />
+                    Reset Filters
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Results */}
+          <div>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : error ? (
+              <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
+                {error}
+              </div>
+            ) : filteredProperties.length === 0 ? (
+              <div className="bg-white p-8 rounded-lg text-center">
+                <h3 className="text-xl font-medium mb-2">No properties found</h3>
+                <p className="text-gray-500 mb-4">Try adjusting your search or filter criteria</p>
+                <Button variant="outline" onClick={resetFilters}>
+                  Clear all filters
+                </Button>
+              </div>
+            ) : (
+              <>
+                <p className="mb-4 text-gray-500">
+                  Showing {currentProperties.length} of {filteredProperties.length} properties
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {currentProperties.map((property) => (
+                    <PropertyCard
+                      key={property.id}
+                      property={property}
+                    />
+                  ))}
+                </div>
+                
+                {totalPages > 1 && (
+                  <div className="mt-8 flex justify-center">
+                    <Pagination
+                      totalPages={totalPages}
+                      currentPage={currentPage}
+                      onPageChange={handlePageChange}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </Layout>

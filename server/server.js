@@ -1,4 +1,3 @@
-
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -26,8 +25,13 @@ app.use(morgan("dev"));
 app.use(passport.initialize());
 require("./config/passport");
 
-// Routes
-app.use("/auth", require("./routes/authRoutes"));
+// Import routes
+const authRoutes = require("./routes/authRoutes");
+const propertyRoutes = require("./routes/propertyRoutes");
+
+// Mount routes
+app.use("/auth", authRoutes);
+app.use("/properties", propertyRoutes);
 
 // Base route
 app.get("/", (req, res) => {

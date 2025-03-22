@@ -1,35 +1,35 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Building2, 
   ArrowLeft, 
-  Home, 
-  MapPin, 
   DollarSign, 
   Bed, 
   Bath, 
   Square, 
   Upload, 
-  Plus, 
   X, 
-  CheckCircle2,
-  Circle,
   Check
 } from "lucide-react";
 import { propertyTypes } from "@/lib/data";
+import { addProperty } from "@/services/propertyService";
 
 const AddProperty = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
+  const [formError, setFormError] = useState("");
 
   // Form states
   const [title, setTitle] = useState("");
@@ -46,6 +46,23 @@ const AddProperty = () => {
   const [zipCode, setZipCode] = useState("");
   const [featured, setFeatured] = useState(false);
 
+  // Check if user has permission to access this page
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+    
+    // Only agent or owner can access this page
+    if (user.role !== 'agent' && user.role !== 'owner') {
+      toast({
+        title: "Access Denied",
+        description: "Only agents and property owners can add properties.",
+        variant: "destructive"
+      });
+      navigate('/dashboard');
+    }
+  }, [user, navigate, toast]);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const fileArray = Array.from(e.target.files);
@@ -59,9 +76,15 @@ const AddProperty = () => {
   };
 
   const nextStep = () => {
+    // Validate current step before proceeding
+    if (!validateCurrentStep()) {
+      return;
+    }
+    
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
       window.scrollTo(0, 0);
+      setFormError("");
     }
   };
 
@@ -69,53 +92,118 @@ const AddProperty = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
       window.scrollTo(0, 0);
+      setFormError("");
     }
+  };
+
+  const validateCurrentStep = (): boolean => {
+    setFormError("");
+    
+    switch (currentStep) {
+      case 1:
+        if (!title || !description || !price) {
+          setFormError("Please fill in all the required fields");
+          return false;
+        }
+        if (isNaN(Number(price)) || Number(price) <= 0) {
+          setFormError("Please enter a valid price");
+          return false;
+        }
+        break;
+      case 2:
+        if (!propertyType || !bedrooms || !bathrooms || !area) {
+          setFormError("Please fill in all the required fields");
+          return false;
+        }
+        if (isNaN(Number(bedrooms)) || Number(bedrooms) <= 0) {
+          setFormError("Please enter a valid number of bedrooms");
+          return false;
+        }
+        if (isNaN(Number(bathrooms)) || Number(bathrooms) <= 0) {
+          setFormError("Please enter a valid number of bathrooms");
+          return false;
+        }
+        if (isNaN(Number(area)) || Number(area) <= 0) {
+          setFormError("Please enter a valid area");
+          return false;
+        }
+        break;
+      case 3:
+        if (!street || !city || !state || !zipCode) {
+          setFormError("Please fill in all the required fields");
+          return false;
+        }
+        break;
+      case 4:
+        if (images.length === 0) {
+          setFormError("Please upload at least one image");
+          return false;
+        }
+        break;
+    }
+    
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateCurrentStep()) {
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
-      // This would connect to Supabase in a real app
-      // For now, just simulate a successful property creation
+      if (!user) {
+        throw new Error("You must be logged in to add a property");
+      }
       
       const propertyData = {
         title,
         description,
         price: parseFloat(price),
-        features: {
-          propertyType,
-          status,
-          bedrooms: parseInt(bedrooms),
-          bathrooms: parseInt(bathrooms),
-          area: parseInt(area)
-        },
         location: {
-          street,
+          address: street,
           city,
           state,
-          zipCode
+          zip: zipCode,
+          country: "United States", // Default value, can be changed if needed
         },
-        featured,
-        images
+        features: {
+          bedrooms: parseInt(bedrooms),
+          bathrooms: parseInt(bathrooms),
+          area: parseInt(area),
+          yearBuilt: new Date().getFullYear(), // Default to current year
+          propertyType: propertyType as 'apartment' | 'house' | 'villa' | 'plot' | 'penthouse',
+          status: status as 'for-sale' | 'for-rent' | 'sold' | 'pending',
+        },
+        amenities: [], // Could add this feature later
+        images,
+        agent: {
+          id: user.id,
+          name: user.name,
+          phone: user.phone || "Not provided",
+          email: user.email,
+          image: user.avatar || "https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+        },
+        featured
       };
       
-      console.log("Creating property:", propertyData);
+      // Call the service to add the property
+      await addProperty(propertyData);
       
-      // Simulate API delay
-      setTimeout(() => {
-        toast({
-          title: "Property Added",
-          description: "Your property has been successfully listed."
-        });
-        navigate("/dashboard");
-      }, 1500);
+      toast({
+        title: "Property Added",
+        description: "Your property has been successfully listed.",
+      });
+      
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error adding property:", error);
       toast({
         title: "Error",
-        description: "There was a problem adding your property.",
+        description: error instanceof Error ? error.message : "There was a problem adding your property.",
         variant: "destructive"
       });
     } finally {
@@ -528,6 +616,12 @@ const AddProperty = () => {
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-3xl mx-auto bg-white shadow-sm rounded-lg p-6">
           <h2 className="text-xl font-bold mb-6">{renderStepTitle()}</h2>
+          
+          {formError && (
+            <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md">
+              {formError}
+            </div>
+          )}
           
           {renderStepIndicator()}
           
