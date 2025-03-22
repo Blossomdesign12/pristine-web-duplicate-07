@@ -166,7 +166,7 @@ exports.oauthSuccess = (req, res) => {
   // Frontend will handle reading the token from URL and authenticating
   const frontendBaseUrl = process.env.NODE_ENV === 'production' 
     ? 'https://your-production-domain.com' 
-    : 'http://localhost:5173';
+    : 'http://localhost:8080';
   
   res.redirect(`${frontendBaseUrl}/?token=${token}`);
 };
