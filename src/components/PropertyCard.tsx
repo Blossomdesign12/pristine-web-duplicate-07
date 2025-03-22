@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bed, Bath, Square, MapPin, Heart } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ interface PropertyCardProps {
 }
 
 const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
+  const navigate = useNavigate();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -47,6 +48,11 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
     e.preventDefault();
     e.stopPropagation();
     setIsFavorite(!isFavorite);
+  };
+
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(`/property/${property.id}`);
   };
 
   const getStatusColor = () => {
@@ -89,7 +95,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
         "hover:shadow-md"
       )}
       style={{ 
-        transitionDelay: `${Math.min(index * 75, 500)}ms`,border:'1px solid #e0e0e0'
+        transitionDelay: `${Math.min(index * 75, 500)}ms`, border:'1px solid #e0e0e0'
       }}
     >
       <Link to={`/property/${property.id}`} className="group flex flex-col h-full bg-white border border-gray-100 rounded-xl overflow-hidden card-shadow">
@@ -177,7 +183,12 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
               {formatPrice(property.price)}
               {property.features.status === 'for-rent' && <span className="text-xs text-gray-600 ml-1">/month</span>}
             </div>
-            <Button variant="outline" size="sm" className="text-xs border-black text-black hover:bg-black hover:text-white rounded-full">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="text-xs border-black text-black hover:bg-black hover:text-white rounded-full"
+              onClick={handleViewDetails}
+            >
               View Details
             </Button>
           </div>

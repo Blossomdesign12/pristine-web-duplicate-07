@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import PropertyCard from "@/components/PropertyCard";
 import Pagination from "@/components/Pagination";
+import PropertyMap from "@/components/PropertyMap";
 import { Button } from "@/components/ui/button";
 import { FilterX, SlidersHorizontal, Search as SearchIcon } from "lucide-react";
 import { Property } from "@/lib/data";
@@ -18,6 +19,7 @@ const PropertiesForSale = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | undefined>(undefined);
   
   // Filter states
   const [minPrice, setMinPrice] = useState("");
@@ -26,7 +28,7 @@ const PropertiesForSale = () => {
   const [propertyType, setPropertyType] = useState("");
   const [sortOption, setSortOption] = useState("newest");
   
-  const itemsPerPage = 9;
+  const itemsPerPage = 6; // Reduced number of items per page to fit with map
   
   // Calculate pagination
   const indexOfLastProperty = currentPage * itemsPerPage;
@@ -120,6 +122,21 @@ const PropertiesForSale = () => {
       top: 0,
       behavior: "smooth",
     });
+  };
+
+  const handlePropertySelect = (propertyId: string) => {
+    setSelectedPropertyId(propertyId);
+    
+    // Find the property in the list
+    const property = properties.find(p => p.id === propertyId);
+    if (property) {
+      // Find the page that contains this property
+      const propertyIndex = properties.indexOf(property);
+      const page = Math.floor(propertyIndex / itemsPerPage) + 1;
+      if (page !== currentPage) {
+        setCurrentPage(page);
+      }
+    }
   };
 
   return (
@@ -235,7 +252,7 @@ const PropertiesForSale = () => {
             )}
           </div>
           
-          {/* Results */}
+          {/* Results with Map */}
           <div>
             {isLoading ? (
               <div className="flex justify-center items-center py-12">
@@ -259,24 +276,40 @@ const PropertiesForSale = () => {
                   Showing {currentProperties.length} of {filteredProperties.length} properties
                 </p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {currentProperties.map((property) => (
-                    <PropertyCard
-                      key={property.id}
-                      property={property}
-                    />
-                  ))}
-                </div>
-                
-                {totalPages > 1 && (
-                  <div className="mt-8 flex justify-center">
-                    <Pagination
-                      totalPages={totalPages}
-                      currentPage={currentPage}
-                      onPageChange={handlePageChange}
-                    />
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Property Cards - Left side */}
+                  <div className="md:w-1/2 lg:w-3/5">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {currentProperties.map((property) => (
+                        <PropertyCard
+                          key={property.id}
+                          property={property}
+                        />
+                      ))}
+                    </div>
+                    
+                    {totalPages > 1 && (
+                      <div className="mt-8 flex justify-center">
+                        <Pagination
+                          totalPages={totalPages}
+                          currentPage={currentPage}
+                          onPageChange={handlePageChange}
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
+                  
+                  {/* Map - Right side */}
+                  <div className="md:w-1/2 lg:w-2/5 mt-6 md:mt-0">
+                    <div className="sticky top-24 h-[calc(100vh-200px)] rounded-lg overflow-hidden border border-gray-200">
+                      <PropertyMap 
+                        properties={filteredProperties} 
+                        selectedPropertyId={selectedPropertyId}
+                        onPropertySelect={handlePropertySelect}
+                      />
+                    </div>
+                  </div>
+                </div>
               </>
             )}
           </div>
