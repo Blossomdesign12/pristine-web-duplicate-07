@@ -9,10 +9,12 @@ const {
   updateProperty,
   deleteProperty,
   getUserProperties,
+  getPropertiesByStatus,
 } = require("../controllers/propertyController");
 
 // Public routes
 router.get("/", getProperties);
+router.get("/status/:status", getPropertiesByStatus);
 router.get("/:id", getPropertyById);
 
 // Protected routes

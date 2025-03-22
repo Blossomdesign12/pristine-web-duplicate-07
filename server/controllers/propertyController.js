@@ -191,7 +191,7 @@ exports.deleteProperty = async (req, res) => {
 };
 
 // @desc    Get properties by user
-// @route   GET /properties/user
+// @route   GET /properties/user/me
 // @access  Private
 exports.getUserProperties = async (req, res) => {
   try {
@@ -206,6 +206,41 @@ exports.getUserProperties = async (req, res) => {
     });
   } catch (error) {
     console.error("Get user properties error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Get properties by status
+// @route   GET /properties/status/:status
+// @access  Public
+exports.getPropertiesByStatus = async (req, res) => {
+  try {
+    const status = req.params.status;
+    
+    // Validate status
+    const validStatuses = ["for-sale", "for-rent", "sold", "pending"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status parameter",
+      });
+    }
+    
+    const properties = await Property.find({
+      "features.status": status
+    }).sort({ createdAt: -1 });
+    
+    res.status(200).json({
+      success: true,
+      count: properties.length,
+      properties,
+    });
+  } catch (error) {
+    console.error("Get properties by status error:", error);
     res.status(500).json({
       success: false,
       message: "Server error",

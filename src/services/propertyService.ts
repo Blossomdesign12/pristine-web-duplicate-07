@@ -91,7 +91,8 @@ export const getAllProperties = async (): Promise<Property[]> => {
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
     }
-    return response.json();
+    const data = await response.json();
+    return data.properties;
   } catch (error) {
     console.warn("API call failed, falling back to local storage:", error);
     
@@ -104,11 +105,12 @@ export const getAllProperties = async (): Promise<Property[]> => {
 // Get properties by status (for-sale, for-rent, etc.)
 export const getPropertiesByStatus = async (status: string): Promise<Property[]> => {
   try {
-    const response = await fetch(`${API_URL}/properties?status=${status}`);
+    const response = await fetch(`${API_URL}/properties/status/${status}`);
     if (!response.ok) {
       throw new Error("Failed to fetch properties");
     }
-    return response.json();
+    const data = await response.json();
+    return data.properties;
   } catch (error) {
     console.warn("API call failed, falling back to local storage:", error);
     
@@ -130,7 +132,8 @@ export const getPropertyById = async (id: string): Promise<Property> => {
     if (!response.ok) {
       throw new Error("Failed to fetch property");
     }
-    return response.json();
+    const data = await response.json();
+    return data.property;
   } catch (error) {
     console.warn("API call failed, falling back to local storage:", error);
     
@@ -180,5 +183,29 @@ export const deleteProperty = async (id: string): Promise<void> => {
     // Fallback to local storage
     const { deleteProperty: deletePropertyFromDb } = await import("@/services/dbService");
     await deletePropertyFromDb(id);
+  }
+};
+
+// Get user properties
+export const getUserProperties = async (): Promise<Property[]> => {
+  try {
+    const response = await authenticatedRequest("/properties/user/me");
+    return response.properties;
+  } catch (error) {
+    console.warn("API call failed, falling back to local storage:", error);
+    
+    // Fallback to local storage
+    const { getAllProperties: getPropertiesFromDb } = await import("@/services/dbService");
+    const properties = await getPropertiesFromDb();
+    const currentUser = getCurrentUser();
+    
+    if (!currentUser) {
+      return [];
+    }
+    
+    // Filter by user ID
+    return properties.filter(
+      (property) => property.user === currentUser.id
+    );
   }
 };
