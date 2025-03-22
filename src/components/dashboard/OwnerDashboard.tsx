@@ -1,307 +1,434 @@
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { 
-  Home, 
-  DollarSign, 
-  Eye, 
-  Users,
-  MessageSquare,
-  BarChart,
-  TrendingUp 
-} from "lucide-react";
-import {
-  LineChart,
-  Line,
-  BarChart as RechartBarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { Button } from "@/components/ui/button";
+import { Home, Plus, Eye, Edit, Trash, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { getUserProperties, deleteProperty } from "@/services/propertyService";
+import { Property } from "@/lib/data";
+import { formatPrice } from "@/lib/data";
 
 interface OwnerDashboardProps {
   activeTab: string;
 }
 
 const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
-  // Mock data - would come from API in real app
-  const [properties] = useState([
-    { id: "1", title: "Modern Apartment", status: "For Rent", views: 156, inquiries: 12 },
-    { id: "2", title: "Beach House", status: "For Sale", views: 208, inquiries: 18 },
-    { id: "3", title: "Mountain Cabin", status: "For Sale", views: 87, inquiries: 5 },
-  ]);
-  
-  // Mock chart data
-  const viewsData = [
-    { month: "Jan", views: 85 },
-    { month: "Feb", views: 110 },
-    { month: "Mar", views: 140 },
-    { month: "Apr", views: 120 },
-    { month: "May", views: 180 },
-    { month: "Jun", views: 240 },
-  ];
-  
-  const inquiriesData = [
-    { month: "Jan", inquiries: 5 },
-    { month: "Feb", inquiries: 8 },
-    { month: "Mar", inquiries: 12 },
-    { month: "Apr", inquiries: 10 },
-    { month: "May", inquiries: 15 },
-    { month: "Jun", inquiries: 22 },
-  ];
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const { user } = useAuth();
 
-  if (activeTab === "properties") {
+  useEffect(() => {
+    const fetchProperties = async () => {
+      setIsLoading(true);
+      try {
+        const userProperties = await getUserProperties();
+        setProperties(userProperties);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load your properties. Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProperties();
+  }, [toast]);
+
+  const handleDeleteProperty = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this property?")) {
+      try {
+        await deleteProperty(id);
+        
+        // Update the properties list
+        setProperties(properties.filter(property => property.id !== id));
+        
+        toast({
+          title: "Success",
+          description: "Property deleted successfully.",
+        });
+      } catch (error) {
+        console.error("Error deleting property:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete property. Please try again later.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return renderOverview();
+      case "properties":
+        return renderPropertiesTab();
+      case "listings":
+        return renderListingsTab();
+      default:
+        return renderOverview();
+    }
+  };
+
+  const renderOverview = () => {
     return (
-      <div>
-        <h2 className="text-xl font-bold mb-6">My Properties</h2>
-        <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-4 py-2 text-left">Title</th>
-                  <th className="px-4 py-2 text-left">Status</th>
-                  <th className="px-4 py-2 text-left">Views</th>
-                  <th className="px-4 py-2 text-left">Inquiries</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {properties.map((property) => (
-                  <tr key={property.id} className="border-b">
-                    <td className="px-4 py-2">{property.title}</td>
-                    <td className="px-4 py-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        property.status === "For Rent" ? "bg-blue-100 text-blue-800" : 
-                        "bg-green-100 text-green-800"
-                      }`}>
-                        {property.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2">{property.views}</td>
-                    <td className="px-4 py-2">{property.inquiries}</td>
-                    <td className="px-4 py-2">
-                      <div className="flex space-x-2">
-                        <Button variant="ghost" size="sm">
-                          Edit
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-blue-600">
-                          View
-                        </Button>
-                      </div>
-                    </td>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium">My Properties</h3>
+              <Home className="h-6 w-6 text-blue-500" />
+            </div>
+            <p className="text-3xl font-bold">{properties.length}</p>
+            <p className="text-gray-500 mt-1">Total properties</p>
+            <Link to="/add-property">
+              <Button variant="outline" className="w-full mt-4">
+                <Plus className="mr-2 h-4 w-4" />
+                Add New
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium">For Sale</h3>
+              <Home className="h-6 w-6 text-green-500" />
+            </div>
+            <p className="text-3xl font-bold">
+              {properties.filter(p => p.features.status === "for-sale").length}
+            </p>
+            <p className="text-gray-500 mt-1">Properties for sale</p>
+            <Link to="/properties-for-sale">
+              <Button variant="outline" className="w-full mt-4">
+                <Eye className="mr-2 h-4 w-4" />
+                View All
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium">For Rent</h3>
+              <Home className="h-6 w-6 text-purple-500" />
+            </div>
+            <p className="text-3xl font-bold">
+              {properties.filter(p => p.features.status === "for-rent").length}
+            </p>
+            <p className="text-gray-500 mt-1">Properties for rent</p>
+            <Link to="/properties-for-rent">
+              <Button variant="outline" className="w-full mt-4">
+                <Eye className="mr-2 h-4 w-4" />
+                View All
+              </Button>
+            </Link>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-medium mb-4">Recent Properties</h3>
+          {isLoading ? (
+            <div className="text-center py-8">Loading...</div>
+          ) : properties.length === 0 ? (
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h4 className="text-lg font-medium mb-2">No Properties Found</h4>
+              <p className="text-gray-500 mb-4">You haven't added any properties yet.</p>
+              <Link to="/add-property">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Your First Property
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full table-auto">
+                <thead className="bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <tr>
+                    <th className="px-6 py-3 text-left">Property</th>
+                    <th className="px-6 py-3 text-left">Status</th>
+                    <th className="px-6 py-3 text-left">Price</th>
+                    <th className="px-6 py-3 text-left">Location</th>
+                    <th className="px-6 py-3 text-left">Added</th>
+                    <th className="px-6 py-3 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {properties.slice(0, 5).map((property) => (
+                    <tr key={property.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 flex-shrink-0">
+                            <img 
+                              className="h-10 w-10 rounded-md object-cover" 
+                              src={property.images[0] || 'https://via.placeholder.com/100'} 
+                              alt={property.title} 
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
+                              {property.title}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {property.features.bedrooms} bed • {property.features.bathrooms} bath
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${property.features.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
+                          property.features.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
+                          property.features.status === 'sold' ? 'bg-gray-100 text-gray-800' : 
+                          'bg-yellow-100 text-yellow-800'}`}>
+                          {property.features.status.replace('-', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatPrice(property.price)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {property.location.city}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(property.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end space-x-2">
+                          <Link to={`/property/${property.id}`}>
+                            <Button size="sm" variant="ghost">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Link to={`/edit-property/${property.id}`}>
+                            <Button size="sm" variant="ghost">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => handleDeleteProperty(property.id)}
+                          >
+                            <Trash className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {properties.length > 5 && (
+                <div className="flex justify-center mt-4">
+                  <Button 
+                    variant="link" 
+                    onClick={() => window.document.getElementById('properties-tab')?.click()}
+                  >
+                    View All Properties
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
-  }
+  };
 
-  if (activeTab === "listings") {
+  const renderPropertiesTab = () => {
     return (
-      <div>
-        <h2 className="text-xl font-bold mb-6">My Listings</h2>
-        <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {properties.map((property) => (
-              <div key={property.id} className="border rounded-lg overflow-hidden">
-                <div className="h-48 bg-gray-200">
-                  {/* Would display property image in a real app */}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold mb-2">{property.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">Status: {property.status}</p>
-                  
-                  <div className="flex items-center text-sm text-gray-500 mb-2">
-                    <Eye className="h-4 w-4 mr-1" />
-                    <span>{property.views} views</span>
-                  </div>
-                  
-                  <div className="flex items-center text-sm text-gray-500 mb-4">
-                    <Users className="h-4 w-4 mr-1" />
-                    <span>{property.inquiries} inquiries</span>
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Default: Overview
-  return (
-    <div>
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Total Properties
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{properties.length}</div>
-              <Home className="h-8 w-8 text-estate-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Total Views
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">
-                {properties.reduce((sum, item) => sum + item.views, 0)}
-              </div>
-              <Eye className="h-8 w-8 text-estate-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Total Inquiries
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">
-                {properties.reduce((sum, item) => sum + item.inquiries, 0)}
-              </div>
-              <MessageSquare className="h-8 w-8 text-estate-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Estimated Value
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">$1.2M</div>
-              <DollarSign className="h-8 w-8 text-estate-primary" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BarChart className="h-5 w-5 mr-2" />
-              Property Views
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={viewsData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="views" 
-                  stroke="#8884d8" 
-                  activeDot={{ r: 8 }} 
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="h-5 w-5 mr-2" />
-              Inquiries
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <RechartBarChart data={inquiriesData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="inquiries" fill="#82ca9d" />
-              </RechartBarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Recent Activities */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activities</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="border-l-2 border-estate-primary pl-4">
-              <p className="font-medium">New property inquiry</p>
-              <p className="text-sm text-gray-500">Someone is interested in Beach House</p>
-              <p className="text-xs text-gray-400">Today, 11:30 AM</p>
-            </div>
-            <div className="border-l-2 border-estate-primary pl-4">
-              <p className="font-medium">Property viewed</p>
-              <p className="text-sm text-gray-500">Modern Apartment was viewed 5 times</p>
-              <p className="text-xs text-gray-400">Yesterday</p>
-            </div>
-            <div className="border-l-2 border-estate-primary pl-4">
-              <p className="font-medium">Offer received</p>
-              <p className="text-sm text-gray-500">You received an offer for Mountain Cabin</p>
-              <p className="text-xs text-gray-400">2 days ago</p>
-            </div>
-          </div>
-          <Link to="#">
-            <Button variant="ghost" className="mt-4 w-full">
-              View All Activities
+      <div className="space-y-6">
+        <div className="flex justify-between mb-4">
+          <h3 className="text-lg font-medium">All Properties</h3>
+          <Link to="/add-property">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Property
             </Button>
           </Link>
-        </CardContent>
-      </Card>
+        </div>
+        
+        {isLoading ? (
+          <div className="text-center py-8">Loading...</div>
+        ) : properties.length === 0 ? (
+          <div className="text-center py-8 bg-white rounded-lg border border-gray-200 p-6">
+            <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h4 className="text-lg font-medium mb-2">No Properties Found</h4>
+            <p className="text-gray-500 mb-4">You haven't added any properties yet.</p>
+            <Link to="/add-property">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Your First Property
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full table-auto">
+                <thead className="bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <tr>
+                    <th className="px-6 py-3 text-left">Property</th>
+                    <th className="px-6 py-3 text-left">Status</th>
+                    <th className="px-6 py-3 text-left">Price</th>
+                    <th className="px-6 py-3 text-left">Location</th>
+                    <th className="px-6 py-3 text-left">Added</th>
+                    <th className="px-6 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {properties.map((property) => (
+                    <tr key={property.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 flex-shrink-0">
+                            <img 
+                              className="h-10 w-10 rounded-md object-cover" 
+                              src={property.images[0] || 'https://via.placeholder.com/100'} 
+                              alt={property.title} 
+                            />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
+                              {property.title}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {property.features.bedrooms} bed • {property.features.bathrooms} bath
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                          ${property.features.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
+                          property.features.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
+                          property.features.status === 'sold' ? 'bg-gray-100 text-gray-800' : 
+                          'bg-yellow-100 text-yellow-800'}`}>
+                          {property.features.status.replace('-', ' ')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatPrice(property.price)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {property.location.city}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(property.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end space-x-2">
+                          <Link to={`/property/${property.id}`}>
+                            <Button size="sm" variant="ghost">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Link to={`/edit-property/${property.id}`}>
+                            <Button size="sm" variant="ghost">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button 
+                            size="sm" 
+                            variant="ghost" 
+                            onClick={() => handleDeleteProperty(property.id)}
+                          >
+                            <Trash className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderListingsTab = () => {
+    return (
+      <div className="space-y-6">
+        <h3 className="text-lg font-medium mb-4">Property Listings</h3>
+        
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium mb-3">For Sale</h4>
+              {properties.filter(p => p.features.status === "for-sale").length === 0 ? (
+                <p className="text-gray-500">No properties for sale</p>
+              ) : (
+                <div className="space-y-4">
+                  {properties
+                    .filter(p => p.features.status === "for-sale")
+                    .map(property => (
+                      <Link
+                        key={property.id}
+                        to={`/property/${property.id}`}
+                        className="flex items-start hover:bg-gray-50 p-2 rounded-md"
+                      >
+                        <img
+                          src={property.images[0] || 'https://via.placeholder.com/100'}
+                          alt={property.title}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                        <div className="ml-3">
+                          <h5 className="font-medium text-sm">{property.title}</h5>
+                          <p className="text-sm text-gray-500">{formatPrice(property.price)}</p>
+                          <p className="text-xs text-gray-400">{property.location.city}</p>
+                        </div>
+                      </Link>
+                    ))}
+                </div>
+              )}
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-3">For Rent</h4>
+              {properties.filter(p => p.features.status === "for-rent").length === 0 ? (
+                <p className="text-gray-500">No properties for rent</p>
+              ) : (
+                <div className="space-y-4">
+                  {properties
+                    .filter(p => p.features.status === "for-rent")
+                    .map(property => (
+                      <Link
+                        key={property.id}
+                        to={`/property/${property.id}`}
+                        className="flex items-start hover:bg-gray-50 p-2 rounded-md"
+                      >
+                        <img
+                          src={property.images[0] || 'https://via.placeholder.com/100'}
+                          alt={property.title}
+                          className="w-16 h-16 object-cover rounded-md"
+                        />
+                        <div className="ml-3">
+                          <h5 className="font-medium text-sm">{property.title}</h5>
+                          <p className="text-sm text-gray-500">{formatPrice(property.price)}</p>
+                          <p className="text-xs text-gray-400">{property.location.city}</p>
+                        </div>
+                      </Link>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      {renderContent()}
     </div>
   );
 };

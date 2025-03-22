@@ -16,10 +16,41 @@ import {
   Square, 
   Upload, 
   X, 
-  Check
+  Check,
+  MapPin
 } from "lucide-react";
 import { propertyTypes } from "@/lib/data";
 import { addProperty } from "@/services/propertyService";
+
+// Mumbai and Thane locations from ToggleBuyRent component
+const mumbaiLocations = [
+  "Andheri West", "Mahim", "Mira Road", "Mulund", "Vile Parle West",
+  "Goregaon West", "Malabar Hill", "Byculla", "Andheri East", "Kurla",
+  "Bhayandar", "Bhandup", "Juhu", "Borivali East", "Colaba", "Kanjurmarg",
+  "Marol", "BKC", "Worli", "Ghatkopar West", "Jogeshwari East",
+  "Borivali West", "Haware City", "Mahalaxmi", "Powai", "Ghatkopar East",
+  "Matunga East", "Sion", "Jogeshwari West", "Dahisar", "Tardeo", "Grant Road"
+];
+
+const thaneLocations = [
+  "Thane East", "Kolshet", "Waghbil", "Dombivli", "Beyond Thane", "Manpada",
+  "Anand Nagar", "Korum Mall", "Hiranandani Estate", "Ghodbunder Road",
+  "Majiwada", "Suraj Water Park", "Thane West"
+];
+
+const naviMumbaiLocations = [
+  "Panvel", "Kharghar", "Turbhe", "Nerul", "Khandaeshwar", "Ulwe", "Airoli",
+  "Taloja", "Vashi", "Seawood Darave", "Bamandongri", "Shilphata", "Ghansoli",
+  "Koparkhairane", "Sanpada", "Belapur CBD", "Kharkopar", "Navi Mumbai",
+  "Rabale", "Juinagar", "Mansarovar", "Diva"
+];
+
+// Combine all locations
+const allLocations = [
+  { region: "Mumbai", locations: mumbaiLocations },
+  { region: "Thane", locations: thaneLocations },
+  { region: "Navi Mumbai", locations: naviMumbaiLocations }
+];
 
 const AddProperty = () => {
   const navigate = useNavigate();
@@ -30,6 +61,8 @@ const AddProperty = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 5;
   const [formError, setFormError] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
 
   // Form states
   const [title, setTitle] = useState("");
@@ -45,6 +78,21 @@ const AddProperty = () => {
   const [state, setState] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [featured, setFeatured] = useState(false);
+  // Add coordinates for map
+  const [coordinates, setCoordinates] = useState({ lat: 19.0760, lng: 72.8777 }); // Default to Mumbai
+
+  // Update available locations when region changes
+  useEffect(() => {
+    if (selectedRegion) {
+      const region = allLocations.find(r => r.region === selectedRegion);
+      if (region) {
+        setAvailableLocations(region.locations);
+        setCity(""); // Reset city when region changes
+      }
+    } else {
+      setAvailableLocations([]);
+    }
+  }, [selectedRegion]);
 
   // Check if user has permission to access this page
   useEffect(() => {
@@ -129,7 +177,7 @@ const AddProperty = () => {
         }
         break;
       case 3:
-        if (!street || !city || !state || !zipCode) {
+        if (!street || !selectedRegion || !city || !state || !zipCode) {
           setFormError("Please fill in all the required fields");
           return false;
         }
@@ -168,7 +216,9 @@ const AddProperty = () => {
           city,
           state,
           zip: zipCode,
-          country: "United States", // Default value, can be changed if needed
+          country: "India", // Updated to India
+          lat: coordinates.lat,
+          lng: coordinates.lng
         },
         features: {
           bedrooms: parseInt(bedrooms),
@@ -424,24 +474,52 @@ const AddProperty = () => {
                 required
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input 
-                  id="city" 
-                  value={city} 
-                  onChange={(e) => setCity(e.target.value)} 
-                  placeholder="e.g. New York"
-                  required
-                />
-              </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="region">Region</Label>
+              <select
+                id="region"
+                value={selectedRegion}
+                onChange={(e) => setSelectedRegion(e.target.value)}
+                className="w-full h-10 px-3 py-2 border border-input rounded-md bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                required
+              >
+                <option value="">Select Region</option>
+                {allLocations.map((region) => (
+                  <option key={region.region} value={region.region}>
+                    {region.region}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="city">Location</Label>
+              <select
+                id="city"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full h-10 px-3 py-2 border border-input rounded-md bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                required
+                disabled={!selectedRegion}
+              >
+                <option value="">Select Location</option>
+                {availableLocations.map((location) => (
+                  <option key={location} value={location}>
+                    {location}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
                 <Input 
                   id="state" 
-                  value={state} 
+                  value={state || "Maharashtra"} 
                   onChange={(e) => setState(e.target.value)} 
-                  placeholder="e.g. NY"
+                  placeholder="Maharashtra"
                   required
                 />
               </div>
@@ -451,10 +529,24 @@ const AddProperty = () => {
                   id="zipCode" 
                   value={zipCode} 
                   onChange={(e) => setZipCode(e.target.value)} 
-                  placeholder="e.g. 10001"
+                  placeholder="e.g. 400001"
                   required
                 />
               </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Map Location (For Demonstration Only)</Label>
+              <div className="relative bg-gray-200 h-40 rounded-lg flex items-center justify-center">
+                <MapPin size={32} className="text-red-500" />
+                <p className="absolute bg-white px-2 py-1 rounded text-sm">
+                  Map View (Mock)
+                </p>
+              </div>
+              <p className="text-sm text-gray-500">
+                For this demo, we're using preset coordinates for Indian cities. In a real application, 
+                you would integrate with a mapping API to allow precise location selection.
+              </p>
             </div>
           </div>
         );
@@ -558,7 +650,11 @@ const AddProperty = () => {
                     <span className="font-medium">{street || "Not specified"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">City:</span>
+                    <span className="text-gray-600">Region:</span>
+                    <span className="font-medium">{selectedRegion || "Not specified"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Location:</span>
                     <span className="font-medium">{city || "Not specified"}</span>
                   </div>
                   <div className="flex justify-between">
@@ -625,7 +721,7 @@ const AddProperty = () => {
           
           {renderStepIndicator()}
           
-          <form onSubmit={currentStep === totalSteps ? handleSubmit : (e) => e.preventDefault()}>
+          <form onSubmit={(e) => e.preventDefault()}>
             {renderStepContent()}
             
             <div className="mt-8 flex justify-between">
@@ -657,9 +753,10 @@ const AddProperty = () => {
                 </Button>
               ) : (
                 <Button 
-                  type="submit" 
+                  type="button" 
                   className="bg-black hover:bg-black/90 text-white"
                   disabled={isLoading}
+                  onClick={handleSubmit}
                 >
                   {isLoading ? "Creating..." : "Create Property"}
                 </Button>
