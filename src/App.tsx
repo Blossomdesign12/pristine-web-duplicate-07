@@ -14,14 +14,10 @@ import Loans from './pages/Loans';
 import Contact from './pages/Contact';
 import Agents from './pages/Agents';
 import AgentDetails from './pages/AgentDetails';
-import AddProperty from './pages/AddProperty';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
-import Messages from './pages/Messages';
-import Notifications from './pages/Notifications';
-import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
 import SiteMap from './pages/SiteMap';
 
@@ -96,8 +92,8 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/sitemap" element={<SiteMap />} />
           
-          {/* Protected Routes */}
-          <Route path="/dashboard" element={
+          {/* Protected Routes - Now all under the dashboard */}
+          <Route path="/dashboard/*" element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
@@ -107,26 +103,12 @@ function App() {
               <AdminDashboard />
             </ProtectedRoute>
           } />
-          <Route path="/add-property" element={
-            <ProtectedRoute>
-              <AddProperty />
-            </ProtectedRoute>
-          } />
-          <Route path="/messages" element={
-            <ProtectedRoute>
-              <Messages />
-            </ProtectedRoute>
-          } />
-          <Route path="/notifications" element={
-            <ProtectedRoute>
-              <Notifications />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          } />
+          
+          {/* Redirect old routes to dashboard with appropriate tabs */}
+          <Route path="/add-property" element={<Navigate to="/dashboard?tab=add-property" replace />} />
+          <Route path="/messages" element={<Navigate to="/dashboard?tab=messages" replace />} />
+          <Route path="/notifications" element={<Navigate to="/dashboard?tab=notifications" replace />} />
+          <Route path="/profile" element={<Navigate to="/dashboard?tab=profile" replace />} />
           
           {/* 404 and redirects */}
           <Route path="/404" element={<NotFound />} />

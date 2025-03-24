@@ -25,6 +25,10 @@ import OwnerDashboard from "@/components/dashboard/OwnerDashboard";
 import AgentDashboard from "@/components/dashboard/AgentDashboard";
 import AdminDashboard from "@/components/dashboard/AdminDashboard";
 import SettingsPanel from "@/components/dashboard/SettingsPanel";
+import AddPropertyContent from "@/components/dashboard/AddPropertyContent";
+import MessageContent from "@/components/dashboard/MessageContent";
+import NotificationContent from "@/components/dashboard/NotificationContent";
+import ProfileContent from "@/components/dashboard/ProfileContent";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -35,10 +39,20 @@ const Dashboard = () => {
   const role = user?.role || "buyer";
 
   const renderDashboardContent = () => {
+    // Handle settings, profile, notifications, messages tabs
     if (activeTab === "settings") {
       return <SettingsPanel />;
+    } else if (activeTab === "profile") {
+      return <ProfileContent />;
+    } else if (activeTab === "notifications") {
+      return <NotificationContent />;
+    } else if (activeTab === "messages") {
+      return <MessageContent />;
+    } else if (activeTab === "add-property") {
+      return <AddPropertyContent />;
     }
     
+    // Handle role-specific dashboards
     switch (role) {
       case "buyer":
         return <BuyerDashboard activeTab={activeTab} />;
@@ -76,18 +90,12 @@ const Dashboard = () => {
           </div>
           
           <div className="p-4 border-b border-gray-200 ms-3">
-            <Link to="/profile" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              {/* <img 
-                src={mockUser.avatar || "https://via.placeholder.com/40"} 
-                alt={mockUser.name} 
-                className="h-10 w-10 rounded-full object-cover"
-              /> */}
+            <div className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer" onClick={() => setActiveTab("profile")}>
               <div>
                 <h4>Welcome</h4>
                 <h5 className="font-medium">{mockUser.name}</h5>
-                {/* <p className="text-xs text-gray-500 capitalize">{mockUser.role}</p> */}
               </div>
-            </Link>
+            </div>
           </div>
           
           <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -100,16 +108,15 @@ const Dashboard = () => {
               Dashboard
             </Button>
             
-            {/* Add Property Link available to all users */}
-            <Link to="/add-property" className="block">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-              >
-                <Plus className="mr-2 h-5 w-5" />
-                Add Property
-              </Button>
-            </Link>
+            {/* Add Property button now sets the activeTab instead of navigating */}
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${activeTab === "add-property" ? "bg-gray-100" : ""}`}
+              onClick={() => setActiveTab("add-property")}
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Add Property
+            </Button>
             
             {(role === "buyer" || !user) && (
               <>
@@ -182,47 +189,34 @@ const Dashboard = () => {
                   <Activity className="mr-2 h-5 w-5" />
                   Analytics
                 </Button>
-                <Link to="/admin" className="block">
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start"
-                  >
-                    <Shield className="mr-2 h-5 w-5" />
-                    Admin Portal
-                  </Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  className={`w-full justify-start ${activeTab === "admin-portal" ? "bg-gray-100" : ""}`}
+                  onClick={() => setActiveTab("admin-portal")}
+                >
+                  <Shield className="mr-2 h-5 w-5" />
+                  Admin Portal
+                </Button>
               </>
             )}
             
-            {/* <Link to="/messages" className="block">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-              >
-                <MessageSquare className="mr-2 h-5 w-5" />
-                Messages
-              </Button>
-            </Link> */}
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${activeTab === "messages" ? "bg-gray-100" : ""}`}
+              onClick={() => setActiveTab("messages")}
+            >
+              <MessageSquare className="mr-2 h-5 w-5" />
+              Messages
+            </Button>
             
-            <Link to="/notifications" className="block">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-              >
-                <Bell className="mr-2 h-5 w-5" />
-                Notifications
-              </Button>
-            </Link>
-            
-            {/* <Link to="/profile" className="block">
-              <Button
-                variant="ghost"
-                className="w-full justify-start"
-              >
-                <UserRound className="mr-2 h-5 w-5" />
-                Profile
-              </Button>
-            </Link> */}
+            <Button
+              variant="ghost"
+              className={`w-full justify-start ${activeTab === "notifications" ? "bg-gray-100" : ""}`}
+              onClick={() => setActiveTab("notifications")}
+            >
+              <Bell className="mr-2 h-5 w-5" />
+              Notifications
+            </Button>
             
             <Button
               variant="ghost"
@@ -262,13 +256,7 @@ const Dashboard = () => {
       <main className="flex-1">
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
-            {/* <h1 className="text-2xl font-bold">Dashboard</h1>
-            <Link to="/add-property">
-              <Button className="bg-black hover:bg-black/90">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Property
-              </Button>
-            </Link> */}
+            {/* Header content if needed */}
           </div>
           
           {renderDashboardContent()}
