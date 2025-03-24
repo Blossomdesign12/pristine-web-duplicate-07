@@ -106,7 +106,7 @@ function App() {
           
           {/* Redirect old routes to dashboard with appropriate tabs */}
           <Route path="/add-property" element={<Navigate to="/dashboard?tab=add-property" replace />} />
-          <Route path="/messages" element={<Navigate to="/dashboard?tab=messages" replace />} />
+          {/* <Route path="/messages" element={<Navigate to="/dashboard?tab=messages" replace />} /> */}
           <Route path="/notifications" element={<Navigate to="/dashboard?tab=notifications" replace />} />
           <Route path="/profile" element={<Navigate to="/dashboard?tab=profile" replace />} />
           

@@ -149,14 +149,7 @@ const Dashboard = () => {
                   <Home className="mr-2 h-5 w-5" />
                   My Properties
                 </Button>
-                <Button
-                  variant="ghost"
-                  className={`w-full justify-start ${activeTab === "listings" ? "bg-gray-100" : ""}`}
-                  onClick={() => setActiveTab("listings")}
-                >
-                  <List className="mr-2 h-5 w-5" />
-                  Listings
-                </Button>
+                
               </>
             )}
             
@@ -167,7 +160,7 @@ const Dashboard = () => {
                 onClick={() => setActiveTab("clients")}
               >
                 <Users className="mr-2 h-5 w-5" />
-                Clients
+                Clients Lead
               </Button>
             )}
             
@@ -200,14 +193,7 @@ const Dashboard = () => {
               </>
             )}
             
-            <Button
-              variant="ghost"
-              className={`w-full justify-start ${activeTab === "messages" ? "bg-gray-100" : ""}`}
-              onClick={() => setActiveTab("messages")}
-            >
-              <MessageSquare className="mr-2 h-5 w-5" />
-              Messages
-            </Button>
+            
             
             <Button
               variant="ghost"
