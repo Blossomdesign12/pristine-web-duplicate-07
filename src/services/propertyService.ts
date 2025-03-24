@@ -105,7 +105,13 @@ export const getAllProperties = async (): Promise<Property[]> => {
     throw new Error("Failed to fetch properties");
   }
   const data = await response.json();
-  return data.properties;
+  return data.properties.map((property: any) => {
+    // Ensure each property has an id property for frontend use
+    if (property._id && !property.id) {
+      property.id = property._id;
+    }
+    return property;
+  });
 };
 
 // Get properties by status (for-sale, for-rent, etc.)
@@ -115,7 +121,13 @@ export const getPropertiesByStatus = async (status: string): Promise<Property[]>
     throw new Error("Failed to fetch properties");
   }
   const data = await response.json();
-  return data.properties;
+  return data.properties.map((property: any) => {
+    // Ensure each property has an id property for frontend use
+    if (property._id && !property.id) {
+      property.id = property._id;
+    }
+    return property;
+  });
 };
 
 // Get property by ID
@@ -125,6 +137,10 @@ export const getPropertyById = async (id: string): Promise<Property> => {
     throw new Error("Failed to fetch property");
   }
   const data = await response.json();
+  // Ensure the property has an id property for frontend use
+  if (data.property._id && !data.property.id) {
+    data.property.id = data.property._id;
+  }
   return data.property;
 };
 
@@ -167,5 +183,11 @@ export const deleteProperty = async (id: string): Promise<void> => {
 // Get properties for the current agent
 export const getUserProperties = async (): Promise<Property[]> => {
   const response = await authenticatedRequest("/properties/user/me");
-  return response.properties;
+  return response.properties.map((property: any) => {
+    // Ensure each property has an id property for frontend use
+    if (property._id && !property.id) {
+      property.id = property._id;
+    }
+    return property;
+  });
 };

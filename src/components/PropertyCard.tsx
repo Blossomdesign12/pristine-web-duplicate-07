@@ -52,7 +52,9 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(`/property/${property.id}`);
+    // Use the _id from the backend if it exists, otherwise fallback to id
+    const propertyId = (property as any)._id || property.id;
+    navigate(`/property/${propertyId}`);
   };
 
   const getStatusColor = () => {
@@ -85,6 +87,9 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
     }
   };
 
+  // Get the property ID safely
+  const propertyId = (property as any)._id || property.id;
+
   return (
     <div 
       ref={cardRef}
@@ -98,7 +103,7 @@ const PropertyCard = ({ property, index = 0 }: PropertyCardProps) => {
         transitionDelay: `${Math.min(index * 75, 500)}ms`, border:'1px solid #e0e0e0'
       }}
     >
-      <Link to={`/property/${property.id}`} className="group flex flex-col h-full bg-white border border-gray-100 rounded-xl overflow-hidden card-shadow">
+      <Link to={`/property/${propertyId}`} className="group flex flex-col h-full bg-white border border-gray-100 rounded-xl overflow-hidden card-shadow">
         {/* Image Container */}
         <div className="relative overflow-hidden aspect-[4/3]">
           <div 

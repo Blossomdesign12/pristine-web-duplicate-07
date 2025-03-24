@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
@@ -37,9 +36,11 @@ const PropertyDetails = () => {
       
       try {
         const propertyData = await getPropertyById(id);
+        if (propertyData._id && !propertyData.id) {
+          propertyData.id = propertyData._id;
+        }
         setProperty(propertyData);
         
-        // Increment the view counter
         await fetch(`${API_URL}/properties/${id}/view`, {
           method: 'PUT'
         });
