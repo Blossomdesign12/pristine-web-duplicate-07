@@ -1,133 +1,182 @@
 
-import { User, UserRole } from '@/types/user';
+import { User, UserRole } from "@/contexts/AuthContext";
 
-// Function to authenticate a user
-export const authenticateUser = async (email: string, password: string): Promise<User | null> => {
+const API_URL = "http://localhost:5000";
+
+// Helper to parse JWT token
+const parseJwt = (token: string) => {
   try {
-    const response = await fetch('http://localhost:5000/auth/login', {
-      method: 'POST',
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch (e) {
+    return null;
+  }
+};
+
+// Login user with email and password
+export const loginUser = async (
+  email: string,
+  password: string
+): Promise<{ user: User; token: string }> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ email, password }),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Login failed');
+      const error = await response.json();
+      throw new Error(error.message || "Login failed");
     }
 
     const data = await response.json();
-    return {
-      id: data.user.id,
-      name: data.user.name,
-      email: data.user.email,
-      role: data.user.role,
-      phone: data.user.phone,
-      avatar: data.user.avatar,
-      bio: data.user.description,
-      memberSince: data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : undefined,
-      // Add other fields as they come from the backend
+    
+    // Store token in localStorage
+    localStorage.setItem("authToken", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    
+    return { 
+      user: data.user, 
+      token: data.token 
     };
   } catch (error) {
-    console.error('Authentication error:', error);
-    return null;
-  }
-};
-
-// Function to register a new user
-export const registerUser = async (
-  name: string, 
-  email: string, 
-  password: string, 
-  role: string = UserRole.BUYER
-): Promise<User> => {
-  try {
-    const response = await fetch('http://localhost:5000/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password, role }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Registration failed');
-    }
-
-    const data = await response.json();
-    return {
-      id: data.user.id,
-      name: data.user.name,
-      email: data.user.email,
-      role: data.user.role,
-      avatar: data.user.avatar,
-      memberSince: data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : undefined,
-    };
-  } catch (error) {
-    console.error('Registration error:', error);
+    console.error("Login error:", error);
     throw error;
   }
 };
 
-// Function to handle OAuth redirect
-export const handleOAuthRedirect = (): boolean => {
-  // Check for token in URL (from OAuth redirect)
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('token');
-  
-  if (token) {
-    // Store the token in localStorage
-    localStorage.setItem('token', token);
-    
-    // Also fetch user data and store it
-    fetchUserData(token)
-      .then(userData => {
-        if (userData) {
-          localStorage.setItem('user', JSON.stringify(userData));
-          window.location.href = '/dashboard';
-        }
-      })
-      .catch(err => console.error('Error fetching user data:', err));
-    
-    return true;
-  }
-  
-  return false;
-};
-
-// Function to fetch user data with token
-const fetchUserData = async (token: string): Promise<User | null> => {
+// Register a new user
+export const registerUser = async (
+  email: string,
+  password: string,
+  name: string,
+  role: UserRole
+): Promise<{ user: User; token: string }> => {
   try {
-    const response = await fetch('http://localhost:5000/auth/me', {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password, name, role }),
     });
-    
+
     if (!response.ok) {
-      throw new Error('Failed to fetch user data');
+      const error = await response.json();
+      throw new Error(error.message || "Registration failed");
     }
-    
+
     const data = await response.json();
-    return {
-      id: data.user.id,
-      name: data.user.name,
-      email: data.user.email,
-      role: data.user.role,
-      phone: data.user.phone,
-      avatar: data.user.avatar,
-      bio: data.user.description,
-      memberSince: data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : undefined,
+    
+    // Store token in localStorage
+    localStorage.setItem("authToken", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+    
+    return { 
+      user: data.user, 
+      token: data.token 
     };
   } catch (error) {
-    console.error('Error fetching user data:', error);
-    return null;
+    console.error("Registration error:", error);
+    throw error;
   }
 };
 
-// Helper function to get stored token
-export const getAuthToken = (): string | null => {
-  return localStorage.getItem('token');
+// Logout user
+export const logoutUser = (): void => {
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("user");
+};
+
+// Check if user is authenticated
+export const isAuthenticated = (): boolean => {
+  const token = localStorage.getItem("authToken");
+  if (!token) return false;
+  
+  // Check if token is expired
+  const decodedToken = parseJwt(token);
+  if (!decodedToken) return false;
+  
+  const isExpired = decodedToken.exp * 1000 < Date.now();
+  if (isExpired) {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
+    return false;
+  }
+  
+  return true;
+};
+
+// Get the current user
+export const getCurrentUser = (): User | null => {
+  if (!isAuthenticated()) return null;
+  
+  const userStr = localStorage.getItem("user");
+  if (!userStr) return null;
+  
+  return JSON.parse(userStr);
+};
+
+// Get user details from server (to refresh user data)
+export const fetchUserDetails = async (): Promise<User> => {
+  const token = localStorage.getItem("authToken");
+  if (!token) throw new Error("Not authenticated");
+  
+  try {
+    const response = await fetch(`${API_URL}/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch user details");
+    }
+
+    const data = await response.json();
+    
+    // Update stored user
+    localStorage.setItem("user", JSON.stringify(data.user));
+    
+    return data.user;
+  } catch (error) {
+    console.error("Fetch user details error:", error);
+    throw error;
+  }
+};
+
+// Handle OAuth redirect
+export const handleOAuthRedirect = (): boolean => {
+  // Check if URL contains token parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  
+  if (token) {
+    // Store token in localStorage
+    localStorage.setItem("authToken", token);
+    
+    // Fetch user details
+    fetchUserDetails()
+      .then(user => {
+        localStorage.setItem("user", JSON.stringify(user));
+        
+        // Clean URL by removing token parameter
+        const url = new URL(window.location.href);
+        url.searchParams.delete('token');
+        window.history.replaceState({}, document.title, url.toString());
+        
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
+      })
+      .catch(error => {
+        console.error("OAuth redirect error:", error);
+        logoutUser();
+      });
+    
+    return true; // Return true to indicate a redirect was handled
+  }
+  
+  return false; // Return false if no redirect was handled
 };

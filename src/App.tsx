@@ -31,6 +31,9 @@ import { AuthProvider } from './contexts/AuthContext';
 // Services
 import { handleOAuthRedirect } from './services/authService';
 
+// Initialize dummy data
+import { initializeDatabase } from './lib/dummy-properties';
+
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [handlingOAuth, setHandlingOAuth] = useState(false);
@@ -41,8 +44,15 @@ function App() {
     setHandlingOAuth(isHandlingRedirect);
 
     if (!isHandlingRedirect) {
-      // No OAuth handling needed, just finish loading
-      setIsLoading(false);
+      // Initialize the database with dummy properties
+      initializeDatabase();
+      
+      // Simulate loading assets or data
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+
+      return () => clearTimeout(timer);
     }
   }, []);
 

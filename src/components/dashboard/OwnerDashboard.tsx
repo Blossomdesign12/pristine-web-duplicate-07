@@ -70,7 +70,7 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
       case "properties":
         return renderPropertiesTab();
       case "listings":
-        return renderClientLeadsTab();
+        return renderListingsTab();
       default:
         return renderOverview();
     }
@@ -87,14 +87,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
             </div>
             <p className="text-3xl font-bold">{properties.length}</p>
             <p className="text-gray-500 mt-1">Total properties</p>
-            <Button 
-              variant="outline" 
-              className="w-full mt-4"
-              onClick={() => document.getElementById('add-property-tab')?.click()}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add New
-            </Button>
+            <Link to="/add-property">
+              <Button variant="outline" className="w-full mt-4">
+                <Plus className="mr-2 h-4 w-4" />
+                Add New
+              </Button>
+            </Link>
           </div>
           
           <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -106,14 +104,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
               {properties.filter(p => p.features.status === "for-sale").length}
             </p>
             <p className="text-gray-500 mt-1">Properties for sale</p>
-            <Button 
-              variant="outline" 
-              className="w-full mt-4"
-              onClick={() => document.getElementById('properties-tab')?.click()}
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              View All
-            </Button>
+            <Link to="/properties-for-sale">
+              <Button variant="outline" className="w-full mt-4">
+                <Eye className="mr-2 h-4 w-4" />
+                View All
+              </Button>
+            </Link>
           </div>
           
           <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -125,14 +121,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
               {properties.filter(p => p.features.status === "for-rent").length}
             </p>
             <p className="text-gray-500 mt-1">Properties for rent</p>
-            <Button 
-              variant="outline" 
-              className="w-full mt-4"
-              onClick={() => document.getElementById('properties-tab')?.click()}
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              View All
-            </Button>
+            <Link to="/properties-for-rent">
+              <Button variant="outline" className="w-full mt-4">
+                <Eye className="mr-2 h-4 w-4" />
+                View All
+              </Button>
+            </Link>
           </div>
         </div>
         
@@ -145,10 +139,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h4 className="text-lg font-medium mb-2">No Properties Found</h4>
               <p className="text-gray-500 mb-4">You haven't added any properties yet.</p>
-              <Button onClick={() => document.getElementById('add-property-tab')?.click()}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Your First Property
-              </Button>
+              <Link to="/add-property">
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Your First Property
+                </Button>
+              </Link>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -210,19 +206,11 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={() => {
-                              // Edit functionality will be implemented in the future
-                              toast({
-                                title: "Edit Property",
-                                description: `Editing property: ${property.title}`,
-                              });
-                            }}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          <Link to={`/edit-property/${property.id}`}>
+                            <Button size="sm" variant="ghost">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
                           <Button 
                             size="sm" 
                             variant="ghost" 
@@ -240,7 +228,7 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                 <div className="flex justify-center mt-4">
                   <Button 
                     variant="link" 
-                    onClick={() => document.getElementById('properties-tab')?.click()}
+                    onClick={() => window.document.getElementById('properties-tab')?.click()}
                   >
                     View All Properties
                   </Button>
@@ -258,10 +246,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
       <div className="space-y-6">
         <div className="flex justify-between mb-4">
           <h3 className="text-lg font-medium">All Properties</h3>
-          <Button onClick={() => document.getElementById('add-property-tab')?.click()}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Property
-          </Button>
+          <Link to="/add-property">
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Property
+            </Button>
+          </Link>
         </div>
         
         {isLoading ? (
@@ -271,10 +261,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
             <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h4 className="text-lg font-medium mb-2">No Properties Found</h4>
             <p className="text-gray-500 mb-4">You haven't added any properties yet.</p>
-            <Button onClick={() => document.getElementById('add-property-tab')?.click()}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Your First Property
-            </Button>
+            <Link to="/add-property">
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Your First Property
+              </Button>
+            </Link>
           </div>
         ) : (
           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -337,19 +329,11 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={() => {
-                              // Edit functionality will be implemented in the future
-                              toast({
-                                title: "Edit Property",
-                                description: `Editing property: ${property.title}`,
-                              });
-                            }}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          <Link to={`/edit-property/${property.id}`}>
+                            <Button size="sm" variant="ghost">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
                           <Button 
                             size="sm" 
                             variant="ghost" 
@@ -370,24 +354,25 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
     );
   };
 
-  const renderClientLeadsTab = () => {
+  const renderListingsTab = () => {
     return (
       <div className="space-y-6">
-        <h3 className="text-lg font-medium mb-4">Client Leads</h3>
+        <h3 className="text-lg font-medium mb-4">Property Listings</h3>
         
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium mb-3">For Sale Inquiries</h4>
+              <h4 className="font-medium mb-3">For Sale</h4>
               {properties.filter(p => p.features.status === "for-sale").length === 0 ? (
-                <p className="text-gray-500">No inquiries for properties for sale</p>
+                <p className="text-gray-500">No properties for sale</p>
               ) : (
                 <div className="space-y-4">
                   {properties
                     .filter(p => p.features.status === "for-sale")
                     .map(property => (
-                      <div
+                      <Link
                         key={property.id}
+                        to={`/property/${property.id}`}
                         className="flex items-start hover:bg-gray-50 p-2 rounded-md"
                       >
                         <img
@@ -399,25 +384,25 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                           <h5 className="font-medium text-sm">{property.title}</h5>
                           <p className="text-sm text-gray-500">{formatPrice(property.price)}</p>
                           <p className="text-xs text-gray-400">{property.location.city}</p>
-                          <p className="text-xs mt-1 text-green-600">3 new inquiries</p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                 </div>
               )}
             </div>
             
             <div>
-              <h4 className="font-medium mb-3">For Rent Inquiries</h4>
+              <h4 className="font-medium mb-3">For Rent</h4>
               {properties.filter(p => p.features.status === "for-rent").length === 0 ? (
-                <p className="text-gray-500">No inquiries for properties for rent</p>
+                <p className="text-gray-500">No properties for rent</p>
               ) : (
                 <div className="space-y-4">
                   {properties
                     .filter(p => p.features.status === "for-rent")
                     .map(property => (
-                      <div
+                      <Link
                         key={property.id}
+                        to={`/property/${property.id}`}
                         className="flex items-start hover:bg-gray-50 p-2 rounded-md"
                       >
                         <img
@@ -429,9 +414,8 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                           <h5 className="font-medium text-sm">{property.title}</h5>
                           <p className="text-sm text-gray-500">{formatPrice(property.price)}</p>
                           <p className="text-xs text-gray-400">{property.location.city}</p>
-                          <p className="text-xs mt-1 text-green-600">2 new inquiries</p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                 </div>
               )}

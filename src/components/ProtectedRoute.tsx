@@ -1,23 +1,10 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please sign in to access this area',
-        variant: 'destructive',
-      });
-    }
-  }, [isLoading, isAuthenticated, toast]);
 
   if (isLoading) {
     return (

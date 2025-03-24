@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Login from '@/pages/Login'; 
@@ -456,12 +457,15 @@ const Header = () => {
                   </DropdownMenu>
                 ) : (
                   <>
-                    <Button variant="outline" className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"} onClick={() => setIsLoginOpen(true)} >
-                      Sign In
-                    </Button>
-                    <Button style={{marginLeft:'5px'}} onClick={() => setIsRegisterOpen(true)} className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90" }>
-                      Sign Up
-                    </Button>
+                   <Button variant="outline" className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90"} onClick={() => setIsLoginOpen(true)} >
+                        Sign In
+                      </Button>
+                      <Login isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+                      <Button style={{marginLeft:'5px'}} onClick={() => setIsRegisterOpen(true)} className={isTransparent ? "bg-white text-black hover:bg-white/90" : "bg-black text-white hover:bg-black/90" }>
+                        Sign Up
+                      </Button>
+                      <Register isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+
                   </>
                 )}
                 <Link to="/add-property" className="ml-4">
@@ -615,12 +619,18 @@ const Header = () => {
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" onClick={() => setIsLoginOpen(true)} className="w-full">
-                      Sign In
-                    </Button>
+                    {/* <Link to="/login" className="w-full"> */}
+                      <Button variant="outline" onClick={() => setIsLoginOpen(true)} className="w-full">
+                        Sign In
+                      </Button>
+                      <Login isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+
+                    {/* </Link> */}
                       <Button onClick={() => setIsRegisterOpen(true)} className="w-full bg-black text-white hover:bg-black/90">
                         Sign Up
                       </Button>
+                      <Register isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
+
                   </>
                 )}
                 <Link to="/add-property" className="w-full">
@@ -634,10 +644,6 @@ const Header = () => {
           </div>
         </div>
       )}
-      
-      {/* Render modals outside the header */}
-      {isLoginOpen && <Login isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />}
-      {isRegisterOpen && <Register isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />}
     </header>
   );
 };

@@ -25,31 +25,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { User as UserType } from "@/types/user";
-
-interface ExtendedUser extends UserType {
-  socialLinks: {
-    facebook: string;
-    twitter: string;
-    linkedin: string;
-    instagram: string;
-  };
-  bio: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  country: string;
-  company: string;
-  website: string;
-  memberSince: string;
-}
 
 const ProfileContent = () => {
   const { user } = useAuth();
   
   // Mock data - would come from API in a real app
-  const mockUser: ExtendedUser = {
+  const mockUser = user || {
     id: "1",
     name: "John Smith",
     email: "john.smith@example.com",
@@ -74,7 +55,7 @@ const ProfileContent = () => {
   };
   
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState<ExtendedUser>(user as ExtendedUser || mockUser);
+  const [profileData, setProfileData] = useState(mockUser);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

@@ -1,159 +1,174 @@
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 
-interface LoginProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-}
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Mail, Lock, ArrowRight, X } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { FaGoogle, FaFacebook } from "react-icons/fa6";
+import { handleOAuthRedirect } from "@/services/authService";
+import { toast } from "@/hooks/use-toast";
 
-const Login = ({ isOpen, onClose }: LoginProps) => {
+const Login = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
-  const { login, isLoading } = useAuth();
-  const [rememberMe, setRememberMe] = useState(false);
-  
-  // Get the from path or default to dashboard
-  const from = location.state?.from?.pathname || '/dashboard';
 
-  const formSchema = z.object({
-    email: z.string().email({
-      message: 'Please enter a valid email address',
-    }),
-    password: z.string().min(1, {
-      message: 'Password is required',
-    }),
-  });
+  // Check for OAuth redirect on component mount
+  useEffect(() => {
+    handleOAuthRedirect();
+  }, []);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    
     try {
-      await login(data.email, data.password);
+      await login(email, password);
       toast({
-        title: 'Login successful',
-        description: 'Welcome back!',
+        title: "Login successful",
+        description: "Welcome back to RealEstate!",
       });
-      if (onClose) {
-        onClose();
-      }
+      
+      const from = location.state?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
-    } catch (error) {
-      console.error('Login error:', error);
+      
+      if (onClose) onClose();
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("Invalid email or password. Please try again.");
       toast({
-        title: 'Login failed',
-        description: 'Invalid email or password. Please try again.',
-        variant: 'destructive',
+        title: "Login failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
       });
     }
   };
 
-  const renderLoginForm = () => (
-    <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-      <div className="text-center mb-6">
-        <Link to="/" className="inline-block">
-          <img 
-            src="https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" 
-            alt="Logo" 
-            className="h-8 mx-auto"
-          />
-        </Link>
-        <h1 className="text-2xl font-bold mt-4">Welcome Back</h1>
-        <p className="text-gray-600 mt-1">Sign in to your account</p>
-      </div>
+  // Function to handle OAuth logins
+  const handleOAuthLogin = (provider: 'google' | 'facebook') => {
+    window.location.href = `http://localhost:5000/auth/${provider}`;
+  };
 
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            {...form.register('email')}
-            className="w-full"
-          />
-          {form.formState.errors.email && (
-            <p className="text-red-500 text-xs mt-1">{form.formState.errors.email.message}</p>
-          )}
-        </div>
+  if (!isOpen) return null;
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Enter your password"
-            {...form.register('password')}
-            className="w-full"
-          />
-          {form.formState.errors.password && (
-            <p className="text-red-500 text-xs mt-1">{form.formState.errors.password.message}</p>
-          )}
-        </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Checkbox
-              id="remember-me"
-              checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(!!checked)}
-            />
-            <label htmlFor="remember-me" className="ml-2 text-sm text-gray-700">
-              Remember me
-            </label>
-          </div>
-          <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800">
-            Forgot password?
-          </Link>
-        </div>
-
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Signing in...' : 'Sign In'}
-        </Button>
-      </form>
-
-      <div className="text-center mt-4">
-        <p className="text-sm text-gray-600">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium">
-            Sign up
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
-
-  // If isOpen prop is provided, render as a modal
-  if (isOpen !== undefined) {
-    return (
-      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose && onClose()}>
-        <DialogContent className="sm:max-w-md">
-          {renderLoginForm()}
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  // Otherwise render as a standalone page
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-      {renderLoginForm()}
-    </div>
+    <>
+      {/* Background Overlay */}
+      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose}></div>
+      
+      {/* Modal Container */}
+      <div className="fixed inset-0 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative z-50">
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* Header */}
+          <div className="mb-6 text-center">
+            <h1 className="text-3xl font-bold">Welcome back</h1>
+            <p className="mt-2 text-gray-600">Sign in to continue to your account</p>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                <Link to="/forgot-password" className="text-sm text-estate-primary hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+
+            <Button
+              type="submit"
+              className="w-full bg-estate-primary hover:bg-estate-primary/90 flex items-center justify-center"
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing in..." : "Sign in"}
+              {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
+            </Button>
+          </form>
+
+          {/* Social Login Buttons */}
+          <div className="mt-6 space-y-3">
+            <div className="flex items-center">
+              <div className="flex-grow border-t border-gray-300"></div>
+              <span className="px-2 text-gray-500 text-sm">or continue with</span>
+              <div className="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <div className="flex space-x-4">
+              <button 
+                type="button"
+                onClick={() => handleOAuthLogin('google')}
+                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+              >
+                <FaGoogle className="h-5 w-5 mr-2" />
+                Google
+              </button>
+              <button 
+                type="button"
+                onClick={() => handleOAuthLogin('facebook')}
+                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+              >
+                <FaFacebook className="h-5 w-5 mr-2 text-blue-600" />
+                Facebook
+              </button>
+            </div>
+          </div>
+
+          {/* Signup Link */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{" "}
+              <Link to="/register" className="text-estate-primary hover:underline font-medium">
+                Create an account
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
