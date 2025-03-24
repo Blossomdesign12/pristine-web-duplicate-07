@@ -1,5 +1,6 @@
 export interface Property {
   id: string;
+  _id?: string; // Add optional _id field to match MongoDB documents
   title: string;
   description: string;
   price: number;
@@ -32,6 +33,7 @@ export interface Property {
   };
   featured: boolean;
   createdAt: string;
+  views?: number; // Add optional views field
 }
 
 export const properties: Property[] = [

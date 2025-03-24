@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -13,15 +12,29 @@ import {
 
 export type UserRole = "owner" | "agent" | "buyer" | "admin";
 
-export type User = {
+export interface User {
   id: string;
-  email: string;
   name: string;
-  role: UserRole;
-  avatar?: string;
+  email: string;
+  role?: string;
   phone?: string;
-  description?: string;
-};
+  avatar?: string;
+  bio?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+  company?: string;
+  website?: string;
+  socialLinks?: {
+    facebook?: string;
+    twitter?: string;
+    linkedin?: string;
+    instagram?: string;
+  };
+  memberSince?: string;
+}
 
 type AuthContextType = {
   user: User | null;

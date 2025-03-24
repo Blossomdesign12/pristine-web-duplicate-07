@@ -24,15 +24,13 @@ const PropertyDetails = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [property, setProperty] = useState<Property | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showFloorPlan, setShowFloorPlan] = useState(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-    
-    const fetchPropertyDetails = async () => {
-      if (!id) return;
+    const fetchProperty = async () => {
+      setIsLoading(true);
       
       try {
         const propertyData = await getPropertyById(id);
@@ -53,11 +51,11 @@ const PropertyDetails = () => {
         });
         navigate('/properties');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     
-    fetchPropertyDetails();
+    fetchProperty();
   }, [id, navigate, toast]);
 
   const handleShare = () => {
@@ -82,7 +80,7 @@ const PropertyDetails = () => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />

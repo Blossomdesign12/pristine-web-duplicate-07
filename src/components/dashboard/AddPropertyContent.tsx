@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -23,7 +22,6 @@ import { AlertCircle, Upload } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { addProperty, uploadImages } from "@/services/propertyService";
 
-// Form schema with validation
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -47,7 +45,6 @@ const formSchema = z.object({
   }).optional(),
 });
 
-// Available cities (limited to Mumbai areas as requested)
 const availableCities = [
   "Mumbai",
   "Navi Mumbai",
@@ -76,7 +73,7 @@ const AddPropertyContent = () => {
       status: "",
       address: "",
       city: "",
-      state: "Maharashtra", // Default state for Mumbai areas
+      state: "Maharashtra",
       zipCode: "",
       features: {
         hasGarden: false,
@@ -94,17 +91,13 @@ const AddPropertyContent = () => {
       const newFiles = Array.from(event.target.files);
       setImages(prev => [...prev, ...newFiles]);
       
-      // Create preview URLs
       const newUrls = newFiles.map(file => URL.createObjectURL(file));
       setPreviewUrls(prev => [...prev, ...newUrls]);
     }
   };
 
   const removeImage = (index: number) => {
-    // Remove the image and its preview
     setImages(images.filter((_, i) => i !== index));
-    
-    // Revoke the URL to prevent memory leaks
     URL.revokeObjectURL(previewUrls[index]);
     setPreviewUrls(previewUrls.filter((_, i) => i !== index));
   };
@@ -131,7 +124,7 @@ const AddPropertyContent = () => {
     const values = form.getValues();
     
     switch (currentStep) {
-      case 1: // Basic Information
+      case 1:
         if (!values.title || !values.description) {
           toast({
             title: "Validation Error",
@@ -141,7 +134,7 @@ const AddPropertyContent = () => {
           isValid = false;
         }
         break;
-      case 2: // Property Details
+      case 2:
         if (!values.price || !values.propertyType || !values.status || !values.bedrooms || !values.bathrooms || !values.area) {
           toast({
             title: "Validation Error",
@@ -151,7 +144,7 @@ const AddPropertyContent = () => {
           isValid = false;
         }
         break;
-      case 3: // Location
+      case 3:
         if (!values.address || !values.city || !values.state || !values.zipCode) {
           toast({
             title: "Validation Error",
@@ -161,7 +154,7 @@ const AddPropertyContent = () => {
           isValid = false;
         }
         break;
-      case 4: // Images
+      case 4:
         if (images.length === 0) {
           toast({
             title: "Validation Error",
@@ -189,18 +182,14 @@ const AddPropertyContent = () => {
     setIsSubmitting(true);
 
     try {
-      // First upload images and get their URLs
       let imageUrls: string[] = [];
       try {
         imageUrls = await uploadImages(images);
       } catch (error) {
         console.error("Error uploading images:", error);
-        // Fallback to using preview URLs if upload fails
-        // In a production app, you'd want to handle this differently
         imageUrls = previewUrls;
       }
 
-      // Create property object
       const propertyData = {
         title: data.title,
         description: data.description,
@@ -209,33 +198,34 @@ const AddPropertyContent = () => {
           bedrooms: parseInt(data.bedrooms),
           bathrooms: parseInt(data.bathrooms),
           area: parseFloat(data.area),
-          status: data.status,
-          propertyType: data.propertyType as any,
+          yearBuilt: new Date().getFullYear(),
+          status: data.status as 'for-sale' | 'for-rent' | 'sold' | 'pending',
+          propertyType: data.propertyType as 'apartment' | 'house' | 'villa' | 'plot' | 'penthouse',
           ...data.features
         },
         images: imageUrls,
+        amenities: [],
         agent: {
           id: user?.id || "unknown",
           name: user?.name || "Unknown Agent",
           email: user?.email || "unknown@example.com",
           phone: user?.phone || "000-000-0000",
-          photo: user?.avatar || "https://via.placeholder.com/300"
+          image: user?.avatar || "https://via.placeholder.com/300"
         },
         location: {
           address: data.address,
           city: data.city,
           state: data.state,
-          zip: data.zipCode,  // Changed from zipCode to zip to match Property type
+          zip: data.zipCode,
           country: "India",
-          lat: 19.076, // Default Mumbai coordinates - would be set accurately in a real app
-          lng: 72.8777 // Changed from longitude to lng to match Property type
+          lat: 19.076,
+          lng: 72.8777
         },
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        views: 0 // Add this field since it's used in AgentDashboard.tsx
+        featured: false,
+        views: 0
       };
 
-      // Save the property
       await addProperty(propertyData);
 
       toast({
@@ -619,7 +609,6 @@ const AddPropertyContent = () => {
               )}
             </div>
             
-            {/* Image Previews */}
             {previewUrls.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
                 {previewUrls.map((url, index) => (
@@ -648,7 +637,6 @@ const AddPropertyContent = () => {
     }
   };
 
-  // For multi-step progress indicator
   const renderProgressBar = () => {
     return (
       <div className="mb-8">
