@@ -155,7 +155,7 @@ const Dashboard = () => {
                   onClick={() => setActiveTab("listings")}
                 >
                   <List className="mr-2 h-5 w-5" />
-                  Listings
+                  Client Leads
                 </Button>
               </>
             )}

@@ -1,182 +1,73 @@
 
-import { User, UserRole } from "@/contexts/AuthContext";
+// Update the imports to use the User type from types/user
+import { User, UserRole } from '@/types/user';
 
-const API_URL = "http://localhost:5000";
-
-// Helper to parse JWT token
-const parseJwt = (token: string) => {
-  try {
-    return JSON.parse(atob(token.split(".")[1]));
-  } catch (e) {
-    return null;
+// Mock user data
+const mockUsers: User[] = [
+  {
+    id: "user-1",
+    name: "John Smith",
+    email: "john@example.com",
+    role: "owner",
+    phone: "+91 9876543210",
+    avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/ed060b47018885c4c6847048f8a83758_qgbypi.png",
+    bio: "I'm a property owner with multiple properties in Mumbai.",
+    address: "123 Main Street, Bandra West",
+    city: "Mumbai",
+    state: "Maharashtra",
+    zipCode: "400050",
+    country: "India",
+    company: "Smith Properties",
+    website: "www.smithproperties.com",
+    socialLinks: {
+      facebook: "facebook.com/johnsmith",
+      twitter: "twitter.com/johnsmith",
+      linkedin: "linkedin.com/in/johnsmith",
+      instagram: "instagram.com/johnsmith"
+    },
+    memberSince: "Jan 2023"
+  },
+  {
+    id: "user-2",
+    name: "Emily Johnson",
+    email: "emily@example.com",
+    role: "agent",
+    phone: "+91 8765432109",
+    avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/7975151ffd45504df14dfc8cb4c55a1a_ccltzx.png",
+    bio: "Experienced real estate agent with 5+ years in the industry.",
+    memberSince: "Mar 2022"
   }
+];
+
+// Function to authenticate a user
+export const authenticateUser = async (email: string, password: string): Promise<User | null> => {
+  // In a real app, this would be an API call that checks credentials
+  const user = mockUsers.find(u => u.email === email);
+  
+  // For demo purposes, any password will work
+  if (user) {
+    return user;
+  }
+  
+  return null;
 };
 
-// Login user with email and password
-export const loginUser = async (
-  email: string,
-  password: string
-): Promise<{ user: User; token: string }> => {
-  try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Login failed");
-    }
-
-    const data = await response.json();
-    
-    // Store token in localStorage
-    localStorage.setItem("authToken", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    
-    return { 
-      user: data.user, 
-      token: data.token 
-    };
-  } catch (error) {
-    console.error("Login error:", error);
-    throw error;
-  }
-};
-
-// Register a new user
+// Function to register a new user
 export const registerUser = async (
-  email: string,
-  password: string,
-  name: string,
-  role: UserRole
-): Promise<{ user: User; token: string }> => {
-  try {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password, name, role }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || "Registration failed");
-    }
-
-    const data = await response.json();
-    
-    // Store token in localStorage
-    localStorage.setItem("authToken", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
-    
-    return { 
-      user: data.user, 
-      token: data.token 
-    };
-  } catch (error) {
-    console.error("Registration error:", error);
-    throw error;
-  }
-};
-
-// Logout user
-export const logoutUser = (): void => {
-  localStorage.removeItem("authToken");
-  localStorage.removeItem("user");
-};
-
-// Check if user is authenticated
-export const isAuthenticated = (): boolean => {
-  const token = localStorage.getItem("authToken");
-  if (!token) return false;
+  name: string, 
+  email: string, 
+  password: string, 
+  role: string = UserRole.BUYER
+): Promise<User> => {
+  // In a real app, this would create a new user in the database
+  const newUser: User = {
+    id: `user-${Math.floor(Math.random() * 1000)}`,
+    name,
+    email,
+    role: role as 'buyer' | 'owner' | 'agent' | 'admin',
+    avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/ed060b47018885c4c6847048f8a83758_qgbypi.png",
+    memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+  };
   
-  // Check if token is expired
-  const decodedToken = parseJwt(token);
-  if (!decodedToken) return false;
-  
-  const isExpired = decodedToken.exp * 1000 < Date.now();
-  if (isExpired) {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("user");
-    return false;
-  }
-  
-  return true;
-};
-
-// Get the current user
-export const getCurrentUser = (): User | null => {
-  if (!isAuthenticated()) return null;
-  
-  const userStr = localStorage.getItem("user");
-  if (!userStr) return null;
-  
-  return JSON.parse(userStr);
-};
-
-// Get user details from server (to refresh user data)
-export const fetchUserDetails = async (): Promise<User> => {
-  const token = localStorage.getItem("authToken");
-  if (!token) throw new Error("Not authenticated");
-  
-  try {
-    const response = await fetch(`${API_URL}/auth/me`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch user details");
-    }
-
-    const data = await response.json();
-    
-    // Update stored user
-    localStorage.setItem("user", JSON.stringify(data.user));
-    
-    return data.user;
-  } catch (error) {
-    console.error("Fetch user details error:", error);
-    throw error;
-  }
-};
-
-// Handle OAuth redirect
-export const handleOAuthRedirect = (): boolean => {
-  // Check if URL contains token parameter
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get('token');
-  
-  if (token) {
-    // Store token in localStorage
-    localStorage.setItem("authToken", token);
-    
-    // Fetch user details
-    fetchUserDetails()
-      .then(user => {
-        localStorage.setItem("user", JSON.stringify(user));
-        
-        // Clean URL by removing token parameter
-        const url = new URL(window.location.href);
-        url.searchParams.delete('token');
-        window.history.replaceState({}, document.title, url.toString());
-        
-        // Redirect to dashboard
-        window.location.href = '/dashboard';
-      })
-      .catch(error => {
-        console.error("OAuth redirect error:", error);
-        logoutUser();
-      });
-    
-    return true; // Return true to indicate a redirect was handled
-  }
-  
-  return false; // Return false if no redirect was handled
+  return newUser;
 };

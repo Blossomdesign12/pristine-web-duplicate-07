@@ -23,3 +23,10 @@ export interface User {
   memberSince?: string;
   description?: string;
 }
+
+export enum UserRole {
+  BUYER = 'buyer',
+  OWNER = 'owner',
+  AGENT = 'agent',
+  ADMIN = 'admin'
+}

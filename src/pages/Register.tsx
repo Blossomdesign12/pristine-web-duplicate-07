@@ -1,187 +1,173 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Building2, Mail, Lock, User, ArrowRight, X } from "lucide-react";
-import { FaGoogle, FaFacebook } from "react-icons/fa6";
-import { toast } from "@/hooks/use-toast";
-import { useAuth, UserRole } from "@/contexts/AuthContext";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserRole } from '@/types/user';
 
-const Register = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("buyer");
-  const [error, setError] = useState("");
-  const { register, isLoading } = useAuth();
+const Register = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { register: registerUser, isLoading } = useAuth();
+  const [role, setRole] = useState<string>(UserRole.BUYER);
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const formSchema = z.object({
+    name: z.string().min(3, {
+      message: 'Name must be at least 3 characters long',
+    }),
+    email: z.string().email({
+      message: 'Please enter a valid email address',
+    }),
+    password: z.string().min(8, {
+      message: 'Password must be at least 8 characters long',
+    }),
+    confirmPassword: z.string(),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      toast({
-        title: "Registration failed",
-        description: "Passwords do not match. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+  });
 
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
-      await register(email, password, name, role);
+      await registerUser(data.name, data.email, data.password, role);
       toast({
-        title: "Registration successful",
-        description: "Your account has been created successfully!",
+        title: 'Account created successfully',
+        description: 'You have been registered and signed in',
       });
-      navigate("/dashboard");
-      if (onClose) onClose();
-    } catch (err) {
-      console.error("Registration error:", err);
-      setError("Registration failed. Please try again.");
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Registration error:', error);
       toast({
-        title: "Registration failed",
-        description: "Please try again with different credentials.",
-        variant: "destructive",
+        title: 'Registration failed',
+        description: 'There was an error during registration. Please try again.',
+        variant: 'destructive',
       });
     }
   };
-
-  // Function to handle OAuth logins
-  const handleOAuthLogin = (provider: 'google' | 'facebook') => {
-    window.location.href = `http://localhost:5000/auth/${provider}`;
-  };
-
-  if (!isOpen) return null;
 
   return (
-    <>
-      {/* Background Overlay */}
-      <div className="fixed inset-0 bg-black/50 z-40" onClick={onClose}></div>
-    
-      {/* Modal Container */}
-      <div className="fixed inset-0 flex items-center justify-center z-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
-          {/* Close Button */}
-          <button className="absolute top-3 right-3 text-gray-600 hover:text-gray-800" onClick={onClose}>
-            <X className="h-5 w-5" />
-          </button>
-    
-          {/* Header */}
-          <div className="text-center mb-6 pb-2">
-            <h1 className="text-2xl font-bold">Create an account</h1>
-            <p className="mt-2 text-gray-600">Join our platform to buy, sell, or list properties</p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+        <div className="text-center mb-6">
+          <Link to="/" className="inline-block">
+            <img 
+              src="https://res.cloudinary.com/dw7w2at8k/image/upload/v1741631701/jugyahblack.5fadb514_sdcgzu.svg" 
+              alt="Logo" 
+              className="h-8 mx-auto"
+            />
+          </Link>
+          <h1 className="text-2xl font-bold mt-4">Create an Account</h1>
+          <p className="text-gray-600 mt-1">Sign up to start using our platform</p>
+        </div>
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+            <Input
+              id="name"
+              placeholder="Enter your full name"
+              {...form.register('name')}
+              className="w-full"
+            />
+            {form.formState.errors.name && (
+              <p className="text-red-500 text-xs mt-1">{form.formState.errors.name.message}</p>
+            )}
           </div>
-    
-          {/* Form */}
-          <form onSubmit={handleRegister} className="space-y-4">
-            <div>
-              <Label htmlFor="name">Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input id="name" type="text" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} className="pl-10" required />
-              </div>
-            </div>
-    
-            <div>
-              <Label htmlFor="email">Email address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input id="email" type="email" placeholder="name@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10" required />
-              </div>
-            </div>
-    
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" required />
-              </div>
-            </div>
-  
-            <div>
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input 
-                  id="confirmPassword" 
-                  type="password" 
-                  placeholder="••••••••" 
-                  value={confirmPassword} 
-                  onChange={(e) => setConfirmPassword(e.target.value)} 
-                  className="pl-10" 
-                  required 
-                />
-              </div>
-            </div>
-    
-            <div>
-              <Label htmlFor="role">I want to</Label>
-              <select 
-                id="role" 
-                value={role} 
-                onChange={(e) => setRole(e.target.value as UserRole)} 
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-estate-primary" 
-                required
-              >
-                <option value="buyer">Buy Properties</option>
-                <option value="owner">Sell My Properties</option>
-                <option value="agent">List as an Agent</option>
-              </select>
-            </div>
-    
-            {error && <div className="text-red-500 text-sm">{error}</div>}
-    
-            <Button type="submit" className="w-full bg-estate-primary hover:bg-estate-primary/90" disabled={isLoading}>
-              {isLoading ? "Creating Account..." : "Create Account"}
-              {!isLoading && <ArrowRight className="ml-2 h-4 w-4" />}
-            </Button>
-          </form>
-    
-          {/* Social Sign-in */}
-          <div className="mt-4 space-y-3">
-            <div className="flex items-center">
-              <div className="flex-grow border-t border-gray-300"></div>
-              <span className="px-2 text-gray-500 text-sm">or continue with</span>
-              <div className="flex-grow border-t border-gray-300"></div>
-            </div>
-    
-            <div className="flex space-x-4">
-              <button 
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              {...form.register('email')}
+              className="w-full"
+            />
+            {form.formState.errors.email && (
+              <p className="text-red-500 text-xs mt-1">{form.formState.errors.email.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">I am a</label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
                 type="button"
-                onClick={() => handleOAuthLogin('google')}
-                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+                variant={role === UserRole.BUYER ? 'default' : 'outline'}
+                className="w-full"
+                onClick={() => setRole(UserRole.BUYER)}
               >
-                <FaGoogle className="h-5 w-5 mr-2" />
-                Google
-              </button>
-              <button 
+                Home Buyer
+              </Button>
+              <Button
                 type="button"
-                onClick={() => handleOAuthLogin('facebook')}
-                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100"
+                variant={role === UserRole.OWNER ? 'default' : 'outline'}
+                className="w-full"
+                onClick={() => setRole(UserRole.OWNER)}
               >
-                <FaFacebook className="h-5 w-5 mr-2 text-blue-600" />
-                Facebook
-              </button>
+                Property Owner
+              </Button>
             </div>
           </div>
-    
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{" "}
-              <Link to="/login" className="text-estate-primary hover:underline font-medium">
-                Sign in
-              </Link>
-            </p>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              {...form.register('password')}
+              className="w-full"
+            />
+            {form.formState.errors.password && (
+              <p className="text-red-500 text-xs mt-1">{form.formState.errors.password.message}</p>
+            )}
           </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="Confirm your password"
+              {...form.register('confirmPassword')}
+              className="w-full"
+            />
+            {form.formState.errors.confirmPassword && (
+              <p className="text-red-500 text-xs mt-1">{form.formState.errors.confirmPassword.message}</p>
+            )}
+          </div>
+
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating account...' : 'Create Account'}
+          </Button>
+        </form>
+
+        <div className="text-center mt-4">
+          <p className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+              Sign in
+            </Link>
+          </p>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
