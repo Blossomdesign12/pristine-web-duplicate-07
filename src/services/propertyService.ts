@@ -49,7 +49,7 @@ const authenticatedRequest = async (
   return response.json();
 };
 
-// Upload images first and get their URLs
+// Upload images to Cloudinary through our backend
 export const uploadImages = async (images: File[]): Promise<string[]> => {
   const formData = new FormData();
   images.forEach((image) => {
@@ -57,7 +57,7 @@ export const uploadImages = async (images: File[]): Promise<string[]> => {
   });
 
   const response = await authenticatedRequest("/properties/upload", "POST", formData, true);
-  return response.urls;
+  return response.urls; // These will be Cloudinary URLs returned from the backend
 };
 
 // Add a new property with uploaded image URLs
@@ -82,6 +82,16 @@ export const addProperty = async (propertyData: Partial<Property>): Promise<Prop
         lng: longitude,
       };
     }
+  }
+
+  // Make sure property data conforms to the expected schema
+  if (!propertyData.features) {
+    propertyData.features = {} as any;
+  }
+  
+  // Ensure yearBuilt is present
+  if (!propertyData.features.yearBuilt) {
+    propertyData.features.yearBuilt = new Date().getFullYear();
   }
 
   const response = await authenticatedRequest("/properties", "POST", propertyData);
@@ -138,6 +148,11 @@ export const updateProperty = async (id: string, propertyData: Partial<Property>
         lng: longitude,
       };
     }
+  }
+
+  // Ensure yearBuilt is present
+  if (propertyData.features && !propertyData.features.yearBuilt) {
+    propertyData.features.yearBuilt = new Date().getFullYear();
   }
 
   const response = await authenticatedRequest(`/properties/${id}`, "PUT", propertyData);

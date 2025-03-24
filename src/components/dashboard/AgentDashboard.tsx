@@ -103,7 +103,7 @@ const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="text-2xl font-bold">
-                  {isLoading ? "..." : properties.reduce((sum, prop) => sum + (prop.views || 0), 0)}
+                  {isLoading ? "..." : properties.reduce((sum, prop) => sum + ((prop as any).views || 0), 0)}
                 </div>
                 <User className="h-8 w-8 text-estate-primary" />
               </div>

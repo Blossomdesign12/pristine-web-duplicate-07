@@ -10,15 +10,19 @@ const {
   deleteProperty,
   getUserProperties,
   getPropertiesByStatus,
+  uploadImages,
+  incrementViews
 } = require("../controllers/propertyController");
 
 // Public routes
 router.get("/", getProperties);
 router.get("/status/:status", getPropertiesByStatus);
 router.get("/:id", getPropertyById);
+router.put("/:id/view", incrementViews);
 
 // Protected routes
 router.post("/", protect, createProperty);
+router.post("/upload", protect, uploadImages);
 router.put("/:id", protect, updateProperty);
 router.delete("/:id", protect, deleteProperty);
 router.get("/user/me", protect, getUserProperties);

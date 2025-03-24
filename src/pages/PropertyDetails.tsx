@@ -10,12 +10,15 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getPropertyById, formatPrice, Property } from '@/lib/data';
+import { formatPrice, Property } from '@/lib/data';
 import SimilarProperties from '@/components/SimilarProperties';
 import PropertyFeatures from '@/components/PropertyFeatures';
 import PropertyGallery from '@/components/PropertyGallery';
 import ContactForm from '@/components/ContactForm';
 import PropertyMap from '@/components/PropertyMap';
+import { getPropertyById } from '@/services/propertyService';
+
+const API_URL = "http://localhost:5000";
 
 const PropertyDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,16 +32,32 @@ const PropertyDetails = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    if (id) {
-      const propertyData = getPropertyById(id);
-      if (propertyData) {
+    const fetchPropertyDetails = async () => {
+      if (!id) return;
+      
+      try {
+        const propertyData = await getPropertyById(id);
         setProperty(propertyData);
-      } else {
-        navigate('/not-found');
+        
+        // Increment the view counter
+        await fetch(`${API_URL}/properties/${id}/view`, {
+          method: 'PUT'
+        });
+      } catch (error) {
+        console.error("Error fetching property:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load property details. The property may not exist.",
+          variant: "destructive",
+        });
+        navigate('/properties');
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
-  }, [id, navigate]);
+    };
+    
+    fetchPropertyDetails();
+  }, [id, navigate, toast]);
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -67,7 +86,10 @@ const PropertyDetails = () => {
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-grow flex items-center justify-center">
-          <div className="animate-pulse">Loading property details...</div>
+          <div className="animate-pulse flex flex-col items-center">
+            <div className="w-16 h-16 border-4 border-estate-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p>Loading property details...</p>
+          </div>
         </main>
         <Footer />
       </div>
@@ -168,6 +190,12 @@ const PropertyDetails = () => {
                 <Calendar size={18} />
                 <span className="font-medium">Built {property.features.yearBuilt}</span>
               </div>
+              {(property as any).views !== undefined && (
+                <div className="flex items-center gap-1 text-estate-gray">
+                  <User size={18} />
+                  <span className="font-medium">{(property as any).views}</span> Views
+                </div>
+              )}
             </div>
             
             <div className="flex flex-wrap gap-3">
@@ -262,6 +290,12 @@ const PropertyDetails = () => {
                       <span className="text-estate-gray">Year Built:</span>
                       <span className="font-medium">{property.features.yearBuilt}</span>
                     </div>
+                    {(property as any).views !== undefined && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-estate-gray">Total Views:</span>
+                        <span className="font-medium">{(property as any).views}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 

@@ -1,5 +1,65 @@
 
 const Property = require("../models/Property");
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
+const path = require('path');
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Configure storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'property-images',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
+  }
+});
+
+// Configure upload middleware
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
+
+// @desc    Upload property images to Cloudinary
+// @route   POST /properties/upload
+// @access  Private (Only authenticated users)
+exports.uploadImages = async (req, res) => {
+  try {
+    // The upload middleware will process the files and add them to req.files
+    upload.array('images', 10)(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({
+          success: false,
+          message: "Error uploading images",
+          error: err.message
+        });
+      }
+
+      // Extract URLs from the uploaded files
+      const urls = req.files.map(file => file.path);
+
+      res.status(200).json({
+        success: true,
+        message: "Images uploaded successfully",
+        urls: urls
+      });
+    });
+  } catch (error) {
+    console.error("Upload images error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message
+    });
+  }
+};
 
 // @desc    Get all properties
 // @route   GET /properties
@@ -82,6 +142,7 @@ exports.createProperty = async (req, res) => {
         email: req.user.email,
         image: req.user.avatar || "https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       },
+      views: 0 // Initialize views counter
     };
     
     const property = await Property.create(propertyData);
@@ -174,6 +235,20 @@ exports.deleteProperty = async (req, res) => {
       });
     }
     
+    // Delete associated images from Cloudinary
+    if (property.images && property.images.length > 0) {
+      try {
+        for (const imageUrl of property.images) {
+          // Extract the public_id from Cloudinary URL
+          const publicId = imageUrl.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`property-images/${publicId}`);
+        }
+      } catch (error) {
+        console.error("Error deleting images:", error);
+        // Continue with property deletion even if image deletion fails
+      }
+    }
+    
     await property.deleteOne();
     
     res.status(200).json({
@@ -241,6 +316,38 @@ exports.getPropertiesByStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("Get properties by status error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Increment property view count
+// @route   PUT /properties/:id/view
+// @access  Public
+exports.incrementViews = async (req, res) => {
+  try {
+    const property = await Property.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true }
+    );
+    
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      views: property.views,
+    });
+  } catch (error) {
+    console.error("Increment views error:", error);
     res.status(500).json({
       success: false,
       message: "Server error",
