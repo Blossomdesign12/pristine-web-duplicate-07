@@ -192,8 +192,7 @@ const SettingsPanel = () => {
                 You can download or delete all your data from our platform.
               </p>
               <div className="flex gap-4">
-                <Button variant="outline" className="flex-1">Download Data</Button>
-                <Button variant="destructive" className="flex-1">Delete Account</Button>
+                <Button variant="destructive" className="flex-2">Delete Account</Button>
               </div>
             </div>
           </div>

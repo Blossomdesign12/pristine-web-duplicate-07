@@ -75,16 +75,17 @@ const Dashboard = () => {
             </Link>
           </div>
           
-          <div className="p-4 border-b border-gray-200">
+          <div className="p-4 border-b border-gray-200 ms-3">
             <Link to="/profile" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <img 
+              {/* <img 
                 src={mockUser.avatar || "https://via.placeholder.com/40"} 
                 alt={mockUser.name} 
                 className="h-10 w-10 rounded-full object-cover"
-              />
+              /> */}
               <div>
+                <h4>Welcome</h4>
                 <h5 className="font-medium">{mockUser.name}</h5>
-                <p className="text-xs text-gray-500 capitalize">{mockUser.role}</p>
+                {/* <p className="text-xs text-gray-500 capitalize">{mockUser.role}</p> */}
               </div>
             </Link>
           </div>
@@ -96,7 +97,7 @@ const Dashboard = () => {
               onClick={() => setActiveTab("overview")}
             >
               <LayoutDashboard className="mr-2 h-5 w-5" />
-              Overview
+              Dashboard
             </Button>
             
             {/* Add Property Link available to all users */}
@@ -193,7 +194,7 @@ const Dashboard = () => {
               </>
             )}
             
-            <Link to="/messages" className="block">
+            {/* <Link to="/messages" className="block">
               <Button
                 variant="ghost"
                 className="w-full justify-start"
@@ -201,7 +202,7 @@ const Dashboard = () => {
                 <MessageSquare className="mr-2 h-5 w-5" />
                 Messages
               </Button>
-            </Link>
+            </Link> */}
             
             <Link to="/notifications" className="block">
               <Button
@@ -213,7 +214,7 @@ const Dashboard = () => {
               </Button>
             </Link>
             
-            <Link to="/profile" className="block">
+            {/* <Link to="/profile" className="block">
               <Button
                 variant="ghost"
                 className="w-full justify-start"
@@ -221,7 +222,7 @@ const Dashboard = () => {
                 <UserRound className="mr-2 h-5 w-5" />
                 Profile
               </Button>
-            </Link>
+            </Link> */}
             
             <Button
               variant="ghost"
@@ -261,13 +262,13 @@ const Dashboard = () => {
       <main className="flex-1">
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-2xl font-bold">Dashboard</h1>
+            {/* <h1 className="text-2xl font-bold">Dashboard</h1>
             <Link to="/add-property">
               <Button className="bg-black hover:bg-black/90">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Property
               </Button>
-            </Link>
+            </Link> */}
           </div>
           
           {renderDashboardContent()}
