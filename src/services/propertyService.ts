@@ -1,91 +1,131 @@
 
 import { Property } from '@/lib/data';
+import { getAuthToken } from './authService';
 
-// Mock function to simulate adding a property
-export const addProperty = async (propertyData: Partial<Property>): Promise<Property> => {
-  // In a real app, this would be an API call
-  console.log('Adding property:', propertyData);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Return a mock response with the ID
+// Get auth token for API requests
+const getHeaders = () => {
+  const token = getAuthToken();
   return {
-    ...propertyData,
-    id: `prop-${Math.floor(Math.random() * 1000)}`,
-    createdAt: new Date().toISOString(),
-  } as Property;
+    'Content-Type': 'application/json',
+    'Authorization': token ? `Bearer ${token}` : '',
+  };
+};
+
+// Add a property
+export const addProperty = async (propertyData: Partial<Property>): Promise<Property> => {
+  try {
+    const response = await fetch('http://localhost:5000/properties', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(propertyData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to add property');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error adding property:', error);
+    throw error;
+  }
 };
 
 // Get properties by status (for-sale, for-rent, etc)
 export const getPropertiesByStatus = async (status: string): Promise<Property[]> => {
-  // In a real app, this would fetch from the backend API
-  console.log('Fetching properties with status:', status);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // For now, use mock data from lib/data
-  const allProperties = await import('@/lib/data').then(module => module.properties);
-  
-  // Filter by status
-  return allProperties.filter(property => property.features.status === status);
+  try {
+    const response = await fetch(`http://localhost:5000/properties/status/${status}`, {
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch properties');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching properties by status:', error);
+    throw error;
+  }
 };
 
 // Get all properties for the current user
 export const getUserProperties = async (): Promise<Property[]> => {
-  // In a real app, this would fetch from the backend API with auth
-  console.log('Fetching user properties');
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // For now, use mock data from lib/data
-  const allProperties = await import('@/lib/data').then(module => module.properties);
-  
-  // Return all properties for mock purposes (in real app would filter by user ID)
-  return allProperties;
+  try {
+    const response = await fetch('http://localhost:5000/properties/user/me', {
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch user properties');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching user properties:', error);
+    throw error;
+  }
 };
 
 // Get a property by ID
 export const getPropertyById = async (id: string): Promise<Property | null> => {
-  console.log('Fetching property with ID:', id);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // For now, use mock data from lib/data
-  const allProperties = await import('@/lib/data').then(module => module.properties);
-  
-  // Find the property with the matching ID
-  const property = allProperties.find(prop => prop.id === id);
-  
-  return property || null;
+  try {
+    const response = await fetch(`http://localhost:5000/properties/${id}`, {
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to fetch property');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching property:', error);
+    throw error;
+  }
 };
 
 // Update a property
 export const updateProperty = async (id: string, propertyData: Partial<Property>): Promise<Property> => {
-  console.log('Updating property:', id, propertyData);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // For a real app, this would update the property in the database
-  return {
-    ...propertyData,
-    id,
-    updatedAt: new Date().toISOString(),
-  } as Property;
+  try {
+    const response = await fetch(`http://localhost:5000/properties/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(propertyData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update property');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating property:', error);
+    throw error;
+  }
 };
 
 // Delete a property
 export const deleteProperty = async (id: string): Promise<boolean> => {
-  console.log('Deleting property:', id);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // In a real app, this would delete from the database
-  // Return success
-  return true;
+  try {
+    const response = await fetch(`http://localhost:5000/properties/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders(),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete property');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting property:', error);
+    throw error;
+  }
 };

@@ -1,55 +1,38 @@
 
-// Update the imports to use the User type from types/user
 import { User, UserRole } from '@/types/user';
-
-// Mock user data
-const mockUsers: User[] = [
-  {
-    id: "user-1",
-    name: "John Smith",
-    email: "john@example.com",
-    role: "owner",
-    phone: "+91 9876543210",
-    avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/ed060b47018885c4c6847048f8a83758_qgbypi.png",
-    bio: "I'm a property owner with multiple properties in Mumbai.",
-    address: "123 Main Street, Bandra West",
-    city: "Mumbai",
-    state: "Maharashtra",
-    zipCode: "400050",
-    country: "India",
-    company: "Smith Properties",
-    website: "www.smithproperties.com",
-    socialLinks: {
-      facebook: "facebook.com/johnsmith",
-      twitter: "twitter.com/johnsmith",
-      linkedin: "linkedin.com/in/johnsmith",
-      instagram: "instagram.com/johnsmith"
-    },
-    memberSince: "Jan 2023"
-  },
-  {
-    id: "user-2",
-    name: "Emily Johnson",
-    email: "emily@example.com",
-    role: "agent",
-    phone: "+91 8765432109",
-    avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/7975151ffd45504df14dfc8cb4c55a1a_ccltzx.png",
-    bio: "Experienced real estate agent with 5+ years in the industry.",
-    memberSince: "Mar 2022"
-  }
-];
 
 // Function to authenticate a user
 export const authenticateUser = async (email: string, password: string): Promise<User | null> => {
-  // In a real app, this would be an API call that checks credentials
-  const user = mockUsers.find(u => u.email === email);
-  
-  // For demo purposes, any password will work
-  if (user) {
-    return user;
+  try {
+    const response = await fetch('http://localhost:5000/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Login failed');
+    }
+
+    const data = await response.json();
+    return {
+      id: data.user.id,
+      name: data.user.name,
+      email: data.user.email,
+      role: data.user.role,
+      phone: data.user.phone,
+      avatar: data.user.avatar,
+      bio: data.user.description,
+      memberSince: data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : undefined,
+      // Add other fields as they come from the backend
+    };
+  } catch (error) {
+    console.error('Authentication error:', error);
+    return null;
   }
-  
-  return null;
 };
 
 // Function to register a new user
@@ -59,24 +42,92 @@ export const registerUser = async (
   password: string, 
   role: string = UserRole.BUYER
 ): Promise<User> => {
-  // In a real app, this would create a new user in the database
-  const newUser: User = {
-    id: `user-${Math.floor(Math.random() * 1000)}`,
-    name,
-    email,
-    role: role as 'buyer' | 'owner' | 'agent' | 'admin',
-    avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/ed060b47018885c4c6847048f8a83758_qgbypi.png",
-    memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-  };
-  
-  return newUser;
+  try {
+    const response = await fetch('http://localhost:5000/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, password, role }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Registration failed');
+    }
+
+    const data = await response.json();
+    return {
+      id: data.user.id,
+      name: data.user.name,
+      email: data.user.email,
+      role: data.user.role,
+      avatar: data.user.avatar,
+      memberSince: data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : undefined,
+    };
+  } catch (error) {
+    console.error('Registration error:', error);
+    throw error;
+  }
 };
 
-// Function to handle OAuth redirect - this is a stub implementation
+// Function to handle OAuth redirect
 export const handleOAuthRedirect = (): boolean => {
-  // In a real implementation, this would check for OAuth callback parameters
-  // and handle the authentication flow
+  // Check for token in URL (from OAuth redirect)
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
   
-  // For now, just return false to indicate we're not handling a redirect
+  if (token) {
+    // Store the token in localStorage
+    localStorage.setItem('token', token);
+    
+    // Also fetch user data and store it
+    fetchUserData(token)
+      .then(userData => {
+        if (userData) {
+          localStorage.setItem('user', JSON.stringify(userData));
+          window.location.href = '/dashboard';
+        }
+      })
+      .catch(err => console.error('Error fetching user data:', err));
+    
+    return true;
+  }
+  
   return false;
+};
+
+// Function to fetch user data with token
+const fetchUserData = async (token: string): Promise<User | null> => {
+  try {
+    const response = await fetch('http://localhost:5000/auth/me', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch user data');
+    }
+    
+    const data = await response.json();
+    return {
+      id: data.user.id,
+      name: data.user.name,
+      email: data.user.email,
+      role: data.user.role,
+      phone: data.user.phone,
+      avatar: data.user.avatar,
+      bio: data.user.description,
+      memberSince: data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : undefined,
+    };
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    return null;
+  }
+};
+
+// Helper function to get stored token
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem('token');
 };
