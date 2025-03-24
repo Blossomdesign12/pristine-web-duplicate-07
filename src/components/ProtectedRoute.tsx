@@ -1,6 +1,7 @@
 
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from "@/hooks/use-toast";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -15,6 +16,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!isAuthenticated) {
+    // Show toast notification
+    toast({
+      title: "Authentication Required",
+      description: "You need to be logged in to access this page",
+      variant: "destructive",
+    });
+    
     // Redirect to login page but save the location they were trying to access
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

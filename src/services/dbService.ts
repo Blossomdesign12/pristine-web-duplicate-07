@@ -1,4 +1,3 @@
-
 // This is a mock implementation of MongoDB service
 // In a real app, you would use the MongoDB driver or an ODM like Mongoose
 

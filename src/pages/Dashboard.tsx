@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, 
@@ -31,10 +31,19 @@ import NotificationContent from "@/components/dashboard/NotificationContent";
 import ProfileContent from "@/components/dashboard/ProfileContent";
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [searchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(tabFromUrl || "overview");
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   
+  // Update active tab when URL changes
+  useEffect(() => {
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
+
   // Default role to buyer if not authenticated
   const role = user?.role || "buyer";
 
@@ -71,11 +80,10 @@ const Dashboard = () => {
     logout();
   };
 
-  // Mock user data when no user is authenticated
-  const mockUser = user || {
-    name: "Guest User",
-    role: "buyer",
-    avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/ed060b47018885c4c6847048f8a83758_qgbypi.png"
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    // Update URL with the new tab
+    navigate(`/dashboard?tab=${tab}`);
   };
 
   return (
@@ -90,10 +98,17 @@ const Dashboard = () => {
           </div>
           
           <div className="p-4 border-b border-gray-200 ms-3">
-            <div className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer" onClick={() => setActiveTab("profile")}>
+            <div className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer" onClick={() => handleTabChange("profile")}>
+              <div className="w-10 h-10 rounded-full overflow-hidden">
+                <img 
+                  src={user?.avatar || "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/ed060b47018885c4c6847048f8a83758_qgbypi.png"} 
+                  alt={user?.name} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div>
                 <h4>Welcome</h4>
-                <h5 className="font-medium">{mockUser.name}</h5>
+                <h5 className="font-medium">{user?.name || "Guest"}</h5>
               </div>
             </div>
           </div>
@@ -102,7 +117,7 @@ const Dashboard = () => {
             <Button
               variant="ghost"
               className={`w-full justify-start ${activeTab === "overview" ? "bg-gray-100" : ""}`}
-              onClick={() => setActiveTab("overview")}
+              onClick={() => handleTabChange("overview")}
             >
               <LayoutDashboard className="mr-2 h-5 w-5" />
               Dashboard
@@ -112,7 +127,7 @@ const Dashboard = () => {
             <Button
               variant="ghost"
               className={`w-full justify-start ${activeTab === "add-property" ? "bg-gray-100" : ""}`}
-              onClick={() => setActiveTab("add-property")}
+              onClick={() => handleTabChange("add-property")}
             >
               <Plus className="mr-2 h-5 w-5" />
               Add Property
@@ -123,7 +138,7 @@ const Dashboard = () => {
                 <Button
                   variant="ghost"
                   className={`w-full justify-start ${activeTab === "favorites" ? "bg-gray-100" : ""}`}
-                  onClick={() => setActiveTab("favorites")}
+                  onClick={() => handleTabChange("favorites")}
                 >
                   <Heart className="mr-2 h-5 w-5" />
                   Favorites
@@ -131,7 +146,7 @@ const Dashboard = () => {
                 <Button
                   variant="ghost"
                   className={`w-full justify-start ${activeTab === "search" ? "bg-gray-100" : ""}`}
-                  onClick={() => setActiveTab("search")}
+                  onClick={() => handleTabChange("search")}
                 >
                   <List className="mr-2 h-5 w-5" />
                   Property Search
@@ -144,7 +159,7 @@ const Dashboard = () => {
                 <Button
                   variant="ghost"
                   className={`w-full justify-start ${activeTab === "properties" ? "bg-gray-100" : ""}`}
-                  onClick={() => setActiveTab("properties")}
+                  onClick={() => handleTabChange("properties")}
                 >
                   <Home className="mr-2 h-5 w-5" />
                   My Properties
@@ -157,10 +172,10 @@ const Dashboard = () => {
               <Button
                 variant="ghost"
                 className={`w-full justify-start ${activeTab === "clients" ? "bg-gray-100" : ""}`}
-                onClick={() => setActiveTab("clients")}
+                onClick={() => handleTabChange("clients")}
               >
                 <Users className="mr-2 h-5 w-5" />
-                Clients Lead
+                Client Leads
               </Button>
             )}
             
@@ -169,7 +184,7 @@ const Dashboard = () => {
                 <Button
                   variant="ghost"
                   className={`w-full justify-start ${activeTab === "users" ? "bg-gray-100" : ""}`}
-                  onClick={() => setActiveTab("users")}
+                  onClick={() => handleTabChange("users")}
                 >
                   <Users className="mr-2 h-5 w-5" />
                   Users
@@ -177,7 +192,7 @@ const Dashboard = () => {
                 <Button
                   variant="ghost"
                   className={`w-full justify-start ${activeTab === "analytics" ? "bg-gray-100" : ""}`}
-                  onClick={() => setActiveTab("analytics")}
+                  onClick={() => handleTabChange("analytics")}
                 >
                   <Activity className="mr-2 h-5 w-5" />
                   Analytics
@@ -185,7 +200,7 @@ const Dashboard = () => {
                 <Button
                   variant="ghost"
                   className={`w-full justify-start ${activeTab === "admin-portal" ? "bg-gray-100" : ""}`}
-                  onClick={() => setActiveTab("admin-portal")}
+                  onClick={() => handleTabChange("admin-portal")}
                 >
                   <Shield className="mr-2 h-5 w-5" />
                   Admin Portal
@@ -193,12 +208,10 @@ const Dashboard = () => {
               </>
             )}
             
-            
-            
             <Button
               variant="ghost"
               className={`w-full justify-start ${activeTab === "notifications" ? "bg-gray-100" : ""}`}
-              onClick={() => setActiveTab("notifications")}
+              onClick={() => handleTabChange("notifications")}
             >
               <Bell className="mr-2 h-5 w-5" />
               Notifications
@@ -207,7 +220,7 @@ const Dashboard = () => {
             <Button
               variant="ghost"
               className={`w-full justify-start ${activeTab === "settings" ? "bg-gray-100" : ""}`}
-              onClick={() => setActiveTab("settings")}
+              onClick={() => handleTabChange("settings")}
             >
               <Settings className="mr-2 h-5 w-5" />
               Settings

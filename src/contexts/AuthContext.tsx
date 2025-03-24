@@ -57,13 +57,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (currentUser) {
             setUser(currentUser);
             
-            // Optionally refresh user data from server
+            // Refresh user data from server
             try {
               const updatedUser = await fetchUserDetails();
               setUser(updatedUser);
             } catch (error) {
-              console.warn("Could not refresh user data:", error);
-              // Continue with stored user data
+              console.error("Could not refresh user data:", error);
+              // If refresh fails, log the user out
+              logoutUser();
+              setUser(null);
             }
           }
         }
@@ -136,6 +138,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(updatedUser);
     } catch (error) {
       console.error("Failed to refresh user:", error);
+      // If refresh fails, log the user out
+      logoutUser();
+      setUser(null);
       throw error;
     }
   };

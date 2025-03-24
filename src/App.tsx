@@ -28,45 +28,19 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Context
 import { AuthProvider } from './contexts/AuthContext';
 
-// Services
-import { handleOAuthRedirect } from './services/authService';
-
-// Initialize dummy data
-import { initializeDatabase } from './lib/dummy-properties';
-
 function App() {
   const [isLoading, setIsLoading] = useState(true);
-  const [handlingOAuth, setHandlingOAuth] = useState(false);
 
   useEffect(() => {
-    // First check if we're handling an OAuth redirect
-    const isHandlingRedirect = handleOAuthRedirect();
-    setHandlingOAuth(isHandlingRedirect);
+    // Simulate loading assets or data
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
 
-    if (!isHandlingRedirect) {
-      // Initialize the database with dummy properties
-      initializeDatabase();
-      
-      // Simulate loading assets or data
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-
-      return () => clearTimeout(timer);
-    }
+    return () => clearTimeout(timer);
   }, []);
 
-  if (isLoading && !handlingOAuth) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  // If we're handling OAuth redirect, don't render the app
-  // The redirect is managed by handleOAuthRedirect()
-  if (handlingOAuth) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin"></div>
@@ -106,7 +80,6 @@ function App() {
           
           {/* Redirect old routes to dashboard with appropriate tabs */}
           <Route path="/add-property" element={<Navigate to="/dashboard?tab=add-property" replace />} />
-          {/* <Route path="/messages" element={<Navigate to="/dashboard?tab=messages" replace />} /> */}
           <Route path="/notifications" element={<Navigate to="/dashboard?tab=notifications" replace />} />
           <Route path="/profile" element={<Navigate to="/dashboard?tab=profile" replace />} />
           
