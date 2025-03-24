@@ -71,3 +71,12 @@ export const registerUser = async (
   
   return newUser;
 };
+
+// Function to handle OAuth redirect - this is a stub implementation
+export const handleOAuthRedirect = (): boolean => {
+  // In a real implementation, this would check for OAuth callback parameters
+  // and handle the authentication flow
+  
+  // For now, just return false to indicate we're not handling a redirect
+  return false;
+};
