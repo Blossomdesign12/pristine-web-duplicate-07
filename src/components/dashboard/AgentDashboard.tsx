@@ -1,258 +1,241 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
   User, 
   Home,
-  MessageSquare,
-  DollarSign,
-  Calendar
+  Plus,
+  AlertCircle
 } from "lucide-react";
+import { getUserProperties } from "@/services/propertyService";
+import { Property } from "@/lib/data";
+import { useToast } from "@/hooks/use-toast";
 
 interface AgentDashboardProps {
   activeTab: string;
 }
 
 const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
-  // Mock data - would come from API in real app
-  const [clients] = useState([
-    { id: "1", name: "John Smith", email: "john@example.com", status: "active" },
-    { id: "2", name: "Emily Johnson", email: "emily@example.com", status: "active" },
-    { id: "3", name: "Robert Davis", email: "robert@example.com", status: "inactive" },
-  ]);
-  
-  const [properties] = useState([
-    { id: "1", title: "Modern Apartment", address: "123 Main St", status: "active", views: 45 },
-    { id: "2", title: "Beach House", address: "456 Ocean Ave", status: "active", views: 72 },
-    { id: "3", title: "Mountain Cabin", address: "789 Forest Rd", status: "pending", views: 31 },
-  ]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  if (activeTab === "clients") {
-    return (
-      <div>
-        <h2 className="text-xl font-bold mb-6">My Clients</h2>
-        <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Email</th>
-                  <th className="px-4 py-2 text-left">Status</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients.map((client) => (
-                  <tr key={client.id} className="border-b">
-                    <td className="px-4 py-2">{client.name}</td>
-                    <td className="px-4 py-2">{client.email}</td>
-                    <td className="px-4 py-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        client.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                      }`}>
-                        {client.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2">
-                      <Button variant="ghost" size="sm">
-                        Contact
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const fetchProperties = async () => {
+      try {
+        const fetchedProperties = await getUserProperties();
+        setProperties(fetchedProperties);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch your properties. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (activeTab === "properties" || activeTab === "listings") {
-    const title = activeTab === "properties" ? "My Properties" : "My Listings";
-    
-    return (
-      <div>
-        <h2 className="text-xl font-bold mb-6">{title}</h2>
-        <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-4 py-2 text-left">Title</th>
-                  <th className="px-4 py-2 text-left">Address</th>
-                  <th className="px-4 py-2 text-left">Status</th>
-                  <th className="px-4 py-2 text-left">Views</th>
-                  <th className="px-4 py-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {properties.map((property) => (
-                  <tr key={property.id} className="border-b">
-                    <td className="px-4 py-2">{property.title}</td>
-                    <td className="px-4 py-2">{property.address}</td>
-                    <td className="px-4 py-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        property.status === "active" ? "bg-green-100 text-green-800" : 
-                        property.status === "pending" ? "bg-yellow-100 text-yellow-800" : 
-                        "bg-gray-100 text-gray-800"
-                      }`}>
-                        {property.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2">{property.views}</td>
-                    <td className="px-4 py-2">
-                      <Button variant="ghost" size="sm">
-                        Edit
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    fetchProperties();
+  }, [toast]);
 
-  // Default: Overview
-  return (
-    <div>
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Total Clients
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">{clients.length}</div>
-              <User className="h-8 w-8 text-estate-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Active Properties
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">
-                {properties.filter(p => p.status === "active").length}
-              </div>
-              <Home className="h-8 w-8 text-estate-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              New Messages
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">12</div>
-              <MessageSquare className="h-8 w-8 text-estate-primary" />
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-500">
-              Revenue
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="text-2xl font-bold">$5,240</div>
-              <DollarSign className="h-8 w-8 text-estate-primary" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      {/* Recent Activities */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Appointments</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-start space-x-4">
-                <Calendar className="h-5 w-5 text-estate-primary mt-0.5" />
-                <div>
-                  <p className="font-medium">Property Viewing: Modern Apartment</p>
-                  <p className="text-sm text-gray-500">Tomorrow, 2:00 PM</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <Calendar className="h-5 w-5 text-estate-primary mt-0.5" />
-                <div>
-                  <p className="font-medium">Client Meeting: John Smith</p>
-                  <p className="text-sm text-gray-500">Thursday, 10:30 AM</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <Calendar className="h-5 w-5 text-estate-primary mt-0.5" />
-                <div>
-                  <p className="font-medium">Open House: Beach House</p>
-                  <p className="text-sm text-gray-500">Saturday, 1:00 PM - 4:00 PM</p>
-                </div>
-              </div>
-            </div>
-            <Link to="#">
-              <Button variant="ghost" className="mt-4 w-full">
-                View All Appointments
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="border-l-2 border-estate-primary pl-4">
-                <p className="font-medium">New client inquiry</p>
-                <p className="text-sm text-gray-500">Michael Brown is interested in Beach House</p>
-                <p className="text-xs text-gray-400">Today, 9:45 AM</p>
-              </div>
-              <div className="border-l-2 border-estate-primary pl-4">
-                <p className="font-medium">Property status updated</p>
-                <p className="text-sm text-gray-500">Mountain Cabin is now pending</p>
-                <p className="text-xs text-gray-400">Yesterday, 3:20 PM</p>
-              </div>
-              <div className="border-l-2 border-estate-primary pl-4">
-                <p className="font-medium">Offer accepted</p>
-                <p className="text-sm text-gray-500">Emily Johnson's offer on Lakeside Villa was accepted</p>
-                <p className="text-xs text-gray-400">2 days ago</p>
-              </div>
-            </div>
-            <Link to="#">
-              <Button variant="ghost" className="mt-4 w-full">
-                View All Activities
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+  const renderEmptyState = () => (
+    <div className="text-center py-12">
+      <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+      <h3 className="mt-4 text-lg font-semibold text-gray-900">No Properties Found</h3>
+      <p className="mt-2 text-sm text-gray-500">Get started by creating your first property listing.</p>
+      <Button className="mt-4" asChild>
+        <Link to="/dashboard?tab=add-property">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Property
+        </Link>
+      </Button>
     </div>
   );
+
+  if (activeTab === "overview") {
+    return (
+      <div className="space-y-6">
+        {/* Stats Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500">
+                Total Properties
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">
+                  {isLoading ? "..." : properties.length}
+                </div>
+                <Home className="h-8 w-8 text-estate-primary" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500">
+                Active Listings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">
+                  {isLoading ? "..." : properties.filter(p => p.features.status === "for-sale" || p.features.status === "for-rent").length}
+                </div>
+                <User className="h-8 w-8 text-estate-primary" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-500">
+                Recent Views
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="text-2xl font-bold">
+                  {isLoading ? "..." : properties.reduce((sum, prop) => sum + (prop.views || 0), 0)}
+                </div>
+                <User className="h-8 w-8 text-estate-primary" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Properties Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Properties</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 border-4 border-estate-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="mt-2 text-sm text-gray-500">Loading properties...</p>
+              </div>
+            ) : properties.length === 0 ? (
+              renderEmptyState()
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {properties.slice(0, 5).map((property) => (
+                  <Link
+                    key={property.id}
+                    to={`/property/${property.id}`}
+                    className="block py-4 hover:bg-gray-50 transition duration-150 ease-in-out"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-shrink-0 w-16 h-16">
+                        <img
+                          src={property.images[0] || "/placeholder.svg"}
+                          alt={property.title}
+                          className="w-full h-full object-cover rounded-md"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {property.title}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {property.location.city}, {property.location.state}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Price: ${property.price.toLocaleString()}
+                        </p>
+                      </div>
+                      <div>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                          ${property.features.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
+                          property.features.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
+                          'bg-gray-100 text-gray-800'}`}>
+                          {property.features.status.replace('-', ' ')}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Properties tab view
+  if (activeTab === "properties") {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold tracking-tight">My Properties</h2>
+          <Button asChild>
+            <Link to="/dashboard?tab=add-property">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Property
+            </Link>
+          </Button>
+        </div>
+
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="w-8 h-8 border-4 border-estate-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4 text-gray-500">Loading your properties...</p>
+          </div>
+        ) : properties.length === 0 ? (
+          renderEmptyState()
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {properties.map((property) => (
+              <Card key={property.id}>
+                <div className="aspect-w-16 aspect-h-9">
+                  <img
+                    src={property.images[0] || "/placeholder.svg"}
+                    alt={property.title}
+                    className="object-cover w-full h-48 rounded-t-lg"
+                  />
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-semibold">{property.title}</h3>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {property.location.city}, {property.location.state}
+                  </p>
+                  <div className="mt-2 flex justify-between items-center">
+                    <span className="text-lg font-bold">
+                      ${property.price.toLocaleString()}
+                    </span>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                      ${property.features.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
+                      property.features.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
+                      'bg-gray-100 text-gray-800'}`}>
+                      {property.features.status.replace('-', ' ')}
+                    </span>
+                  </div>
+                  <div className="mt-4 flex justify-end space-x-2">
+                    <Button variant="outline" asChild>
+                      <Link to={`/property/${property.id}`}>View Details</Link>
+                    </Button>
+                    <Button variant="default" asChild>
+                      <Link to={`/dashboard?tab=edit-property&id=${property.id}`}>Edit</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return null;
 };
 
 export default AgentDashboard;

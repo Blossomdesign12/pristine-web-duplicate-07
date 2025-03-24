@@ -1,6 +1,4 @@
-
 import { Property } from "@/lib/data";
-import { getCurrentUser } from "./authService";
 
 const API_URL = "http://localhost:5000";
 
@@ -13,7 +11,8 @@ const getToken = (): string | null => {
 const authenticatedRequest = async (
   endpoint: string,
   method: string = "GET",
-  data?: any
+  data?: any,
+  isFormData: boolean = false
 ) => {
   const token = getToken();
   if (!token) {
@@ -21,20 +20,23 @@ const authenticatedRequest = async (
   }
 
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   };
+
+  // Only add Content-Type for non-FormData requests
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
+  }
 
   const config: RequestInit = {
     method,
     headers,
-    body: data ? JSON.stringify(data) : undefined,
+    body: isFormData ? data : data ? JSON.stringify(data) : undefined,
   };
 
   const response = await fetch(`${API_URL}${endpoint}`, config);
 
   if (!response.ok) {
-    // Try to parse error message from response
     try {
       const errorData = await response.json();
       throw new Error(errorData.message || `Error: ${response.status}`);
@@ -46,7 +48,18 @@ const authenticatedRequest = async (
   return response.json();
 };
 
-// Add a new property
+// Upload images first and get their URLs
+export const uploadImages = async (images: File[]): Promise<string[]> => {
+  const formData = new FormData();
+  images.forEach((image) => {
+    formData.append("images", image);
+  });
+
+  const response = await authenticatedRequest("/properties/upload", "POST", formData, true);
+  return response.urls;
+};
+
+// Add a new property with uploaded image URLs
 export const addProperty = async (propertyData: Partial<Property>): Promise<Property> => {
   const response = await authenticatedRequest("/properties", "POST", propertyData);
   return response.property;
@@ -93,7 +106,7 @@ export const deleteProperty = async (id: string): Promise<void> => {
   await authenticatedRequest(`/properties/${id}`, "DELETE");
 };
 
-// Get user properties
+// Get properties for the current agent
 export const getUserProperties = async (): Promise<Property[]> => {
   const response = await authenticatedRequest("/properties/user/me");
   return response.properties;
