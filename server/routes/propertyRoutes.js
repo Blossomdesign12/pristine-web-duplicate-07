@@ -11,7 +11,8 @@ const {
   getUserProperties,
   getPropertiesByStatus,
   uploadImages,
-  incrementViews
+  incrementViews,
+  getDashboardStats
 } = require("../controllers/propertyController");
 
 // Public routes
@@ -26,5 +27,6 @@ router.post("/upload", protect, uploadImages);
 router.put("/:id", protect, updateProperty);
 router.delete("/:id", protect, deleteProperty);
 router.get("/user/me", protect, getUserProperties);
+router.get("/dashboard/stats", protect, getDashboardStats);
 
 module.exports = router;

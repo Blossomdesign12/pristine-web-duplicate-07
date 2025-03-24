@@ -1,4 +1,3 @@
-
 const Property = require("../models/Property");
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
@@ -355,3 +354,48 @@ exports.incrementViews = async (req, res) => {
     });
   }
 };
+
+// @desc    Get dashboard statistics
+// @route   GET /dashboard/stats
+// @access  Private
+exports.getDashboardStats = async (req, res) => {
+  try {
+    // Get user ID from authenticated request
+    const userId = req.user.id;
+    
+    // Get user's properties
+    const properties = await Property.find({ user: userId });
+    
+    // Calculate statistics
+    const totalProperties = properties.length;
+    const activeProperties = properties.filter(
+      p => p.features.status === "for-sale" || p.features.status === "for-rent"
+    ).length;
+    
+    // Calculate total views
+    const totalViews = properties.reduce((sum, property) => sum + (property.views || 0), 0);
+    
+    // Get recent properties (last 5)
+    const recentProperties = await Property.find({ user: userId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        totalProperties,
+        activeProperties,
+        totalViews,
+        recentProperties
+      }
+    });
+  } catch (error) {
+    console.error("Dashboard stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message
+    });
+  }
+};
+

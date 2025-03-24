@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Home, Plus, Eye, Edit, Trash, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserProperties, deleteProperty } from "@/services/propertyService";
+import { getDashboardStats } from "@/services/dashboardService";
 import { Property } from "@/lib/data";
 import { formatPrice } from "@/lib/data";
 
@@ -13,23 +13,38 @@ interface OwnerDashboardProps {
   activeTab: string;
 }
 
+interface DashboardStats {
+  totalProperties: number;
+  activeProperties: number;
+  totalViews: number;
+  recentProperties: Property[];
+}
+
 const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
 
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
+        // Fetch dashboard stats
+        if (activeTab === "overview") {
+          const dashboardStats = await getDashboardStats();
+          setStats(dashboardStats);
+        }
+        
+        // Fetch properties
         const userProperties = await getUserProperties();
         setProperties(userProperties);
       } catch (error) {
-        console.error("Error fetching properties:", error);
+        console.error("Error fetching dashboard data:", error);
         toast({
           title: "Error",
-          description: "Failed to load your properties. Please try again later.",
+          description: "Failed to load your dashboard data. Please try again later.",
           variant: "destructive"
         });
       } finally {
@@ -37,8 +52,8 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
       }
     };
 
-    fetchProperties();
-  }, [toast]);
+    fetchDashboardData();
+  }, [activeTab, toast]);
 
   const handleDeleteProperty = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this property?")) {
@@ -46,7 +61,7 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
         await deleteProperty(id);
         
         // Update the properties list
-        setProperties(properties.filter(property => property.id !== id));
+        setProperties(properties.filter(property => (property.id !== id && property._id !== id)));
         
         toast({
           title: "Success",
@@ -85,9 +100,9 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
               <h3 className="text-lg font-medium">My Properties</h3>
               <Home className="h-6 w-6 text-blue-500" />
             </div>
-            <p className="text-3xl font-bold">{properties.length}</p>
+            <p className="text-3xl font-bold">{isLoading ? "..." : stats?.totalProperties || 0}</p>
             <p className="text-gray-500 mt-1">Total properties</p>
-            <Link to="/add-property">
+            <Link to="/dashboard?tab=add-property">
               <Button variant="outline" className="w-full mt-4">
                 <Plus className="mr-2 h-4 w-4" />
                 Add New
@@ -101,10 +116,10 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
               <Home className="h-6 w-6 text-green-500" />
             </div>
             <p className="text-3xl font-bold">
-              {properties.filter(p => p.features.status === "for-sale").length}
+              {isLoading ? "..." : properties.filter(p => p.features.status === "for-sale").length}
             </p>
             <p className="text-gray-500 mt-1">Properties for sale</p>
-            <Link to="/properties-for-sale">
+            <Link to="/dashboard?tab=properties">
               <Button variant="outline" className="w-full mt-4">
                 <Eye className="mr-2 h-4 w-4" />
                 View All
@@ -114,17 +129,17 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
           
           <div className="bg-white rounded-lg border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium">For Rent</h3>
-              <Home className="h-6 w-6 text-purple-500" />
+              <h3 className="text-lg font-medium">Property Views</h3>
+              <Eye className="h-6 w-6 text-purple-500" />
             </div>
             <p className="text-3xl font-bold">
-              {properties.filter(p => p.features.status === "for-rent").length}
+              {isLoading ? "..." : stats?.totalViews || 0}
             </p>
-            <p className="text-gray-500 mt-1">Properties for rent</p>
-            <Link to="/properties-for-rent">
+            <p className="text-gray-500 mt-1">Total property views</p>
+            <Link to="/dashboard?tab=analytics">
               <Button variant="outline" className="w-full mt-4">
                 <Eye className="mr-2 h-4 w-4" />
-                View All
+                View Analytics
               </Button>
             </Link>
           </div>
@@ -133,13 +148,16 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h3 className="text-lg font-medium mb-4">Recent Properties</h3>
           {isLoading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : properties.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-8 h-8 border-4 border-estate-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="mt-4 text-gray-500">Loading properties...</p>
+            </div>
+          ) : !stats?.recentProperties || stats.recentProperties.length === 0 ? (
             <div className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h4 className="text-lg font-medium mb-2">No Properties Found</h4>
               <p className="text-gray-500 mb-4">You haven't added any properties yet.</p>
-              <Link to="/add-property">
+              <Link to="/dashboard?tab=add-property">
                 <Button>
                   <Plus className="mr-2 h-4 w-4" />
                   Add Your First Property
@@ -160,14 +178,14 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {properties.slice(0, 5).map((property) => (
-                    <tr key={property.id} className="hover:bg-gray-50">
+                  {stats.recentProperties.map((property) => (
+                    <tr key={property.id || property._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">
                             <img 
                               className="h-10 w-10 rounded-md object-cover" 
-                              src={property.images[0] || 'https://via.placeholder.com/100'} 
+                              src={property.images[0] || '/placeholder.svg'} 
                               alt={property.title} 
                             />
                           </div>
@@ -201,12 +219,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
-                          <Link to={`/property/${property.id}`}>
+                          <Link to={`/property/${property.id || property._id}`}>
                             <Button size="sm" variant="ghost">
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Link to={`/edit-property/${property.id}`}>
+                          <Link to={`/dashboard?tab=edit-property&id=${property.id || property._id}`}>
                             <Button size="sm" variant="ghost">
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -214,7 +232,7 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                           <Button 
                             size="sm" 
                             variant="ghost" 
-                            onClick={() => handleDeleteProperty(property.id)}
+                            onClick={() => handleDeleteProperty(property.id || property._id as string)}
                           >
                             <Trash className="h-4 w-4 text-red-500" />
                           </Button>
@@ -246,7 +264,7 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
       <div className="space-y-6">
         <div className="flex justify-between mb-4">
           <h3 className="text-lg font-medium">All Properties</h3>
-          <Link to="/add-property">
+          <Link to="/dashboard?tab=add-property">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
               Add Property
@@ -255,13 +273,16 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
         </div>
         
         {isLoading ? (
-          <div className="text-center py-8">Loading...</div>
+          <div className="text-center py-8">
+            <div className="w-8 h-8 border-4 border-estate-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4 text-gray-500">Loading properties...</p>
+          </div>
         ) : properties.length === 0 ? (
           <div className="text-center py-8 bg-white rounded-lg border border-gray-200 p-6">
             <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h4 className="text-lg font-medium mb-2">No Properties Found</h4>
             <p className="text-gray-500 mb-4">You haven't added any properties yet.</p>
-            <Link to="/add-property">
+            <Link to="/dashboard?tab=add-property">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Your First Property
@@ -284,13 +305,13 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {properties.map((property) => (
-                    <tr key={property.id} className="hover:bg-gray-50">
+                    <tr key={property.id || property._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="h-10 w-10 flex-shrink-0">
                             <img 
                               className="h-10 w-10 rounded-md object-cover" 
-                              src={property.images[0] || 'https://via.placeholder.com/100'} 
+                              src={property.images[0] || '/placeholder.svg'} 
                               alt={property.title} 
                             />
                           </div>
@@ -324,12 +345,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
-                          <Link to={`/property/${property.id}`}>
+                          <Link to={`/property/${property.id || property._id}`}>
                             <Button size="sm" variant="ghost">
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Link to={`/edit-property/${property.id}`}>
+                          <Link to={`/dashboard?tab=edit-property&id=${property.id || property._id}`}>
                             <Button size="sm" variant="ghost">
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -337,7 +358,7 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                           <Button 
                             size="sm" 
                             variant="ghost" 
-                            onClick={() => handleDeleteProperty(property.id)}
+                            onClick={() => handleDeleteProperty(property.id || property._id as string)}
                           >
                             <Trash className="h-4 w-4 text-red-500" />
                           </Button>
@@ -371,12 +392,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                     .filter(p => p.features.status === "for-sale")
                     .map(property => (
                       <Link
-                        key={property.id}
-                        to={`/property/${property.id}`}
+                        key={property.id || property._id}
+                        to={`/property/${property.id || property._id}`}
                         className="flex items-start hover:bg-gray-50 p-2 rounded-md"
                       >
                         <img
-                          src={property.images[0] || 'https://via.placeholder.com/100'}
+                          src={property.images[0] || '/placeholder.svg'}
                           alt={property.title}
                           className="w-16 h-16 object-cover rounded-md"
                         />
@@ -401,12 +422,12 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
                     .filter(p => p.features.status === "for-rent")
                     .map(property => (
                       <Link
-                        key={property.id}
-                        to={`/property/${property.id}`}
+                        key={property.id || property._id}
+                        to={`/property/${property.id || property._id}`}
                         className="flex items-start hover:bg-gray-50 p-2 rounded-md"
                       >
                         <img
-                          src={property.images[0] || 'https://via.placeholder.com/100'}
+                          src={property.images[0] || '/placeholder.svg'}
                           alt={property.title}
                           className="w-16 h-16 object-cover rounded-md"
                         />

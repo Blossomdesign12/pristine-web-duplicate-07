@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -27,6 +28,7 @@ export interface User {
   country?: string;
   company?: string;
   website?: string;
+  description?: string;
   socialLinks?: {
     facebook?: string;
     twitter?: string;
