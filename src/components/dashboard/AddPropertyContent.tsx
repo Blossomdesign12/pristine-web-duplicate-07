@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,9 +18,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AlertCircle, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { addProperty } from "@/services/propertyService";
+import { Property } from "@/lib/data";
 
 // Form schema with validation
 const formSchema = z.object({
@@ -58,7 +58,6 @@ const AddPropertyContent = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const navigate = useNavigate();
   const { user } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -121,31 +120,37 @@ const AddPropertyContent = () => {
 
     try {
       // Create property object
-      const propertyData = {
-        ...data,
+      const propertyData: Partial<Property> = {
+        title: data.title,
+        description: data.description,
         price: parseFloat(data.price),
-        bedrooms: parseInt(data.bedrooms),
-        bathrooms: parseInt(data.bathrooms),
-        area: parseFloat(data.area),
         images: previewUrls, // In a real app, these would be uploaded to a server
         agent: {
           id: user?.id || "unknown",
           name: user?.name || "Unknown Agent",
           email: user?.email || "unknown@example.com",
           phone: user?.phone || "000-000-0000",
-          photo: user?.avatar || "https://via.placeholder.com/300"
+          image: user?.avatar || "https://via.placeholder.com/300"
+        },
+        features: {
+          bedrooms: parseInt(data.bedrooms),
+          bathrooms: parseInt(data.bathrooms),
+          area: parseFloat(data.area),
+          yearBuilt: new Date().getFullYear(),
+          propertyType: data.propertyType as any,
+          status: data.status as any,
         },
         location: {
           address: data.address,
           city: data.city,
           state: data.state,
-          zipCode: data.zipCode,
+          zip: data.zipCode,
           country: "India",
-          latitude: 19.076, // Default Mumbai coordinates - would be set accurately in a real app
-          longitude: 72.8777
+          lat: 19.076, // Default Mumbai coordinates
+          lng: 72.8777
         },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        amenities: [],
+        featured: false,
       };
 
       // Save the property
@@ -156,7 +161,7 @@ const AddPropertyContent = () => {
         description: "Property has been added successfully",
       });
 
-      // No longer navigating away, just resetting form
+      // Reset form
       form.reset();
       setImages([]);
       setPreviewUrls([]);

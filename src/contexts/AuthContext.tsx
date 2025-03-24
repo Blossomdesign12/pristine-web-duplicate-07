@@ -1,172 +1,99 @@
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
-import { 
-  loginUser, 
-  registerUser, 
-  logoutUser, 
-  getCurrentUser, 
-  isAuthenticated,
-  fetchUserDetails
-} from "@/services/authService";
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { User } from '@/types/user';
 
-export type UserRole = "owner" | "agent" | "buyer" | "admin";
-
-export type User = {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  avatar?: string;
-  phone?: string;
-  description?: string;
-};
-
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  refreshUser: () => Promise<void>;
-};
+  isAuthenticated: boolean;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  // Check for existing session on mount using JWT
+  // Check if user is logged in on mount
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        if (isAuthenticated()) {
-          const currentUser = getCurrentUser();
-          if (currentUser) {
-            setUser(currentUser);
-            
-            // Optionally refresh user data from server
-            try {
-              const updatedUser = await fetchUserDetails();
-              setUser(updatedUser);
-            } catch (error) {
-              console.warn("Could not refresh user data:", error);
-              // Continue with stored user data
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Auth check error:", error);
-        // If token is invalid, clear it
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("user");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    checkAuth();
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      setIsAuthenticated(true);
+    }
   }, []);
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    try {
-      const { user: loggedInUser } = await loginUser(email, password);
-      setUser(loggedInUser);
-      
-      toast({
-        title: "Success!",
-        description: "You have successfully logged in.",
-      });
-      
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Login error:", error);
-      toast({
-        title: "Login failed",
-        description: "Please check your credentials and try again.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    // This would be an API call in a real app
+    // Simulating login with mock data
+    const mockUser: User = {
+      id: "user-1",
+      name: "John Smith",
+      email: email,
+      role: "owner",
+      phone: "+91 9876543210",
+      avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/ed060b47018885c4c6847048f8a83758_qgbypi.png",
+      bio: "I'm a property owner with multiple properties in Mumbai.",
+      address: "123 Main Street, Bandra West",
+      city: "Mumbai",
+      state: "Maharashtra",
+      zipCode: "400050",
+      country: "India",
+      company: "Smith Properties",
+      website: "www.smithproperties.com",
+      socialLinks: {
+        facebook: "facebook.com/johnsmith",
+        twitter: "twitter.com/johnsmith",
+        linkedin: "linkedin.com/in/johnsmith",
+        instagram: "instagram.com/johnsmith"
+      },
+      memberSince: "Jan 2023"
+    };
+
+    // Store user in localStorage
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    setUser(mockUser);
+    setIsAuthenticated(true);
   };
 
-  const register = async (email: string, password: string, name: string, role: UserRole) => {
-    setIsLoading(true);
-    try {
-      const { user: registeredUser } = await registerUser(email, password, name, role);
-      setUser(registeredUser);
-      
-      toast({
-        title: "Registration successful!",
-        description: "Your account has been created.",
-      });
-      
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Registration error:", error);
-      toast({
-        title: "Registration failed",
-        description: "Please try again with different credentials.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const register = async (name: string, email: string, password: string) => {
+    // This would be an API call in a real app
+    // Simulating registration with mock data
+    const mockUser: User = {
+      id: "user-" + Math.floor(Math.random() * 1000),
+      name: name,
+      email: email,
+      role: "buyer",
+      avatar: "https://res.cloudinary.com/dw7w2at8k/image/upload/v1736785538/ed060b47018885c4c6847048f8a83758_qgbypi.png",
+      memberSince: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    };
 
-  const refreshUser = async () => {
-    try {
-      const updatedUser = await fetchUserDetails();
-      setUser(updatedUser);
-    } catch (error) {
-      console.error("Failed to refresh user:", error);
-      throw error;
-    }
+    // Store user in localStorage
+    localStorage.setItem('user', JSON.stringify(mockUser));
+    setUser(mockUser);
+    setIsAuthenticated(true);
   };
 
   const logout = () => {
-    logoutUser();
+    // Remove user from localStorage
+    localStorage.removeItem('user');
     setUser(null);
-    
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-    
-    navigate("/");
+    setIsAuthenticated(false);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isLoading,
-        login,
-        register,
-        logout,
-        refreshUser,
-      }}
-    >
+    <AuthContext.Provider value={{ user, login, register, logout, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export default AuthContext;
