@@ -1,3 +1,4 @@
+
 import { Property } from "@/lib/data";
 
 const API_URL = "http://localhost:5000";
@@ -61,6 +62,28 @@ export const uploadImages = async (images: File[]): Promise<string[]> => {
 
 // Add a new property with uploaded image URLs
 export const addProperty = async (propertyData: Partial<Property>): Promise<Property> => {
+  // Ensure the location structure matches what the API expects
+  if (propertyData.location) {
+    // Rename zipCode to zip to match the expected Property type
+    if ('zipCode' in propertyData.location) {
+      const { zipCode, ...rest } = propertyData.location as any;
+      propertyData.location = {
+        ...rest,
+        zip: zipCode,
+      };
+    }
+    
+    // Rename latitude/longitude to lat/lng if needed
+    if ('latitude' in propertyData.location) {
+      const { latitude, longitude, ...rest } = propertyData.location as any;
+      propertyData.location = {
+        ...rest,
+        lat: latitude,
+        lng: longitude,
+      };
+    }
+  }
+
   const response = await authenticatedRequest("/properties", "POST", propertyData);
   return response.property;
 };
@@ -97,6 +120,26 @@ export const getPropertyById = async (id: string): Promise<Property> => {
 
 // Update a property
 export const updateProperty = async (id: string, propertyData: Partial<Property>): Promise<Property> => {
+  // Apply the same location field conversions as in addProperty
+  if (propertyData.location) {
+    if ('zipCode' in propertyData.location) {
+      const { zipCode, ...rest } = propertyData.location as any;
+      propertyData.location = {
+        ...rest,
+        zip: zipCode,
+      };
+    }
+    
+    if ('latitude' in propertyData.location) {
+      const { latitude, longitude, ...rest } = propertyData.location as any;
+      propertyData.location = {
+        ...rest,
+        lat: latitude,
+        lng: longitude,
+      };
+    }
+  }
+
   const response = await authenticatedRequest(`/properties/${id}`, "PUT", propertyData);
   return response.property;
 };

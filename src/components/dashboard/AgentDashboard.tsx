@@ -87,7 +87,7 @@ const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
             <CardContent>
               <div className="flex items-center justify-between">
                 <div className="text-2xl font-bold">
-                  {isLoading ? "..." : properties.filter(p => p.features.status === "for-sale" || p.features.status === "for-rent").length}
+                  {isLoading ? "..." : properties.filter(p => p.features?.status === "for-sale" || p.features?.status === "for-rent").length}
                 </div>
                 <User className="h-8 w-8 text-estate-primary" />
               </div>
@@ -153,10 +153,10 @@ const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
                       </div>
                       <div>
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                          ${property.features.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
-                          property.features.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
+                          ${property.features?.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
+                          property.features?.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
                           'bg-gray-100 text-gray-800'}`}>
-                          {property.features.status.replace('-', ' ')}
+                          {(property.features?.status || "").replace('-', ' ')}
                         </span>
                       </div>
                     </div>
@@ -212,10 +212,10 @@ const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
                       ${property.price.toLocaleString()}
                     </span>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                      ${property.features.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
-                      property.features.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
+                      ${property.features?.status === 'for-sale' ? 'bg-green-100 text-green-800' : 
+                      property.features?.status === 'for-rent' ? 'bg-blue-100 text-blue-800' : 
                       'bg-gray-100 text-gray-800'}`}>
-                      {property.features.status.replace('-', ' ')}
+                      {(property.features?.status || "").replace('-', ' ')}
                     </span>
                   </div>
                   <div className="mt-4 flex justify-end space-x-2">
