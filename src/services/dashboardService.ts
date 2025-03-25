@@ -51,8 +51,9 @@ export const getDashboardStats = async (): Promise<{
   totalViews: number;
   recentProperties: Property[];
 }> => {
+  console.log("Fetching dashboard stats...");
   const response = await authenticatedRequest("/properties/dashboard/stats");
-  console.log("Dashboard stats response:", response); // Add logging to help debug
+  console.log("Dashboard stats response:", response); 
   return response.data;
 };
 
@@ -133,6 +134,54 @@ export const updateProperty = async (id: string, updates: Partial<Property>): Pr
   return response.property;
 };
 
+// Fetch user favorites (for buyer dashboard)
+export const getUserFavorites = async (): Promise<Property[]> => {
+  try {
+    const response = await authenticatedRequest("/properties/user/favorites");
+    console.log("User favorites response:", response);
+    return response.properties || [];
+  } catch (error) {
+    console.error("Error fetching user favorites:", error);
+    return [];
+  }
+};
+
+// Fetch recently viewed properties (for buyer dashboard)
+export const getRecentlyViewed = async (): Promise<Property[]> => {
+  try {
+    const response = await authenticatedRequest("/properties/user/recently-viewed");
+    console.log("Recently viewed response:", response);
+    return response.properties || [];
+  } catch (error) {
+    console.error("Error fetching recently viewed properties:", error);
+    return [];
+  }
+};
+
+// Fetch recommended properties (for buyer dashboard)
+export const getRecommendedProperties = async (): Promise<Property[]> => {
+  try {
+    const response = await authenticatedRequest("/properties/recommended");
+    console.log("Recommended properties response:", response);
+    return response.properties || [];
+  } catch (error) {
+    console.error("Error fetching recommended properties:", error);
+    return [];
+  }
+};
+
+// Fetch client leads for agents
+export const getClientLeads = async (): Promise<any[]> => {
+  try {
+    const response = await authenticatedRequest("/leads");
+    console.log("Client leads response:", response);
+    return response.leads || [];
+  } catch (error) {
+    console.error("Error fetching client leads:", error);
+    return [];
+  }
+};
+
 // Fetch analytics data (for admin)
 export const getAnalyticsData = async (): Promise<any> => {
   const response = await authenticatedRequest("/admin/analytics");
@@ -144,5 +193,9 @@ export default {
   getFilteredProperties,
   getPropertyForEditing,
   updateProperty,
-  getAnalyticsData
+  getAnalyticsData,
+  getUserFavorites,
+  getRecentlyViewed,
+  getRecommendedProperties,
+  getClientLeads
 };

@@ -62,6 +62,13 @@ const Dashboard = () => {
       return <AddPropertyContent />;
     } else if (activeTab === "clients" && role === "agent") {
       return <ClientLeads />;
+    } else if (activeTab === "edit-property" && (role === "agent" || role === "owner")) {
+      const propertyId = searchParams.get("id");
+      if (propertyId) {
+        // This would be the component for editing a property
+        return <AddPropertyContent propertyId={propertyId} />;
+      }
+      return <AgentDashboard activeTab="properties" />;
     }
     
     // Handle role-specific dashboards
@@ -138,7 +145,7 @@ const Dashboard = () => {
               </Button>
             )}
             
-            {(role === "buyer" || !user) && (
+            {role === "buyer" && (
               <>
                 <Button
                   variant="ghost"

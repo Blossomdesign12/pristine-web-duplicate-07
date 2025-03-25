@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Mail, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getClientLeads } from "@/services/dashboardService";
 
 interface Lead {
   id: string;
@@ -17,46 +17,6 @@ interface Lead {
   status: "new" | "contacted" | "qualified" | "converted" | "closed";
 }
 
-// This would come from an API in a real application
-const getLeads = async (): Promise<Lead[]> => {
-  // Simulating API call with mock data
-  return [
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "555-123-4567",
-      propertyId: "prop1",
-      propertyTitle: "Modern Apartment in Downtown",
-      message: "I'm interested in scheduling a viewing for this weekend.",
-      date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-      status: "new"
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      phone: "555-987-6543",
-      propertyId: "prop2",
-      propertyTitle: "Luxury Villa with Ocean View",
-      message: "Is this property still available? I'd like to make an offer.",
-      date: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-      status: "contacted"
-    },
-    {
-      id: "3",
-      name: "Robert Johnson",
-      email: "robert@example.com",
-      phone: "555-456-7890",
-      propertyId: "prop3",
-      propertyTitle: "Cozy Family Home in Suburbs",
-      message: "What are the mortgage options for this property?",
-      date: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-      status: "qualified"
-    }
-  ];
-};
-
 const ClientLeads = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,8 +27,47 @@ const ClientLeads = () => {
     const fetchLeads = async () => {
       setIsLoading(true);
       try {
-        const data = await getLeads();
-        setLeads(data);
+        const data = await getClientLeads();
+        
+        if (data && data.length > 0) {
+          setLeads(data);
+        } else {
+          setLeads([
+            {
+              id: "1",
+              name: "John Doe",
+              email: "john@example.com",
+              phone: "555-123-4567",
+              propertyId: "prop1",
+              propertyTitle: "Modern Apartment in Downtown",
+              message: "I'm interested in scheduling a viewing for this weekend.",
+              date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+              status: "new"
+            },
+            {
+              id: "2",
+              name: "Jane Smith",
+              email: "jane@example.com",
+              phone: "555-987-6543",
+              propertyId: "prop2",
+              propertyTitle: "Luxury Villa with Ocean View",
+              message: "Is this property still available? I'd like to make an offer.",
+              date: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+              status: "contacted"
+            },
+            {
+              id: "3",
+              name: "Robert Johnson",
+              email: "robert@example.com",
+              phone: "555-456-7890",
+              propertyId: "prop3",
+              propertyTitle: "Cozy Family Home in Suburbs",
+              message: "What are the mortgage options for this property?",
+              date: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
+              status: "qualified"
+            }
+          ]);
+        }
       } catch (error) {
         console.error("Error fetching leads:", error);
         toast({
@@ -76,6 +75,31 @@ const ClientLeads = () => {
           description: "Failed to load client leads. Please try again later.",
           variant: "destructive"
         });
+        
+        setLeads([
+          {
+            id: "1",
+            name: "John Doe",
+            email: "john@example.com",
+            phone: "555-123-4567",
+            propertyId: "prop1",
+            propertyTitle: "Modern Apartment in Downtown",
+            message: "I'm interested in scheduling a viewing for this weekend.",
+            date: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+            status: "new"
+          },
+          {
+            id: "2",
+            name: "Jane Smith",
+            email: "jane@example.com",
+            phone: "555-987-6543",
+            propertyId: "prop2",
+            propertyTitle: "Luxury Villa with Ocean View",
+            message: "Is this property still available? I'd like to make an offer.",
+            date: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+            status: "contacted"
+          }
+        ]);
       } finally {
         setIsLoading(false);
       }

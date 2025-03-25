@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Property } from "@/lib/data";
 import PropertyCard from "@/components/PropertyCard";
 import { Heart, Clock, Eye, AlertCircle } from "lucide-react";
-import { getAllProperties } from "@/services/propertyService";
+import { 
+  getUserFavorites, 
+  getRecentlyViewed, 
+  getRecommendedProperties 
+} from "@/services/dashboardService";
 import { useToast } from "@/hooks/use-toast";
 
 interface BuyerDashboardProps {
@@ -13,7 +17,6 @@ interface BuyerDashboardProps {
 }
 
 const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ activeTab }) => {
-  // Use real data from backend instead of mock data
   const [favoriteProperties, setFavoriteProperties] = useState<Property[]>([]);
   const [recentlyViewed, setRecentlyViewed] = useState<Property[]>([]);
   const [recommendedProperties, setRecommendedProperties] = useState<Property[]>([]);
@@ -21,23 +24,24 @@ const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ activeTab }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // In a real application, we would fetch these specifically for the user
-        // For now, we'll just get all properties and use different subsets
-        const allProperties = await getAllProperties();
+        // Fetch real data from the backend based on the active tab
+        if (activeTab === "favorites" || activeTab === "overview") {
+          const favorites = await getUserFavorites();
+          setFavoriteProperties(favorites);
+        }
         
-        // Simulate favorited properties (in a real app, this would come from user's saved properties)
-        setFavoriteProperties(allProperties.slice(0, 3));
-        
-        // Simulate recently viewed (in a real app, this would track user's view history)
-        setRecentlyViewed(allProperties.slice(3, 6));
-        
-        // Simulate recommended properties
-        setRecommendedProperties(allProperties.slice(0, 2));
+        if (activeTab === "overview") {
+          const viewed = await getRecentlyViewed();
+          setRecentlyViewed(viewed);
+          
+          const recommended = await getRecommendedProperties();
+          setRecommendedProperties(recommended);
+        }
       } catch (error) {
-        console.error("Error fetching properties:", error);
+        console.error("Error fetching buyer dashboard data:", error);
         toast({
           title: "Error",
           description: "Failed to load properties. Please try again later.",
@@ -48,8 +52,8 @@ const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ activeTab }) => {
       }
     };
 
-    fetchProperties();
-  }, [toast]);
+    fetchDashboardData();
+  }, [activeTab, toast]);
 
   if (activeTab === "favorites") {
     return (
@@ -135,7 +139,7 @@ const BuyerDashboard: React.FC<BuyerDashboardProps> = ({ activeTab }) => {
                 <h3 className="text-lg font-medium">New Listings</h3>
                 <Eye className="h-6 w-6 text-estate-primary" />
               </div>
-              <p className="text-3xl font-bold mt-2">{Math.min(10, recentlyViewed.length + favoriteProperties.length)}</p>
+              <p className="text-3xl font-bold mt-2">{recommendedProperties.length}</p>
               <p className="text-green-500 text-sm mt-1">Updated today</p>
             </div>
           </div>
