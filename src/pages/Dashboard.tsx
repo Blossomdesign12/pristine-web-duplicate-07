@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -65,8 +64,9 @@ const Dashboard = () => {
     } else if (activeTab === "edit-property" && (role === "agent" || role === "owner")) {
       const propertyId = searchParams.get("id");
       if (propertyId) {
-        // This would be the component for editing a property
-        return <AddPropertyContent propertyId={propertyId} />;
+        // Navigate to the add property page with the propertyId in the URL
+        navigate(`/add-property?edit=true&id=${propertyId}`);
+        return null;
       }
       return <AgentDashboard activeTab="properties" />;
     }
@@ -95,7 +95,7 @@ const Dashboard = () => {
     // Update URL with the new tab
     navigate(`/dashboard?tab=${tab}`);
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
