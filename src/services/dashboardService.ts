@@ -1,3 +1,4 @@
+
 import { Property } from "@/lib/data";
 
 const API_URL = "http://localhost:5000";
@@ -103,6 +104,35 @@ export const getFilteredProperties = async (
   };
 };
 
+// Get property by ID for editing
+export const getPropertyForEditing = async (id: string): Promise<Property> => {
+  const response = await authenticatedRequest(`/properties/${id}`);
+  
+  // Ensure property has an id property (using _id if necessary)
+  if (response.property._id && !response.property.id) {
+    response.property.id = response.property._id;
+  }
+
+  return response.property;
+};
+
+// Update a property (for editing)
+export const updateProperty = async (id: string, updates: Partial<Property>): Promise<Property> => {
+  // Make sure we have a valid features object with yearBuilt
+  if (updates.features && !updates.features.yearBuilt) {
+    updates.features.yearBuilt = new Date().getFullYear();
+  }
+  
+  const response = await authenticatedRequest(`/properties/${id}`, "PUT", updates);
+  
+  // Ensure property has an id property
+  if (response.property._id && !response.property.id) {
+    response.property.id = response.property._id;
+  }
+  
+  return response.property;
+};
+
 // Fetch analytics data (for admin)
 export const getAnalyticsData = async (): Promise<any> => {
   const response = await authenticatedRequest("/admin/analytics");
@@ -112,5 +142,7 @@ export const getAnalyticsData = async (): Promise<any> => {
 export default {
   getDashboardStats,
   getFilteredProperties,
+  getPropertyForEditing,
+  updateProperty,
   getAnalyticsData
 };

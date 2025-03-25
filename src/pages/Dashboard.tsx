@@ -29,6 +29,7 @@ import AddPropertyContent from "@/components/dashboard/AddPropertyContent";
 import MessageContent from "@/components/dashboard/MessageContent";
 import NotificationContent from "@/components/dashboard/NotificationContent";
 import ProfileContent from "@/components/dashboard/ProfileContent";
+import ClientLeads from "@/components/dashboard/ClientLeads";
 
 const Dashboard = () => {
   const [searchParams] = useSearchParams();
@@ -57,8 +58,10 @@ const Dashboard = () => {
       return <NotificationContent />;
     } else if (activeTab === "messages") {
       return <MessageContent />;
-    } else if (activeTab === "add-property") {
+    } else if (activeTab === "add-property" && (role === "agent" || role === "owner")) {
       return <AddPropertyContent />;
+    } else if (activeTab === "clients" && role === "agent") {
+      return <ClientLeads />;
     }
     
     // Handle role-specific dashboards
@@ -123,15 +126,17 @@ const Dashboard = () => {
               Dashboard
             </Button>
             
-            {/* Add Property button now sets the activeTab instead of navigating */}
-            <Button
-              variant="ghost"
-              className={`w-full justify-start ${activeTab === "add-property" ? "bg-gray-100" : ""}`}
-              onClick={() => handleTabChange("add-property")}
-            >
-              <Plus className="mr-2 h-5 w-5" />
-              Add Property
-            </Button>
+            {/* Only show Add Property for agents and owners */}
+            {(role === "agent" || role === "owner") && (
+              <Button
+                variant="ghost"
+                className={`w-full justify-start ${activeTab === "add-property" ? "bg-gray-100" : ""}`}
+                onClick={() => handleTabChange("add-property")}
+              >
+                <Plus className="mr-2 h-5 w-5" />
+                Add Property
+              </Button>
+            )}
             
             {(role === "buyer" || !user) && (
               <>
