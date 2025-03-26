@@ -117,12 +117,13 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
           form.setValue("zipCode", property.location.zip);
           
           if (property.features) {
-            form.setValue("features.hasGarden", property.features.hasGarden || false);
-            form.setValue("features.hasGarage", property.features.hasGarage || false);
-            form.setValue("features.hasPool", property.features.hasPool || false);
-            form.setValue("features.isPetFriendly", property.features.isPetFriendly || false);
-            form.setValue("features.hasCentralHeating", property.features.hasCentralHeating || false);
-            form.setValue("features.hasAirConditioning", property.features.hasAirConditioning || false);
+            const features = property.features as any;
+            form.setValue("features.hasGarden", features.hasGarden || false);
+            form.setValue("features.hasGarage", features.hasGarage || false);
+            form.setValue("features.hasPool", features.hasPool || false);
+            form.setValue("features.isPetFriendly", features.isPetFriendly || false);
+            form.setValue("features.hasCentralHeating", features.hasCentralHeating || false);
+            form.setValue("features.hasAirConditioning", features.hasAirConditioning || false);
           }
           
           if (property.images && property.images.length > 0) {
