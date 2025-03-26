@@ -1,266 +1,569 @@
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "@/hooks/use-toast";
-import { Save, BellRing, Mail, Lock, Shield, UserRound } from 'lucide-react';
+const profileFormSchema = z.object({
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  phone: z.string().optional(),
+  bio: z.string().optional(),
+});
+
+const notificationFormSchema = z.object({
+  emailNotifications: z.boolean(),
+  pushNotifications: z.boolean(),
+  marketingEmails: z.boolean(),
+  activityDigest: z.boolean(),
+});
+
+const securityFormSchema = z.object({
+  currentPassword: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+  newPassword: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+  confirmPassword: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match.",
+  path: ["confirmPassword"],
+});
 
 const SettingsPanel = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("profile");
-  
-  // Form states
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [pushNotifications, setPushNotifications] = useState(true);
-  const [marketingEmails, setMarketingEmails] = useState(false);
-  
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
+  const [isLoadingSecurity, setIsLoadingSecurity] = useState(false);
+  const { toast } = useToast();
+  const { user, updateUserProfile } = useAuth();
+  const API_URL = "http://localhost:5000";
+
+  // Profile form
+  const profileForm = useForm<z.infer<typeof profileFormSchema>>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      username: user?.username || "",
+      email: user?.email || "",
+      name: user?.name || "",
+      phone: user?.phone || "",
+      bio: user?.bio || "",
+    },
+  });
+
+  // Notification preferences form
+  const notificationForm = useForm<z.infer<typeof notificationFormSchema>>({
+    resolver: zodResolver(notificationFormSchema),
+    defaultValues: {
+      emailNotifications: true,
+      pushNotifications: true,
+      marketingEmails: false,
+      activityDigest: true,
+    },
+  });
+
+  // Security form
+  const securityForm = useForm<z.infer<typeof securityFormSchema>>({
+    resolver: zodResolver(securityFormSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+  });
+
+  // Load user settings from backend
+  useEffect(() => {
+    const fetchUserSettings = async () => {
+      if (!user) return;
+      
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          throw new Error('Authentication required');
+        }
+
+        // Fetch notification preferences
+        const response = await fetch(`${API_URL}/users/settings`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch user settings');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.settings) {
+          // Update notification form with user preferences if they exist
+          if (data.settings.notifications) {
+            notificationForm.setValue('emailNotifications', data.settings.notifications.emailNotifications ?? true);
+            notificationForm.setValue('pushNotifications', data.settings.notifications.pushNotifications ?? true);
+            notificationForm.setValue('marketingEmails', data.settings.notifications.marketingEmails ?? false);
+            notificationForm.setValue('activityDigest', data.settings.notifications.activityDigest ?? true);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user settings:', error);
+        // Keep default values if we can't fetch from backend
+      }
+    };
+
+    fetchUserSettings();
+  }, [user, notificationForm]);
+
+  // Update profile form when user changes
+  useEffect(() => {
+    if (user) {
+      profileForm.setValue('username', user.username || '');
+      profileForm.setValue('email', user.email || '');
+      profileForm.setValue('name', user.name || '');
+      profileForm.setValue('phone', user.phone || '');
+      profileForm.setValue('bio', user.bio || '');
+    }
+  }, [user, profileForm]);
+
+  const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => {
+    setIsLoadingProfile(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_URL}/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(values)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+      
+      // Update local user state if API call succeeds
+      if (updateUserProfile) {
+        updateUserProfile({
+          ...user,
+          name: values.name,
+          email: values.email,
+          username: values.username,
+          phone: values.phone,
+          bio: values.bio
+        });
+      }
       
       toast({
-        title: "Settings Updated",
-        description: "Your settings have been successfully saved."
+        title: "Profile updated",
+        description: "Your profile information has been updated.",
       });
     } catch (error) {
+      console.error('Error updating profile:', error);
       toast({
-        title: "Error",
-        description: "Failed to update settings. Please try again.",
-        variant: "destructive"
+        title: "Update failed",
+        description: "Could not update your profile. Please try again.",
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsLoadingProfile(false);
     }
   };
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case "profile":
-        return (
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" defaultValue="John Doe" />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <Input id="email" type="email" defaultValue="john.doe@example.com" />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input id="phone" defaultValue="+1 (555) 123-4567" />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea 
-                id="bio" 
-                defaultValue="Real estate enthusiast with a passion for finding the perfect home."
-                className="min-h-32"
-              />
-            </div>
-          </div>
-        );
-        
-      case "notifications":
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium mb-4">Notification Preferences</h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Email Notifications</Label>
-                  <p className="text-sm text-gray-500">Receive updates via email</p>
-                </div>
-                <Switch 
-                  checked={emailNotifications} 
-                  onCheckedChange={setEmailNotifications}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Push Notifications</Label>
-                  <p className="text-sm text-gray-500">Receive notifications on your device</p>
-                </div>
-                <Switch 
-                  checked={pushNotifications} 
-                  onCheckedChange={setPushNotifications} 
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Marketing Emails</Label>
-                  <p className="text-sm text-gray-500">Receive promotional content and offers</p>
-                </div>
-                <Switch 
-                  checked={marketingEmails} 
-                  onCheckedChange={setMarketingEmails} 
-                />
-              </div>
-            </div>
-          </div>
-        );
-        
-      case "security":
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium mb-4">Security Settings</h3>
-            
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <Input id="currentPassword" type="password" />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input id="newPassword" type="password" />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input id="confirmPassword" type="password" />
-            </div>
-            
-            <div className="pt-4">
-              <Button className="w-full bg-black hover:bg-black/90">Change Password</Button>
-            </div>
-            
-            <div className="pt-4 border-t border-gray-200">
-              <h4 className="text-md font-medium mb-2">Two-Factor Authentication</h4>
-              <p className="text-sm text-gray-500 mb-4">
-                Add an extra layer of security to your account by enabling two-factor authentication.
-              </p>
-              <Button variant="outline" className="w-full">Enable 2FA</Button>
-            </div>
-          </div>
-        );
-        
-      case "privacy":
-        return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-medium mb-4">Privacy Settings</h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Profile Visibility</Label>
-                  <p className="text-sm text-gray-500">Make your profile visible to other users</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Contact Information</Label>
-                  <p className="text-sm text-gray-500">Show your contact information publicly</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Location Data</Label>
-                  <p className="text-sm text-gray-500">Allow us to use your location data</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="text-base">Data Collection</Label>
-                  <p className="text-sm text-gray-500">Allow us to collect usage data to improve services</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </div>
-            
-            <div className="pt-4 border-t border-gray-200">
-              <h4 className="text-md font-medium mb-2">Data Management</h4>
-              <p className="text-sm text-gray-500 mb-4">
-                You can download or delete all your data from our platform.
-              </p>
-              <div className="flex gap-4">
-                <Button variant="destructive" className="flex-2">Delete Account</Button>
-              </div>
-            </div>
-          </div>
-        );
-        
-      default:
-        return null;
+  const onNotificationSubmit = async (values: z.infer<typeof notificationFormSchema>) => {
+    setIsLoadingNotifications(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_URL}/users/settings/notifications`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(values)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update notification preferences');
+      }
+      
+      toast({
+        title: "Preferences updated",
+        description: "Your notification preferences have been updated.",
+      });
+    } catch (error) {
+      console.error('Error updating notification preferences:', error);
+      toast({
+        title: "Update failed",
+        description: "Could not update your notification preferences. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingNotifications(false);
     }
   };
+
+  const onSecuritySubmit = async (values: z.infer<typeof securityFormSchema>) => {
+    setIsLoadingSecurity(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_URL}/users/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to change password');
+      }
+      
+      toast({
+        title: "Password updated",
+        description: "Your password has been changed successfully.",
+      });
+      
+      // Reset form
+      securityForm.reset({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      });
+    } catch (error) {
+      console.error('Error changing password:', error);
+      toast({
+        title: "Update failed",
+        description: error instanceof Error ? error.message : "Could not update your password. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingSecurity(false);
+    }
+  };
+
+  if (!user) {
+    return (
+      <Card>
+        <CardContent className="p-8 text-center">
+          <p>Please log in to access settings.</p>
+          <Button className="mt-4" onClick={() => window.location.href = '/login'}>Log In</Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm">
-      <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x">
-        {/* Settings Navigation */}
-        <nav className="p-4 space-y-1">
-          <h2 className="text-xl font-bold mb-4">Settings</h2>
-          <Button
-            variant="ghost"
-            className={`w-full justify-start ${activeTab === "profile" ? "bg-gray-100" : ""}`}
-            onClick={() => setActiveTab("profile")}
-          >
-            <UserRound className="mr-2 h-5 w-5" />
-            Profile
-          </Button>
-          <Button
-            variant="ghost"
-            className={`w-full justify-start ${activeTab === "notifications" ? "bg-gray-100" : ""}`}
-            onClick={() => setActiveTab("notifications")}
-          >
-            <BellRing className="mr-2 h-5 w-5" />
-            Notifications
-          </Button>
-          <Button
-            variant="ghost"
-            className={`w-full justify-start ${activeTab === "security" ? "bg-gray-100" : ""}`}
-            onClick={() => setActiveTab("security")}
-          >
-            <Lock className="mr-2 h-5 w-5" />
-            Security
-          </Button>
-          <Button
-            variant="ghost"
-            className={`w-full justify-start ${activeTab === "privacy" ? "bg-gray-100" : ""}`}
-            onClick={() => setActiveTab("privacy")}
-          >
-            <Shield className="mr-2 h-5 w-5" />
-            Privacy
-          </Button>
-        </nav>
+    <div className="space-y-6">
+      <Tabs defaultValue="profile" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsTrigger value="security">Security</TabsTrigger>
+        </TabsList>
         
-        {/* Settings Content */}
-        <div className="p-6 col-span-3">
-          <form onSubmit={handleSave}>
-            {renderTabContent()}
-            
-            <div className="mt-8 pt-4 border-t border-gray-200 flex justify-end">
-              <Button 
-                type="submit"
-                className="bg-black hover:bg-black/90"
-                disabled={isLoading}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                {isLoading ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-          </form>
-        </div>
-      </div>
+        {/* Profile Settings Tab */}
+        <TabsContent value="profile">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Settings</CardTitle>
+              <CardDescription>
+                Manage your personal information and contact details
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Form {...profileForm}>
+                <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={profileForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={profileForm.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={profileForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={profileForm.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={profileForm.control}
+                      name="bio"
+                      render={({ field }) => (
+                        <FormItem className="md:col-span-2">
+                          <FormLabel>Bio</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            A brief description about yourself
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <Button type="submit" disabled={isLoadingProfile}>
+                    {isLoadingProfile ? "Saving..." : "Save changes"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Notification Settings Tab */}
+        <TabsContent value="notifications">
+          <Card>
+            <CardHeader>
+              <CardTitle>Notification Preferences</CardTitle>
+              <CardDescription>
+                Configure how you want to receive updates and alerts
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...notificationForm}>
+                <form onSubmit={notificationForm.handleSubmit(onNotificationSubmit)} className="space-y-6">
+                  <div className="space-y-4">
+                    <FormField
+                      control={notificationForm.control}
+                      name="emailNotifications"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Email Notifications</FormLabel>
+                            <FormDescription>
+                              Receive notifications via email
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={notificationForm.control}
+                      name="pushNotifications"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Push Notifications</FormLabel>
+                            <FormDescription>
+                              Receive notifications on your device
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={notificationForm.control}
+                      name="marketingEmails"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Marketing Emails</FormLabel>
+                            <FormDescription>
+                              Receive emails about new features and promotions
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={notificationForm.control}
+                      name="activityDigest"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Activity Digest</FormLabel>
+                            <FormDescription>
+                              Receive a weekly summary of your account activity
+                            </FormDescription>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <Button type="submit" disabled={isLoadingNotifications}>
+                    {isLoadingNotifications ? "Saving..." : "Save preferences"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Security Settings Tab */}
+        <TabsContent value="security">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security Settings</CardTitle>
+              <CardDescription>
+                Update your password and manage security preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...securityForm}>
+                <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-6">
+                  <div className="space-y-4">
+                    <FormField
+                      control={securityForm.control}
+                      name="currentPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Current Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={securityForm.control}
+                      name="newPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>New Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={securityForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm New Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <Button type="submit" disabled={isLoadingSecurity}>
+                    {isLoadingSecurity ? "Changing..." : "Change Password"}
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

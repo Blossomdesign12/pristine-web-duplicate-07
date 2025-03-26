@@ -20,7 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Upload } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { addProperty, uploadImages } from "@/services/propertyService";
+import { addProperty, uploadImages, getPropertyById, updateProperty } from "@/services/propertyService";
 
 interface AddPropertyContentProps {
   propertyId?: string;
@@ -60,15 +60,11 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
   const editMode = propertyId || searchParams.get("edit") === "true";
   const idFromUrl = propertyId || searchParams.get("id");
   
-  useEffect(() => {
-    if (editMode && idFromUrl) {
-      // Load property data for editing
-    }
-  }, [editMode, idFromUrl]);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
   const navigate = useNavigate();
@@ -100,6 +96,54 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
     },
   });
 
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      if (editMode && idFromUrl) {
+        setIsLoading(true);
+        try {
+          const property = await getPropertyById(idFromUrl);
+          
+          form.setValue("title", property.title);
+          form.setValue("description", property.description);
+          form.setValue("price", property.price.toString());
+          form.setValue("bedrooms", property.features.bedrooms.toString());
+          form.setValue("bathrooms", property.features.bathrooms.toString());
+          form.setValue("area", property.features.area.toString());
+          form.setValue("propertyType", property.features.propertyType);
+          form.setValue("status", property.features.status);
+          form.setValue("address", property.location.address);
+          form.setValue("city", property.location.city);
+          form.setValue("state", property.location.state || "Maharashtra");
+          form.setValue("zipCode", property.location.zip);
+          
+          if (property.features) {
+            form.setValue("features.hasGarden", property.features.hasGarden || false);
+            form.setValue("features.hasGarage", property.features.hasGarage || false);
+            form.setValue("features.hasPool", property.features.hasPool || false);
+            form.setValue("features.isPetFriendly", property.features.isPetFriendly || false);
+            form.setValue("features.hasCentralHeating", property.features.hasCentralHeating || false);
+            form.setValue("features.hasAirConditioning", property.features.hasAirConditioning || false);
+          }
+          
+          if (property.images && property.images.length > 0) {
+            setExistingImages(property.images);
+          }
+        } catch (error) {
+          console.error("Error fetching property:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load property data. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    
+    fetchPropertyData();
+  }, [editMode, idFromUrl, form]);
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files);
@@ -114,6 +158,10 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
     setImages(images.filter((_, i) => i !== index));
     URL.revokeObjectURL(previewUrls[index]);
     setPreviewUrls(previewUrls.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages(existingImages.filter((_, i) => i !== index));
   };
 
   const nextStep = () => {
@@ -169,7 +217,7 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
         }
         break;
       case 4:
-        if (images.length === 0) {
+        if (images.length === 0 && existingImages.length === 0) {
           toast({
             title: "Validation Error",
             description: "Please upload at least one image",
@@ -184,7 +232,7 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
   };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    if (images.length === 0) {
+    if (images.length === 0 && existingImages.length === 0) {
       toast({
         title: "Error",
         description: "Please upload at least one image",
@@ -196,12 +244,15 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
     setIsSubmitting(true);
 
     try {
-      let imageUrls: string[] = [];
-      try {
-        imageUrls = await uploadImages(images);
-      } catch (error) {
-        console.error("Error uploading images:", error);
-        imageUrls = previewUrls;
+      let imageUrls: string[] = [...existingImages];
+      
+      if (images.length > 0) {
+        try {
+          const newImageUrls = await uploadImages(images);
+          imageUrls = [...imageUrls, ...newImageUrls];
+        } catch (error) {
+          console.error("Error uploading images:", error);
+        }
       }
 
       const propertyData = {
@@ -240,19 +291,26 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
         views: 0
       };
 
-      await addProperty(propertyData);
-
-      toast({
-        title: "Success",
-        description: "Property has been added successfully",
-      });
+      if (editMode && idFromUrl) {
+        await updateProperty(idFromUrl, propertyData);
+        toast({
+          title: "Success",
+          description: "Property has been updated successfully",
+        });
+      } else {
+        await addProperty(propertyData);
+        toast({
+          title: "Success",
+          description: "Property has been added successfully",
+        });
+      }
 
       navigate("/dashboard?tab=properties");
     } catch (error) {
-      console.error("Error adding property:", error);
+      console.error("Error with property:", error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to add property. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to process property. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -689,65 +747,5 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
     );
   };
 
-  return (
-    <div className="max-w-4xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">{editMode ? "Edit Property" : "Add New Property"}</CardTitle>
-          <CardDescription>Enter the details of the property you want to list</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {renderProgressBar()}
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {renderStepContent()}
-              </div>
-              
-              <div className="flex justify-between space-x-4">
-                {currentStep > 1 ? (
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={prevStep}
-                  >
-                    Previous
-                  </Button>
-                ) : (
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={() => navigate('/dashboard')}
-                  >
-                    Cancel
-                  </Button>
-                )}
-                
-                {currentStep < totalSteps ? (
-                  <Button 
-                    type="button" 
-                    onClick={nextStep}
-                    className="bg-estate-primary hover:bg-estate-primary/90"
-                  >
-                    Next
-                  </Button>
-                ) : (
-                  <Button 
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-estate-primary hover:bg-estate-primary/90"
-                  >
-                    {isSubmitting ? "Submitting..." : "Add Property"}
-                  </Button>
-                )}
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+  if
 
-export default AddPropertyContent;
