@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,6 +21,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AlertCircle, Upload } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { addProperty, uploadImages } from "@/services/propertyService";
+
+interface AddPropertyContentProps {
+  propertyId?: string;
+}
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -51,7 +55,17 @@ const availableCities = [
   "Thane"
 ];
 
-const AddPropertyContent = () => {
+const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) => {
+  const [searchParams] = useSearchParams();
+  const editMode = propertyId || searchParams.get("edit") === "true";
+  const idFromUrl = propertyId || searchParams.get("id");
+  
+  useEffect(() => {
+    if (editMode && idFromUrl) {
+      // Load property data for editing
+    }
+  }, [editMode, idFromUrl]);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -679,7 +693,7 @@ const AddPropertyContent = () => {
     <div className="max-w-4xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Add New Property</CardTitle>
+          <CardTitle className="text-2xl">{editMode ? "Edit Property" : "Add New Property"}</CardTitle>
           <CardDescription>Enter the details of the property you want to list</CardDescription>
         </CardHeader>
         <CardContent>

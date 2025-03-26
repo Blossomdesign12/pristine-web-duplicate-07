@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,7 +37,6 @@ const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // Fetch dashboard stats
         if (activeTab === "overview") {
           console.log("Fetching dashboard stats...");
           const dashboardStats = await getDashboardStats();
@@ -46,7 +44,6 @@ const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
           setStats(dashboardStats);
         }
         
-        // Fetch all properties for properties tab
         const fetchedProperties = await getUserProperties();
         console.log("Fetched user properties:", fetchedProperties);
         setProperties(fetchedProperties);
@@ -82,7 +79,6 @@ const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
   if (activeTab === "overview") {
     return (
       <div className="space-y-6">
-        {/* Stats Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
             <CardHeader className="pb-2">
@@ -133,7 +129,6 @@ const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
           </Card>
         </div>
 
-        {/* Recent Properties Section */}
         <Card>
           <CardHeader>
             <CardTitle>Recent Properties</CardTitle>
@@ -192,7 +187,6 @@ const AgentDashboard = ({ activeTab }: AgentDashboardProps) => {
     );
   }
 
-  // Properties tab view
   if (activeTab === "properties") {
     return (
       <div className="space-y-6">

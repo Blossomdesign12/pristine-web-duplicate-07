@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -64,9 +65,8 @@ const Dashboard = () => {
     } else if (activeTab === "edit-property" && (role === "agent" || role === "owner")) {
       const propertyId = searchParams.get("id");
       if (propertyId) {
-        // Navigate to the add property page with the propertyId in the URL
-        navigate(`/add-property?edit=true&id=${propertyId}`);
-        return null;
+        // Instead of navigating, render the AddPropertyContent with the propertyId
+        return <AddPropertyContent propertyId={propertyId} />;
       }
       return <AgentDashboard activeTab="properties" />;
     }

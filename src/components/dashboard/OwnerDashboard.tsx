@@ -31,13 +31,11 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // Fetch dashboard stats
         if (activeTab === "overview") {
           const dashboardStats = await getDashboardStats();
           setStats(dashboardStats);
         }
         
-        // Fetch properties
         const userProperties = await getUserProperties();
         setProperties(userProperties);
       } catch (error) {
@@ -60,7 +58,6 @@ const OwnerDashboard = ({ activeTab }: OwnerDashboardProps) => {
       try {
         await deleteProperty(id);
         
-        // Update the properties list
         setProperties(properties.filter(property => (property.id !== id && property._id !== id)));
         
         toast({
