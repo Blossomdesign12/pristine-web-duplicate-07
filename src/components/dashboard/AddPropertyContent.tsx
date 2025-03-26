@@ -747,5 +747,90 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
     );
   };
 
-  if
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>{editMode ? "Edit Property" : "Add New Property"}</CardTitle>
+          <CardDescription>
+            {editMode 
+              ? "Update your property information" 
+              : "Add a new property to your listings"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {renderProgressBar()}
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {renderStepContent()}
+                
+                <div className="md:col-span-1">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Property Submission</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center space-x-2 text-sm">
+                        <AlertCircle className="h-4 w-4 text-yellow-500" />
+                        <p>Complete all required fields</p>
+                      </div>
+                      
+                      <div className="flex justify-between mt-6">
+                        {currentStep > 1 && (
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={prevStep}
+                          >
+                            Previous
+                          </Button>
+                        )}
+                        
+                        {currentStep < totalSteps ? (
+                          <Button 
+                            type="button" 
+                            onClick={nextStep}
+                            className="ml-auto"
+                          >
+                            Next
+                          </Button>
+                        ) : (
+                          <Button 
+                            type="submit" 
+                            className="ml-auto"
+                            disabled={isSubmitting}
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <span className="animate-spin mr-2">⌛</span>
+                                {editMode ? "Updating..." : "Submitting..."}
+                              </>
+                            ) : (
+                              editMode ? "Update Property" : "Submit Property"
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default AddPropertyContent;
