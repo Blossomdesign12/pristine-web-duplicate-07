@@ -125,17 +125,36 @@ export const formatPrice = (price: number): string => {
   return formatter.format(price);
 };
 
-// Sample properties data
-import { propertiesForSale, propertiesForRent } from './dummy-properties';
-export const properties = [...propertiesForSale, ...propertiesForRent];
+// Import PropertyService for backend data
+import { getAllProperties, getPropertiesByStatus } from '@/services/propertyService';
 
-// Function to get featured properties
-export const getFeaturedProperties = (): Property[] => {
+// Initialize empty properties array (will be populated from backend)
+let properties: Property[] = [];
+
+// Function to load properties from backend
+export const loadProperties = async (): Promise<Property[]> => {
+  try {
+    properties = await getAllProperties();
+    return properties;
+  } catch (error) {
+    console.error("Error loading properties:", error);
+    return [];
+  }
+};
+
+// Function to get featured properties from backend
+export const getFeaturedProperties = async (): Promise<Property[]> => {
+  if (properties.length === 0) {
+    await loadProperties();
+  }
   return properties.filter(property => property.featured).slice(0, 6);
 };
 
 // Function to get recent properties
-export const getRecentProperties = (count: number = 3): Property[] => {
+export const getRecentProperties = async (count: number = 3): Promise<Property[]> => {
+  if (properties.length === 0) {
+    await loadProperties();
+  }
   // Sort by createdAt date (newest first) and take the specified count
   return [...properties]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -143,7 +162,7 @@ export const getRecentProperties = (count: number = 3): Property[] => {
 };
 
 // Function to search properties with various filters
-export const searchProperties = (
+export const searchProperties = async (
   query?: string,
   filters?: {
     city?: string;
@@ -154,7 +173,11 @@ export const searchProperties = (
     bedrooms?: number;
     bathrooms?: number;
   }
-): Property[] => {
+): Promise<Property[]> => {
+  if (properties.length === 0) {
+    await loadProperties();
+  }
+  
   let results = [...properties];
   
   if (query) {
@@ -216,6 +239,9 @@ export const searchProperties = (
 };
 
 // Function to get property by ID
-export const getPropertyById = (id: string): Property | undefined => {
+export const getPropertyById = async (id: string): Promise<Property | undefined> => {
+  if (properties.length === 0) {
+    await loadProperties();
+  }
   return properties.find(property => property.id === id || property._id === id);
 };

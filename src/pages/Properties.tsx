@@ -18,49 +18,62 @@ const Properties = () => {
   const [sortOption, setSortOption] = useState('latest');
   const [showMap, setShowMap] = useState(true);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(true);
   const propertiesPerPage = 9;
 
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    // Get filter values from URL params
-    const query = searchParams.get('q') || '';
-    const city = searchParams.get('city') || '';
-    const propertyType = searchParams.get('type') || '';
-    const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
-    const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
-    const beds = searchParams.get('beds') ? parseInt(searchParams.get('beds')!) : undefined;
-    const baths = searchParams.get('baths') ? parseInt(searchParams.get('baths')!) : undefined;
+    const fetchProperties = async () => {
+      setIsLoading(true);
+      
+      // Get filter values from URL params
+      const query = searchParams.get('q') || '';
+      const city = searchParams.get('city') || '';
+      const type = searchParams.get('type') || '';
+      const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
+      const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
+      const beds = searchParams.get('beds') ? parseInt(searchParams.get('beds')!) : undefined;
+      const baths = searchParams.get('baths') ? parseInt(searchParams.get('baths')!) : undefined;
+      
+      try {
+        // Search properties based on filters
+        const filteredProperties = await searchProperties(query, {
+          city,
+          type,
+          minPrice,
+          maxPrice,
+          bedrooms: beds,
+          bathrooms: baths
+        });
+        
+        // Sort properties
+        let sortedProperties = [...filteredProperties];
+        switch (sortOption) {
+          case 'latest':
+            sortedProperties.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            break;
+          case 'price-low':
+            sortedProperties.sort((a, b) => a.price - b.price);
+            break;
+          case 'price-high':
+            sortedProperties.sort((a, b) => b.price - a.price);
+            break;
+          default:
+            break;
+        }
+        
+        setProperties(sortedProperties);
+        setTotalPages(Math.ceil(sortedProperties.length / propertiesPerPage));
+        setCurrentPage(1); // Reset to first page on new search
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    // Search properties based on filters
-    const filteredProperties = searchProperties(query, {
-      city,
-      propertyType,
-      minPrice,
-      maxPrice,
-      bedrooms: beds,
-      bathrooms: baths
-    });
-    
-    // Sort properties
-    let sortedProperties = [...filteredProperties];
-    switch (sortOption) {
-      case 'latest':
-        sortedProperties.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        break;
-      case 'price-low':
-        sortedProperties.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        sortedProperties.sort((a, b) => b.price - a.price);
-        break;
-      default:
-        break;
-    }
-    
-    setProperties(sortedProperties);
-    setTotalPages(Math.ceil(sortedProperties.length / propertiesPerPage));
-    setCurrentPage(1); // Reset to first page on new search
+    fetchProperties();
   }, [searchParams, sortOption]);
 
   const handlePageChange = (page: number) => {
@@ -215,7 +228,13 @@ const Properties = () => {
             </div>
           </div>
           
-          {currentProperties.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((_, index) => (
+                <div key={index} className="bg-gray-100 rounded-xl h-[400px] animate-pulse"></div>
+              ))}
+            </div>
+          ) : currentProperties.length > 0 ? (
             <div className="flex flex-col lg:flex-row gap-6">
               {/* Properties List */}
               <div className={`${showMap ? 'lg:w-1/2' : 'w-full'}`}>
@@ -226,7 +245,7 @@ const Properties = () => {
                 }`}>
                   {currentProperties.map((property, index) => (
                     <PropertyCard 
-                      key={property.id} 
+                      key={property.id || property._id} 
                       property={property} 
                       index={index}
                     />

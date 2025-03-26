@@ -19,31 +19,41 @@ const PropertyListings = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    const query = searchParams.get('q') || '';
-    const city = searchParams.get('city') || '';
-    const propertyType = searchParams.get('type') || '';
-    const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
-    const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
-    const bedrooms = searchParams.get('bedrooms') ? parseInt(searchParams.get('bedrooms')!) : undefined;
-    const status = searchParams.get('status') || '';
+    const fetchProperties = async () => {
+      setLoading(true);
+      const query = searchParams.get('q') || '';
+      const city = searchParams.get('city') || '';
+      const type = searchParams.get('type') || '';
+      const minPrice = searchParams.get('minPrice') ? parseInt(searchParams.get('minPrice')!) : undefined;
+      const maxPrice = searchParams.get('maxPrice') ? parseInt(searchParams.get('maxPrice')!) : undefined;
+      const bedrooms = searchParams.get('bedrooms') ? parseInt(searchParams.get('bedrooms')!) : undefined;
+      const status = searchParams.get('status') || '';
+      
+      try {
+        const allProperties = await searchProperties(query, {
+          city,
+          type,
+          minPrice,
+          maxPrice,
+          bedrooms,
+          status: status as any
+        });
+        
+        setTotalProperties(allProperties.length);
+        
+        // Calculate pagination
+        const startIndex = (currentPage - 1) * propertiesPerPage;
+        const paginatedProperties = allProperties.slice(startIndex, startIndex + propertiesPerPage);
+        
+        setProperties(paginatedProperties);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    const allProperties = searchProperties(query, {
-      city,
-      propertyType,
-      minPrice,
-      maxPrice,
-      bedrooms,
-      status: status as any
-    });
-    
-    setTotalProperties(allProperties.length);
-    
-    // Calculate pagination
-    const startIndex = (currentPage - 1) * propertiesPerPage;
-    const paginatedProperties = allProperties.slice(startIndex, startIndex + propertiesPerPage);
-    
-    setProperties(paginatedProperties);
-    setLoading(false);
+    fetchProperties();
   }, [searchParams, currentPage]);
   
   const handlePageChange = (page: number) => {
@@ -97,7 +107,7 @@ const PropertyListings = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                   {properties.map((property, index) => (
                     <PropertyCard 
-                      key={property.id} 
+                      key={property.id || property._id} 
                       property={property} 
                       index={index}
                     />

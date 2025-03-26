@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from '@/lib/utils';
 import PropertyCard from './PropertyCard';
 import { Link } from 'react-router-dom';
-import { getFeaturedProperties } from '@/lib/data';
+import { getFeaturedProperties, Property } from '@/lib/data';
 
 const FeaturedProperties = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const featuredProperties = getFeaturedProperties();
+  const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -26,6 +27,20 @@ const FeaturedProperties = () => {
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
     }
+
+    const loadFeaturedProperties = async () => {
+      setIsLoading(true);
+      try {
+        const properties = await getFeaturedProperties();
+        setFeaturedProperties(properties);
+      } catch (error) {
+        console.error("Error loading featured properties:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadFeaturedProperties();
 
     return () => {
       if (sectionRef.current) {
@@ -59,15 +74,23 @@ const FeaturedProperties = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {featuredProperties.map((property, index) => (
-            <PropertyCard 
-              key={property.id} 
-              property={property} 
-              index={index}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {[1, 2, 3, 4, 5, 6].map((_, index) => (
+              <div key={index} className="bg-gray-100 rounded-xl h-[400px] animate-pulse"></div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            {featuredProperties.map((property, index) => (
+              <PropertyCard 
+                key={property.id || property._id} 
+                property={property} 
+                index={index}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

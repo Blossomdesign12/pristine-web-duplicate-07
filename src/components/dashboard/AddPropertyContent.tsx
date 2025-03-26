@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Form, 
   FormControl, 
@@ -69,6 +69,7 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
   const totalSteps = 4;
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -750,81 +751,80 @@ const AddPropertyContent: React.FC<AddPropertyContentProps> = ({ propertyId }) =
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      <div className="flex items-center justify-center py-12">
+        <div className="w-12 h-12 border-4 border-black border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <Card>
         <CardHeader>
           <CardTitle>{editMode ? "Edit Property" : "Add New Property"}</CardTitle>
           <CardDescription>
             {editMode 
-              ? "Update your property information" 
-              : "Add a new property to your listings"}
+              ? "Update your property information below" 
+              : "Fill in the property details to create a new listing"}
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {renderProgressBar()}
+          
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {renderProgressBar()}
-              
+            <form className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {renderStepContent()}
-                
                 <div className="md:col-span-1">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">Property Submission</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center space-x-2 text-sm">
-                        <AlertCircle className="h-4 w-4 text-yellow-500" />
-                        <p>Complete all required fields</p>
-                      </div>
-                      
-                      <div className="flex justify-between mt-6">
-                        {currentStep > 1 && (
-                          <Button 
-                            type="button" 
-                            variant="outline" 
-                            onClick={prevStep}
-                          >
-                            Previous
-                          </Button>
-                        )}
-                        
-                        {currentStep < totalSteps ? (
-                          <Button 
-                            type="button" 
-                            onClick={nextStep}
-                            className="ml-auto"
-                          >
-                            Next
-                          </Button>
-                        ) : (
-                          <Button 
-                            type="submit" 
-                            className="ml-auto"
-                            disabled={isSubmitting}
-                          >
-                            {isSubmitting ? (
-                              <>
-                                <span className="animate-spin mr-2">⌛</span>
-                                {editMode ? "Updating..." : "Submitting..."}
-                              </>
-                            ) : (
-                              editMode ? "Update Property" : "Submit Property"
-                            )}
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="space-y-4">
+                    <h3 className="font-medium">Steps</h3>
+                    <ul className="space-y-2">
+                      <li className={`p-3 rounded-md cursor-pointer transition-colors ${currentStep === 1 ? 'bg-estate-primary/10 font-medium text-estate-primary' : 'hover:bg-gray-100'}`} onClick={() => setCurrentStep(1)}>
+                        1. Basic Information
+                      </li>
+                      <li className={`p-3 rounded-md cursor-pointer transition-colors ${currentStep === 2 ? 'bg-estate-primary/10 font-medium text-estate-primary' : 'hover:bg-gray-100'}`} onClick={() => setCurrentStep(2)}>
+                        2. Property Details
+                      </li>
+                      <li className={`p-3 rounded-md cursor-pointer transition-colors ${currentStep === 3 ? 'bg-estate-primary/10 font-medium text-estate-primary' : 'hover:bg-gray-100'}`} onClick={() => setCurrentStep(3)}>
+                        3. Location
+                      </li>
+                      <li className={`p-3 rounded-md cursor-pointer transition-colors ${currentStep === 4 ? 'bg-estate-primary/10 font-medium text-estate-primary' : 'hover:bg-gray-100'}`} onClick={() => setCurrentStep(4)}>
+                        4. Images
+                      </li>
+                    </ul>
+                  </div>
                 </div>
+                
+                {renderStepContent()}
+              </div>
+              
+              <div className="flex justify-between pt-4 border-t">
+                {currentStep > 1 && (
+                  <Button type="button" variant="outline" onClick={prevStep}>
+                    Previous
+                  </Button>
+                )}
+                
+                {currentStep < totalSteps ? (
+                  <Button type="button" className="ml-auto" onClick={nextStep}>
+                    Next
+                  </Button>
+                ) : (
+                  <Button 
+                    type="button" 
+                    className="ml-auto"
+                    onClick={form.handleSubmit(onSubmit)}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span className="animate-spin mr-2">⟳</span>
+                        {editMode ? "Updating..." : "Submitting..."}
+                      </>
+                    ) : (
+                      editMode ? "Update Property" : "Submit Property"
+                    )}
+                  </Button>
+                )}
               </div>
             </form>
           </Form>
