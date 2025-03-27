@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { updateUserProfile, updateNotificationPreferences } from "@/services/authService";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -35,7 +36,7 @@ const formSchema = z.object({
 
 const SettingsPanel = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -45,32 +46,68 @@ const SettingsPanel = () => {
       email: user?.email || "",
       phone: user?.phone || "",
       bio: user?.bio || "",
-      emailNotifications: true,
-      listings: true,
-      messages: true,
+      emailNotifications: user?.preferences?.emailNotifications ?? true,
+      listings: user?.preferences?.listings ?? true,
+      messages: user?.preferences?.messages ?? true,
     },
   });
+
+  // Update form when user data changes
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        bio: user.bio || "",
+        emailNotifications: user.preferences?.emailNotifications ?? true,
+        listings: user.preferences?.listings ?? true,
+        messages: user.preferences?.messages ?? true,
+      });
+    }
+  }, [user, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
     try {
-      // This would normally call an API to update the user profile
-      // Since updateUserProfile doesn't exist in AuthContextType, we'll just show a success message
+      // Split the profile update and notification preferences
+      const profileData = {
+        name: values.name,
+        phone: values.phone,
+        bio: values.bio,
+      };
       
-      console.log("Profile update values:", values);
+      const notificationPrefs = {
+        emailNotifications: values.emailNotifications,
+        listings: values.listings,
+        messages: values.messages,
+      };
       
-      // Simulating an API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Update profile data
+      await updateUserProfile(profileData);
+      
+      // Update notification preferences
+      await updateNotificationPreferences(notificationPrefs);
+      
+      // Refresh user data in context
+      if (refreshUser) {
+        await refreshUser();
+      }
       
       toast({
         title: "Profile updated",
         description: "Your profile information has been updated successfully.",
       });
     } catch (error) {
+      let errorMessage = "Failed to update profile. Please try again.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to update profile. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
