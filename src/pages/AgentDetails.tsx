@@ -1,11 +1,14 @@
+
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import { Phone, Mail, MapPin, Facebook, Twitter, Instagram, Linkedin, FileText } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import PropertyCard from '@/components/PropertyCard';
 import { Property } from '@/lib/data';
 import { getAllProperties } from '@/services/propertyService';
+import ContactForm from '@/components/ContactForm';
 
 const AgentDetails = () => {
   const { id } = useParams<{ id: string }>();

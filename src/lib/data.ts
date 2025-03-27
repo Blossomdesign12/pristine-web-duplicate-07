@@ -144,21 +144,27 @@ export const loadProperties = async (): Promise<Property[]> => {
 
 // Function to get featured properties from backend
 export const getFeaturedProperties = async (): Promise<Property[]> => {
-  if (properties.length === 0) {
-    await loadProperties();
+  try {
+    const allProperties = await getAllProperties();
+    return allProperties.filter(property => property.featured).slice(0, 6);
+  } catch (error) {
+    console.error("Error getting featured properties:", error);
+    return [];
   }
-  return properties.filter(property => property.featured).slice(0, 6);
 };
 
 // Function to get recent properties
 export const getRecentProperties = async (count: number = 3): Promise<Property[]> => {
-  if (properties.length === 0) {
-    await loadProperties();
+  try {
+    const allProperties = await getAllProperties();
+    // Sort by createdAt date (newest first) and take the specified count
+    return [...allProperties]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, count);
+  } catch (error) {
+    console.error("Error getting recent properties:", error);
+    return [];
   }
-  // Sort by createdAt date (newest first) and take the specified count
-  return [...properties]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, count);
 };
 
 // Function to search properties with various filters
@@ -174,74 +180,80 @@ export const searchProperties = async (
     bathrooms?: number;
   }
 ): Promise<Property[]> => {
-  if (properties.length === 0) {
-    await loadProperties();
+  try {
+    const allProperties = await getAllProperties();
+    
+    let results = [...allProperties];
+    
+    if (query) {
+      const searchQuery = query.toLowerCase();
+      results = results.filter(
+        property => 
+          property.title.toLowerCase().includes(searchQuery) ||
+          property.description.toLowerCase().includes(searchQuery) ||
+          property.location.address.toLowerCase().includes(searchQuery) ||
+          property.location.city.toLowerCase().includes(searchQuery)
+      );
+    }
+    
+    if (filters) {
+      if (filters.city) {
+        results = results.filter(property => 
+          property.location.city.toLowerCase() === filters.city!.toLowerCase()
+        );
+      }
+      
+      if (filters.type) {
+        results = results.filter(property => 
+          property.features.propertyType === filters.type
+        );
+      }
+      
+      if (filters.status) {
+        results = results.filter(property => 
+          property.features.status === filters.status
+        );
+      }
+      
+      if (filters.minPrice) {
+        results = results.filter(property => 
+          property.price >= filters.minPrice!
+        );
+      }
+      
+      if (filters.maxPrice) {
+        results = results.filter(property => 
+          property.price <= filters.maxPrice!
+        );
+      }
+      
+      if (filters.bedrooms) {
+        results = results.filter(property => 
+          property.features.bedrooms >= filters.bedrooms!
+        );
+      }
+      
+      if (filters.bathrooms) {
+        results = results.filter(property => 
+          property.features.bathrooms >= filters.bathrooms!
+        );
+      }
+    }
+    
+    return results;
+  } catch (error) {
+    console.error("Error searching properties:", error);
+    return [];
   }
-  
-  let results = [...properties];
-  
-  if (query) {
-    const searchQuery = query.toLowerCase();
-    results = results.filter(
-      property => 
-        property.title.toLowerCase().includes(searchQuery) ||
-        property.description.toLowerCase().includes(searchQuery) ||
-        property.location.address.toLowerCase().includes(searchQuery) ||
-        property.location.city.toLowerCase().includes(searchQuery)
-    );
-  }
-  
-  if (filters) {
-    if (filters.city) {
-      results = results.filter(property => 
-        property.location.city.toLowerCase() === filters.city!.toLowerCase()
-      );
-    }
-    
-    if (filters.type) {
-      results = results.filter(property => 
-        property.features.propertyType === filters.type
-      );
-    }
-    
-    if (filters.status) {
-      results = results.filter(property => 
-        property.features.status === filters.status
-      );
-    }
-    
-    if (filters.minPrice) {
-      results = results.filter(property => 
-        property.price >= filters.minPrice!
-      );
-    }
-    
-    if (filters.maxPrice) {
-      results = results.filter(property => 
-        property.price <= filters.maxPrice!
-      );
-    }
-    
-    if (filters.bedrooms) {
-      results = results.filter(property => 
-        property.features.bedrooms >= filters.bedrooms!
-      );
-    }
-    
-    if (filters.bathrooms) {
-      results = results.filter(property => 
-        property.features.bathrooms >= filters.bathrooms!
-      );
-    }
-  }
-  
-  return results;
 };
 
 // Function to get property by ID
 export const getPropertyById = async (id: string): Promise<Property | undefined> => {
-  if (properties.length === 0) {
-    await loadProperties();
+  try {
+    const allProperties = await getAllProperties();
+    return allProperties.find(property => property.id === id || property._id === id);
+  } catch (error) {
+    console.error("Error getting property by ID:", error);
+    return undefined;
   }
-  return properties.find(property => property.id === id || property._id === id);
 };

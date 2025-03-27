@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -38,18 +37,15 @@ const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   
-  // Update active tab when URL changes
   useEffect(() => {
     if (tabFromUrl) {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
 
-  // Default role to buyer if not authenticated
   const role = user?.role || "buyer";
 
   const renderDashboardContent = () => {
-    // Handle settings, profile, notifications, messages tabs
     if (activeTab === "settings") {
       return <SettingsPanel />;
     } else if (activeTab === "profile") {
@@ -65,13 +61,11 @@ const Dashboard = () => {
     } else if (activeTab === "edit-property" && (role === "agent" || role === "owner")) {
       const propertyId = searchParams.get("id");
       if (propertyId) {
-        // Instead of navigating, render the AddPropertyContent with the propertyId
         return <AddPropertyContent propertyId={propertyId} />;
       }
       return <AgentDashboard activeTab="properties" />;
     }
     
-    // Handle role-specific dashboards
     switch (role) {
       case "buyer":
         return <BuyerDashboard activeTab={activeTab} />;
@@ -92,13 +86,11 @@ const Dashboard = () => {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    // Update URL with the new tab
     navigate(`/dashboard?tab=${tab}`);
   };
   
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 hidden md:block">
         <div className="h-full flex flex-col">
           <div className="p-4 border-b border-gray-200">
@@ -133,7 +125,6 @@ const Dashboard = () => {
               Dashboard
             </Button>
             
-            {/* Only show Add Property for agents and owners */}
             {(role === "agent" || role === "owner") && (
               <Button
                 variant="ghost"
@@ -263,11 +254,9 @@ const Dashboard = () => {
         </div>
       </aside>
       
-      {/* Main Content */}
       <main className="flex-1">
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
-            {/* Header content if needed */}
           </div>
           
           {renderDashboardContent()}

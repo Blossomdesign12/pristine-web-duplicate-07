@@ -19,6 +19,7 @@ const SimilarProperties = ({ currentPropertyId, propertyType, city }: SimilarPro
   useEffect(() => {
     const fetchSimilarProperties = async () => {
       try {
+        setIsLoading(true);
         // Get all properties asynchronously
         const allProperties = await searchProperties();
         
