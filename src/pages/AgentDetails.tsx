@@ -1,37 +1,52 @@
-
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, FileText, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import PropertyCard from "@/components/PropertyCard";
-import ContactForm from "@/components/ContactForm";
-import { agents, properties, Property } from '@/lib/data';
+import { useParams } from 'react-router-dom';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { Button } from '@/components/ui/button';
+import PropertyCard from '@/components/PropertyCard';
+import { Property } from '@/lib/data';
+import { getAllProperties } from '@/services/propertyService';
 
 const AgentDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [agent, setAgent] = useState<any>(null);
   const [agentProperties, setAgentProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
-    window.scrollTo(0, 0);
-    
-    // Find agent with matching id
-    const foundAgent = agents.find(a => a.id === id);
-    
-    if (foundAgent) {
-      setAgent(foundAgent);
-      
-      // Find properties listed by this agent
-      const agentProps = properties.filter(property => property.agent.id === id);
-      setAgentProperties(agentProps);
-    }
-    
-    setLoading(false);
+    const fetchAgentDetails = async () => {
+      try {
+        // In a real app, this would be a fetch call to get agent details
+        // For now, we'll use a dummy agent
+        setAgent({
+          id: id,
+          name: "Rahul Sharma",
+          email: "rahul.sharma@example.com",
+          phone: "+91 9876543210",
+          image: "https://randomuser.me/api/portraits/men/1.jpg",
+          properties: 24,
+          experience: 5,
+          specialization: "Residential",
+          bio: "Rahul is a dedicated real estate professional with 5 years of experience in Mumbai's property market."
+        });
+
+        // Fetch properties for this agent
+        const allProperties = await getAllProperties();
+        // Filter properties by agent ID
+        const agentProps = allProperties.filter(property => 
+          property.agent && property.agent.id === id
+        );
+        setAgentProperties(agentProps);
+      } catch (error) {
+        console.error('Error fetching agent details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgentDetails();
   }, [id]);
-  
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -43,7 +58,7 @@ const AgentDetails = () => {
       </div>
     );
   }
-  
+
   if (!agent) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -61,7 +76,7 @@ const AgentDetails = () => {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />

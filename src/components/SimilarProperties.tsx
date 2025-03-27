@@ -14,22 +14,33 @@ interface SimilarPropertiesProps {
 
 const SimilarProperties = ({ currentPropertyId, propertyType, city }: SimilarPropertiesProps) => {
   const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Get all properties
-    const allProperties = searchProperties();
+    const fetchSimilarProperties = async () => {
+      try {
+        // Get all properties asynchronously
+        const allProperties = await searchProperties();
+        
+        // Find similar properties based on type and city, excluding the current property
+        const similar = allProperties.filter(property => 
+          property.id !== currentPropertyId && 
+          (property.features.propertyType === propertyType || 
+           property.location.city === city)
+        ).slice(0, 3);
+        
+        setSimilarProperties(similar);
+      } catch (error) {
+        console.error("Error fetching similar properties:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    // Find similar properties based on type and city, excluding the current property
-    const similar = allProperties.filter(property => 
-      property.id !== currentPropertyId && 
-      (property.features.propertyType === propertyType || 
-       property.location.city === city)
-    ).slice(0, 3);
-    
-    setSimilarProperties(similar);
+    fetchSimilarProperties();
   }, [currentPropertyId, propertyType, city]);
 
-  if (similarProperties.length === 0) {
+  if (!isLoading && similarProperties.length === 0) {
     return null;
   }
 
@@ -51,15 +62,23 @@ const SimilarProperties = ({ currentPropertyId, propertyType, city }: SimilarPro
           </Link>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          {similarProperties.map((property, index) => (
-            <PropertyCard 
-              key={property.id} 
-              property={property} 
-              index={index}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {[1, 2, 3].map((_, index) => (
+              <div key={index} className="bg-gray-100 rounded-xl h-[400px] animate-pulse"></div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {similarProperties.map((property, index) => (
+              <PropertyCard 
+                key={property.id || property._id} 
+                property={property} 
+                index={index}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

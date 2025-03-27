@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import FeaturedProperties from "@/components/FeaturedProperties";
@@ -6,18 +6,33 @@ import Footer from "@/components/Footer";
 import { ArrowRight, Search, Home, Building2, Handshake, Users, Award, CheckCircle2, MapPin } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
-import { getRecentProperties, formatPrice } from '@/lib/data';
+import { Property, getRecentProperties, formatPrice } from '@/lib/data';
 import PropertyCategorySection from '@/components/PropertyCategorySection';
 import FlatsGrid from '@/components/Flatgrid';
-import Sellrent from "@/components/Sellrent"
-import Togglebuyrent from "@/components/Togglebuyrent"
+import Sellrent from "@/components/Sellrent";
+import Togglebuyrent from "@/components/Togglebuyrent";
 import { Toggle } from '@/components/ui/toggle';
 import TestimonialSection from '@/components/TestimonialSection';
 
 const Index = () => {
-  const recentProperties = getRecentProperties(3);
+  const [recentProperties, setRecentProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch recent properties
+    const fetchRecentProperties = async () => {
+      try {
+        const properties = await getRecentProperties(3);
+        setRecentProperties(properties);
+      } catch (error) {
+        console.error("Error fetching recent properties:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchRecentProperties();
+
     // Initialize animation observer
     const observerOptions = {
       threshold: 0.1,
@@ -196,62 +211,70 @@ const Index = () => {
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {recentProperties.map((property, index) => (
-              <div 
-                key={property.id}
-                className="property-card overflow-hidden rounded-xl transition-all duration-500 transform animate-on-scroll hover:shadow-md"
-              >
-                <Link to={`/property/${property.id}`} className="group">
-                  <div className="relative overflow-hidden aspect-[4/3]">
-                    <img 
-                      src={property.images[0]} 
-                      alt={property.title}
-                      className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
-                    />
-                    
-                    <div className="absolute top-3 left-3">
-                      <span className={`tag ${property.features.status === 'for-sale' ? 'bg-estate-primary text-white' : 'bg-estate-secondary text-estate-dark'}`}>
-                        {property.features.status === 'for-sale' ? 'For Sale' : 'For Rent'}
-                      </span>
-                    </div>
-                    
-                    <div className="absolute bottom-3 left-3">
-                      <span className="tag bg-black/70 text-white">
-                        {property.features.propertyType.charAt(0).toUpperCase() + property.features.propertyType.slice(1)}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4">
-                    <div className="flex items-center gap-1 text-estate-gray mb-2">
-                      <MapPin size={16} />
-                      <span className="text-sm truncate">
-                        {property.location.city}, {property.location.state}
-                      </span>
-                    </div>
-                    
-                    <h3 className="text-lg font-semibold mb-2 line-clamp-1 group-hover:text-estate-primary transition-colors">
-                      {property.title}
-                    </h3>
-                    
-                    <p className="text-estate-gray text-sm mb-4 line-clamp-2">
-                      {property.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="font-semibold text-lg text-estate-primary">
-                        {formatPrice(property.price)}
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              {[1, 2, 3].map((_, index) => (
+                <div key={index} className="bg-gray-100 rounded-xl h-[400px] animate-pulse"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+              {recentProperties.map((property, index) => (
+                <div 
+                  key={property.id || property._id}
+                  className="property-card overflow-hidden rounded-xl transition-all duration-500 transform animate-on-scroll hover:shadow-md"
+                >
+                  <Link to={`/property/${property.id || property._id}`} className="group">
+                    <div className="relative overflow-hidden aspect-[4/3]">
+                      <img 
+                        src={property.images[0]} 
+                        alt={property.title}
+                        className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110"
+                      />
+                      
+                      <div className="absolute top-3 left-3">
+                        <span className={`tag ${property.features.status === 'for-sale' ? 'bg-estate-primary text-white' : 'bg-estate-secondary text-estate-dark'}`}>
+                          {property.features.status === 'for-sale' ? 'For Sale' : 'For Rent'}
+                        </span>
                       </div>
-                      <Button variant="outline" size="sm" className="text-xs border-estate-primary text-estate-primary hover:bg-estate-primary hover:text-white">
-                        View Details
-                      </Button>
+                      
+                      <div className="absolute bottom-3 left-3">
+                        <span className="tag bg-black/70 text-white">
+                          {property.features.propertyType.charAt(0).toUpperCase() + property.features.propertyType.slice(1)}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
+                    
+                    <div className="p-4">
+                      <div className="flex items-center gap-1 text-estate-gray mb-2">
+                        <MapPin size={16} />
+                        <span className="text-sm truncate">
+                          {property.location.city}, {property.location.state}
+                        </span>
+                      </div>
+                      
+                      <h3 className="text-lg font-semibold mb-2 line-clamp-1 group-hover:text-estate-primary transition-colors">
+                        {property.title}
+                      </h3>
+                      
+                      <p className="text-estate-gray text-sm mb-4 line-clamp-2">
+                        {property.description}
+                      </p>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="font-semibold text-lg text-estate-primary">
+                          {formatPrice(property.price)}
+                        </div>
+                        <Button variant="outline" size="sm" className="text-xs border-estate-primary text-estate-primary hover:bg-estate-primary hover:text-white">
+                          View Details
+                        </Button>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -260,7 +283,6 @@ const Index = () => {
         <Sellrent/>
 
         <TestimonialSection />
-
 
         {/* CTA */}
         <section className="py-20 bg-estate-primary">
